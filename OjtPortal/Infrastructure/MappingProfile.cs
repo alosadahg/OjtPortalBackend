@@ -6,9 +6,10 @@ namespace OjtPortal.Infrastructure
 {
     public class MappingProfile : Profile
     {
-        protected MappingProfile()
+        public MappingProfile()
         {
             CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<NewStudentDto, Student>().ReverseMap();
         }
     }
 }

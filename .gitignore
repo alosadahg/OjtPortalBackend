@@ -6,6 +6,7 @@ OjtPortal/Migrations/*
 
 # dotenv files
 .env
+*.env
 
 # User-specific files
 *.rsuser

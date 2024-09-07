@@ -28,6 +28,12 @@ Log.Logger = new LoggerConfiguration()
             .CreateLogger();
 builder.Host.UseSerilog();
 
+// Load Secrets
+DotNetEnv.Env.Load();
+
+var dbConnectionString = Environment.GetEnvironmentVariable("DbConnection");
+var calendarificApiKey = Environment.GetEnvironmentVariable("CalendarificApiKey");
+
 // Connect database to container 
 builder.Services.AddDbContext<OjtPortalContext>(db =>
     db.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection")));
@@ -37,6 +43,7 @@ builder.Services.AddIdentityCore<User>(option => {
     option.Password.RequireDigit = false;
     option.Password.RequireLowercase = false;
     option.Password.RequireNonAlphanumeric = false;
+    option.Password.RequireUppercase = false;
 }).AddEntityFrameworkStores<OjtPortalContext>();
 
 // Add HttpClient
@@ -56,6 +63,7 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddTransient<IHolidayService, HolidayService>();
 builder.Services.AddTransient<IShiftRecordService, ShiftRecordService>();
 builder.Services.AddTransient<IStudentService, StudentService>();
+builder.Services.AddTransient<IUserService, UserService>();
 
 // Scoped repositories
 builder.Services.AddScoped<IHolidayRepository, HolidayRepository>();

@@ -57,7 +57,8 @@ namespace OjtPortal.Services
 
         private async Task<(List<Holiday>?, ErrorResponseModel?)> GetHolidaysFromAPIAsync(string cacheKey, int yearToCheck)
         {
-            var url = $"https://calendarific.com/api/v2/holidays?&api_key=MYMVKRH8evDUxwL3n5dQVugbN8oCGZi2&country=PH&year={yearToCheck}";
+            var calendarificApiKey = Environment.GetEnvironmentVariable("CalendarificApiKey");
+            var url = $"https://calendarific.com/api/v2/holidays?&api_key={calendarificApiKey}&country=PH&year={yearToCheck}";
 
             HttpResponseMessage response = await _client.GetAsync(url);
 
