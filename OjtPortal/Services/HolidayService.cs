@@ -18,13 +18,15 @@ namespace OjtPortal.Services
         private readonly HttpClient _client;
         private readonly IHolidayRepository _holidayRepository;
         private readonly ICacheService _cacheService;
+        private readonly IConfiguration _configuration;
 
-        public HolidayService(ILogger<HolidayService> logger, HttpClient client, IHolidayRepository holidayRepository, ICacheService cacheService)
+        public HolidayService(ILogger<HolidayService> logger, HttpClient client, IHolidayRepository holidayRepository, ICacheService cacheService, IConfiguration configuration)
         {
             this._logger = logger;
             this._client = client;
             this._holidayRepository = holidayRepository;
             this._cacheService = cacheService;
+            this._configuration = configuration;
         }
 
         public async Task<(List<Holiday>?, ErrorResponseModel?)> GetHolidaysAsync()
@@ -57,7 +59,7 @@ namespace OjtPortal.Services
 
         private async Task<(List<Holiday>?, ErrorResponseModel?)> GetHolidaysFromAPIAsync(string cacheKey, int yearToCheck)
         {
-            var calendarificApiKey = Environment.GetEnvironmentVariable("CalendarificApiKey");
+            var calendarificApiKey = _configuration["CalendarificApiKey"];
             var url = $"https://calendarific.com/api/v2/holidays?&api_key={calendarificApiKey}&country=PH&year={yearToCheck}";
 
             HttpResponseMessage response = await _client.GetAsync(url);

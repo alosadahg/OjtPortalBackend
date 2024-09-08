@@ -22,9 +22,6 @@ jobs:
           dotnet-version: '8.x'
 
       - name: Build with dotnet
-        env:
-          DbConnection: ${{ secrets.DBCONNECTION }}
-          CalendarificApiKey: ${{ secrets.CALENDARIFICAPIKEY }}
         run: dotnet build --configuration Release
 
       - name: dotnet publish

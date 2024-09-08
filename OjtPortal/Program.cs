@@ -32,14 +32,6 @@ builder.Host.UseSerilog();
 DotNetEnv.Env.Load();
 builder.Configuration.AddUserSecrets<Program>();
 
-/*var builderStore = builder.Configuration.GetConnectionString("CalendarificApiKey");
-var builderStoreCU = builder.Configuration.GetConnectionString("CALENDARIFICAPIKEY");
-var builderStoredb = builder.Configuration.GetConnectionString("DbConnection");
-var builderStoreUdb = builder.Configuration["CALENDARIFICAPIKEY"];
-var evr = Environment.GetEnvironmentVariable("CalendarificApiKey");
-var evrU = Environment.GetEnvironmentVariable("CALENDARIFICAPIKEY");*/
-
-
 // Connect database to container 
 builder.Services.AddDbContext<OjtPortalContext>(db =>
     db.UseNpgsql(builder.Configuration["DBCONNECTION"]));
