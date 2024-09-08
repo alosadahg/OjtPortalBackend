@@ -32,6 +32,10 @@ builder.Host.UseSerilog();
 DotNetEnv.Env.Load();
 builder.Configuration.AddUserSecrets<Program>();
 
+Log.Information("Email: " + builder.Configuration["SMTP_EMAIL"]);
+Log.Information("Email: " + builder.Configuration["SMTP_PASSWORD"]);
+Log.Information("Email: " + builder.Configuration["SMTP_PORT"]);
+
 // Connect database to container 
 builder.Services.AddDbContext<OjtPortalContext>(db =>
     db.UseNpgsql(builder.Configuration["DBCONNECTION"]));
@@ -121,5 +125,12 @@ app.UseAuthorization();
 app.UseSerilogRequestLogging();
 
 app.MapControllers();
+
+app.UseCors(options =>
+    options.AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .SetIsOriginAllowed(origin => true)
+);
 
 app.Run();
