@@ -27,9 +27,6 @@ jobs:
           CalendarificApiKey: ${{ secrets.CALENDARIFICAPIKEY }}
         run: dotnet build --configuration Release
 
-      - name: Check Workload
-        run: dotnet workload list
-
       - name: dotnet publish
         run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 

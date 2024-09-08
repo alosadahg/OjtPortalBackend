@@ -4,9 +4,10 @@
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
+        "environmentVariables": {
+            "ASPNETCORE_ENVIRONMENT": "Development",
+            "CalendarificApiKey": "MYMVKRH8evDUxwL3n5dQVugbN8oCGZi2"
+        },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5033"
     },
