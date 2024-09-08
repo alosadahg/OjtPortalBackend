@@ -46,7 +46,7 @@ namespace OjtPortal.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterStudent(NewStudentDto newStudent)
         {
-            _studentService.RegisterStudent(newStudent);
+            //_studentService.RegisterStudent(newStudent);
             return Ok();
         }
     }

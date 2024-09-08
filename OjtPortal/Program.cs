@@ -21,6 +21,9 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Add logging configuration
 Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
+            .WriteTo.AzureApp(
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+             )
             .WriteTo.Console(
                 theme: SeriLogCustomThemes.Theme1(), 
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
