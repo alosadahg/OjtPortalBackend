@@ -36,7 +36,7 @@ namespace OjtPortal.Services
                 return existing as T;
             }
 
-            _logger.LogInformation($"Cache miss for {find}. Fetching from database...");
+            _logger.LogInformation($"Cache miss for {find}.");
             return default;
         }
 
@@ -64,7 +64,7 @@ namespace OjtPortal.Services
                 return existing as T;
             }
 
-            _logger.LogInformation($"Cache miss from concurrent map for {key}. Fetching from database...");
+            _logger.LogInformation($"Cache miss from concurrent map for {key}.");
             return default;
         }
 

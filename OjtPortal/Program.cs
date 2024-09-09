@@ -1,15 +1,13 @@
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using OjtPortal.Context;
 using OjtPortal.Entities;
 using OjtPortal.Infrastructure;
-using OjtPortal.Infrastructure.JsonConverters;
 using OjtPortal.Repositories;
 using OjtPortal.Services;
 using Serilog;
 using Serilog.Events;
-using Serilog.Templates;
 using SeriLogThemesLibrary;
 using System.Reflection;
 
@@ -22,7 +20,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
             .WriteTo.AzureApp(
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                outputTemplate: "{Message:lj}{NewLine}{Exception}"
              )
             .WriteTo.Console(
                 theme: SeriLogCustomThemes.Theme1(), 
@@ -34,10 +32,6 @@ builder.Host.UseSerilog();
 // Load Secrets
 DotNetEnv.Env.Load();
 builder.Configuration.AddUserSecrets<Program>();
-
-Log.Information("Email: " + builder.Configuration["SMTP_EMAIL"]);
-Log.Information("Email: " + builder.Configuration["SMTP_PASSWORD"]);
-Log.Information("Email: " + builder.Configuration["SMTP_PORT"]);
 
 // Connect database to container 
 builder.Services.AddDbContext<OjtPortalContext>(db =>
@@ -69,23 +63,28 @@ builder.Services.AddTransient<IHolidayService, HolidayService>();
 builder.Services.AddTransient<IShiftRecordService, ShiftRecordService>();
 builder.Services.AddTransient<IStudentService, StudentService>();
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IEmailSender, EmailService>();
+builder.Services.AddTransient<IDepartmentService, DepartmentService>();
+builder.Services.AddTransient<IDegreeProgramService, DegreeProgramService>();
 
 // Scoped repositories
 builder.Services.AddScoped<IHolidayRepository, HolidayRepository>();
+builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+builder.Services.AddScoped<IDegreeProgramRepository, DegreeProgramRepository>();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        In = ParameterLocation.Header,
         Description = "Please enter token",
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
 
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme

@@ -18,7 +18,7 @@ namespace OjtPortal.Controllers.BaseController.cs
                 HttpStatusCode.Unauthorized => Unauthorized(errorResponseModel),
                 HttpStatusCode.UnprocessableEntity => UnprocessableEntity(errorResponseModel),
                 HttpStatusCode.InternalServerError => Problem(JsonSerializer.Serialize(errorResponseModel), statusCode: 500),
-                _ => Problem(JsonSerializer.Serialize(errorResponseModel), statusCode: 500)
+                _ => StatusCode(((int) errorResponseModel.statusCode), errorResponseModel)
             };
         }
     }

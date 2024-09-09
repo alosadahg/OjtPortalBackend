@@ -19,6 +19,7 @@ namespace OjtPortal.Services
         private readonly IHolidayRepository _holidayRepository;
         private readonly ICacheService _cacheService;
         private readonly IConfiguration _configuration;
+        private static List<Holiday> _holidays = new();
 
         public HolidayService(ILogger<HolidayService> logger, HttpClient client, IHolidayRepository holidayRepository, ICacheService cacheService, IConfiguration configuration)
         {
@@ -31,6 +32,11 @@ namespace OjtPortal.Services
 
         public async Task<(List<Holiday>?, ErrorResponseModel?)> GetHolidaysAsync()
         {
+            if(_holidays.Any())
+            {
+                _logger.LogInformation("Returning existing local holidays.");
+                return (_holidays, null);
+            }
             var cacheKey = "holidays";
             var existingHolidays = _cacheService.GetFromPermanentCache<List<Holiday>>(cacheKey);
             var yearToCheck = DateTime.UtcNow.Year;
@@ -50,6 +56,7 @@ namespace OjtPortal.Services
                 } 
                 else
                 {
+                    _holidays = existingHolidays;
                     return (existingHolidays, null);
                 }
             }
@@ -101,6 +108,7 @@ namespace OjtPortal.Services
             }
             await _holidayRepository.AddAllHolidaysAsync(result);
             _cacheService.AddToPermanentCache(cacheKey, result);
+            _holidays = result;
             return (result, null);
         }
     }

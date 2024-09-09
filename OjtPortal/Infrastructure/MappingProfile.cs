@@ -9,7 +9,8 @@ namespace OjtPortal.Infrastructure
         public MappingProfile()
         {
             CreateMap<User, UserDto>().ReverseMap();
-            CreateMap<NewStudentDto, Student>().ReverseMap();
+            CreateMap<Student, NewStudentDto>().ReverseMap();
+            CreateMap<DegreeProgram, DegreeProgramDto>().ReverseMap();
         }
     }
 }
