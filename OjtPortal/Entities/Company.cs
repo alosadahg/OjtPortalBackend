@@ -1,4 +1,6 @@
-﻿namespace OjtPortal.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace OjtPortal.Entities
 {
     public class Company
     {
@@ -6,8 +8,9 @@
         public string CompanyName { get; set; } = string.Empty;
         public string ContactNo { get; set; } = string.Empty;
         public string ContactEmail { get; set; } = string.Empty;
-        public int AddressId { get; set; }
         public Address Address { get; set; } = new();
+        [JsonIgnore]
+        public IEnumerable<Mentor>? Mentors { get; set; }
 
         public Company()
         {

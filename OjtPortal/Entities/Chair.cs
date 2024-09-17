@@ -1,13 +1,19 @@
-﻿namespace OjtPortal.Entities
-{
-    public class Chair : AcademeAccount
-    {
-        public int ChairId { get; set; }
-        public Chair() : base() { }
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-        public Chair(AcademeAccount academeAccount, int chairId) : base(academeAccount)
-        {
-            ChairId = chairId;
-        }
+namespace OjtPortal.Entities
+{
+    public class Chair 
+    {
+        [Key]
+        [Column("ChairId")]
+        public int UserId { get; set; }
+
+        [ForeignKey("UserId")]
+        public User? User { get; set; }
+        public Department Department { get; set; } = new();
+        public string Designation { get; set; } = string.Empty;
+
+
     }
 }

@@ -7,7 +7,7 @@ namespace OjtPortal.Infrastructure
     public static class ErrorHandler
     {
 
-        public static ErrorResponseModel getIdentityErrorResponse(IEnumerable<IdentityError> errors, string? email)
+        public static ErrorResponseModel GetIdentityErrorResponse(IEnumerable<IdentityError> errors, string? email)
         {
             ErrorResponseModel errorResponseModel = new ErrorResponseModel();
             foreach (var error in errors)
@@ -21,7 +21,7 @@ namespace OjtPortal.Infrastructure
             return errorResponseModel;
         }
 
-        public static ErrorModel getActivationError(HttpStatusCode status, string email)
+        public static ErrorModel GetActivationError(HttpStatusCode status, string email)
         {
             ErrorModel errorModel = new ErrorModel("Activation Email Not Delivered", "Cannot send activation email to '" + email + "'");
             if (status.Equals(HttpStatusCode.NotFound))

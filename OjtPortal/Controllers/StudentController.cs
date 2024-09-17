@@ -33,7 +33,7 @@ namespace OjtPortal.Controllers
         public async Task<IActionResult> GetEndDate(int manDays, string startDate = "2024-01-01", bool includeHolidays = false, WorkingDays workingDays = WorkingDays.WeekdaysOnly)
         {
             var startDateOnly = DateOnly.Parse(startDate);
-            var (response, error) = await _studentService.GetEndDate(startDateOnly, manDays, includeHolidays, workingDays);
+            var (response, error) = await _studentService.GetEndDateAsync(startDateOnly, manDays, includeHolidays, workingDays);
             if (error != null) return MakeErrorResponse(error);
             return Ok(response);
         }
@@ -43,10 +43,10 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="newStudent"></param>
         /// <returns></returns>
-        [HttpPost("register")]
+        [HttpPost]
         public async Task<IActionResult> RegisterStudent(NewStudentDto newStudent)
         {
-            //_studentService.RegisterStudent(newStudent);
+            await _studentService.RegisterStudent(newStudent);
             return Ok();
         }
     }

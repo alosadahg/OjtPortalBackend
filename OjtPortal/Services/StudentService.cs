@@ -1,16 +1,18 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using OjtPortal.Dtos;
 using OjtPortal.Entities;
 using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
+using OjtPortal.EmailTemplates;
 
 namespace OjtPortal.Services
 {
     public interface IStudentService
     {
-        Task<(DateOnly?, ErrorResponseModel?)> GetEndDate(DateOnly startDate, int manDays, bool includeHolidays, WorkingDays workingDays);
-        void RegisterStudent(NewStudentDto newStudent);
+        Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly startDate, int manDays, bool includeHolidays, WorkingDays workingDays);
+        Task<(StudentDto?, ErrorResponseModel?)> RegisterStudent(NewStudentDto newStudent);
     }
 
     public class StudentService : IStudentService
@@ -18,21 +20,29 @@ namespace OjtPortal.Services
         private readonly UserManager<User> _userManager;
         private readonly IHolidayService _holidayService;
         private readonly IMapper _mapper;
+        private readonly IEmailSender _emailSender;
+        private readonly IUserService _userService;
 
-        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper)
+        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper, IEmailSender emailSender, IUserService userService)
         {
             this._userManager = userManager;
             this._holidayService = holidayService;
             this._mapper = mapper;
+            this._emailSender = emailSender;
+            this._userService = userService;
         }
 
-        public void RegisterStudent(NewStudentDto newStudent)
+        public async Task<(StudentDto?, ErrorResponseModel?)> RegisterStudent(NewStudentDto newStudent)
         {
-            var newStudentEntity = _mapper.Map<Student>(newStudent);
-            Console.WriteLine("eyy");
+            var (newUser, error) = await _userService.CreateUserAsync(newStudent, UserType.Student);
+            if (error != null) return (null, error);
+
+            return (null, null);
+            //TODO: Add registration logic for student (Priority: Urgent)
+
         }
 
-        public async Task<(DateOnly?, ErrorResponseModel?)> GetEndDate(DateOnly startDate, int manDays, bool includeHolidays, WorkingDays workingDays)
+        public async Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly startDate, int manDays, bool includeHolidays, WorkingDays workingDays)
         {
             var (holidays, error) = await _holidayService.GetHolidaysAsync();
             if (error != null) return (null, error);

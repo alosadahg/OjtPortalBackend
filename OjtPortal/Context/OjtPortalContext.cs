@@ -16,8 +16,9 @@ namespace OjtPortal.Context
             modelBuilder.Entity<IdentityRole>().ToTable("Roles");
             modelBuilder.Entity<Chair>().ToTable("Chairs");
             modelBuilder.Entity<Teacher>().ToTable("Teachers");
-            modelBuilder.Entity<Student>().ToTable("Students");
+            modelBuilder.Entity<Student>().ToTable("Students").OwnsOne(s => s.Shift);
             modelBuilder.Entity<Mentor>().ToTable("Mentors");
+            modelBuilder.Entity<Company>().OwnsOne(c => c.Address);
         }
 
         public DbSet<User> Users { get; set; }
@@ -27,7 +28,8 @@ namespace OjtPortal.Context
         public DbSet<Student>  Students { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<DegreeProgram> DegreePrograms { get; set; }
-
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<Mentor> Mentors { get; set; }
         public DbSet<Holiday> Holidays {  get; set; }
     }
 }

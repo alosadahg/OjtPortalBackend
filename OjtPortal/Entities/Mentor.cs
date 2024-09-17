@@ -1,22 +1,26 @@
-﻿namespace OjtPortal.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+namespace OjtPortal.Entities
 {
-    public class Mentor : User
+    public class Mentor 
     {
+        [Key]
+        [Column("MentorId")]
+        public int UserId { get; set; }
+
+        [ForeignKey("UserId")]
+        public User? User { get; set; }
         public Company Company { get; set; } = new();
         public int CompanyId { get; set; }
         public string Department { get; set; } = string.Empty;
         public string Designation { get; set; } = string.Empty;
+        [JsonIgnore]
         public IEnumerable<Student>? Students { get; set; }
 
         public Mentor()
         {
-        }
-
-        public Mentor(User user, Company company, string department, string designation): base(user)
-        {
-            Company = company;
-            Department = department;
-            Designation = designation;
         }
     }
 }

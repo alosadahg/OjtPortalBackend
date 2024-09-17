@@ -19,13 +19,5 @@ namespace OjtPortal.Entities
             UserType = userType;
             AccountStatus = accountStatus;
         }
-        public User(User user)
-        {
-            FirstName = user.FirstName;
-            LastName = user.LastName;
-            UserType = user.UserType;
-            AccountStatus = user.AccountStatus;
-        }
-
     }
 }

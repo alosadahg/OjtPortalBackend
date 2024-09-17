@@ -60,17 +60,24 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 
 // Transient services
 builder.Services.AddTransient<IHolidayService, HolidayService>();
-builder.Services.AddTransient<IShiftRecordService, ShiftRecordService>();
+builder.Services.AddTransient<IShiftRecordService, ShiftService>();
 builder.Services.AddTransient<IStudentService, StudentService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IEmailSender, EmailService>();
 builder.Services.AddTransient<IDepartmentService, DepartmentService>();
 builder.Services.AddTransient<IDegreeProgramService, DegreeProgramService>();
+builder.Services.AddTransient<IMentorService, MentorService>();
+builder.Services.AddTransient<ITeacherService, TeacherService>();
 
 // Scoped repositories
 builder.Services.AddScoped<IHolidayRepository, HolidayRepository>();
 builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<IDegreeProgramRepository, DegreeProgramRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IMentorRepository, MentorRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
+
 
 builder.Services.AddSwaggerGen(options =>
 {

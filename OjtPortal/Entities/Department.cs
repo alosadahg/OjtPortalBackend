@@ -1,4 +1,5 @@
 ﻿using OjtPortal.Enums;
+using System.Text.Json.Serialization;
 
 namespace OjtPortal.Entities
 {
@@ -7,6 +8,8 @@ namespace OjtPortal.Entities
         public int DepartmentId { get; set; } = 0;
         public string DepartmentCode { get; set; } = string.Empty;
         public string DepartmentName { get; set; } = string.Empty;
+        [JsonIgnore]
+        public IEnumerable<Student>? Students { get; set; }
 
         public Department()
         {

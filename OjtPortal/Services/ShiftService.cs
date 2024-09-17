@@ -6,12 +6,12 @@ namespace OjtPortal.Services
     {
     }
 
-    public class ShiftRecordService : IShiftRecordService
+    public class ShiftService : IShiftRecordService
     {
-        private readonly ILogger<ShiftRecordService> _logger;
+        private readonly ILogger<ShiftService> _logger;
         private readonly IHolidayService _holidayService;
 
-        public ShiftRecordService(ILogger<ShiftRecordService> logger, IHolidayService holidayService)
+        public ShiftService(ILogger<ShiftService> logger, IHolidayService holidayService)
         {
             this._logger = logger;
             this._holidayService = holidayService;

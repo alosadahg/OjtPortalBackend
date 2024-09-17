@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Dtos;
+using OjtPortal.Entities;
+using OjtPortal.Enums;
 using OjtPortal.Services;
 
 namespace OjtPortal.Controllers
@@ -18,7 +20,7 @@ namespace OjtPortal.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> AddNewUser(NewUserDto newUser)
         {
-            await _userService.CreateUserAsync(newUser);
+            await _userService.CreateUserAsync(newUser, UserType.Admin);
             return Ok();
         }
     }

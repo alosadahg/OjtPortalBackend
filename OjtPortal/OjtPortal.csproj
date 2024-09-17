@@ -11,7 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Program.cs~RF784efd0.TMP" />
     <None Remove="Repositories\2ztavf51.ns3~" />
+    <None Remove="Services\CompanyService.cs~RF717f2fe.TMP" />
   </ItemGroup>
 
   <ItemGroup>
