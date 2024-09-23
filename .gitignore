@@ -3,6 +3,7 @@
 ##
 ## Get latest from `dotnet new gitignore`
 OjtPortal/Migrations/*
+OjtPortal/load-secrets.bat
 
 # dotenv files
 .env

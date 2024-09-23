@@ -17,11 +17,11 @@ namespace OjtPortal.Services
     {
         private readonly ICacheService _cacheService;
         private readonly ILogger<DegreeProgramService> _logger;
-        private readonly IDegreeProgramRepository _degreeProgramRepository;
+        private readonly IDegreeProgramRepo _degreeProgramRepository;
         private readonly IMapper _mapper;
         private static List<DegreeProgramDto> _degreePrograms = new();
 
-        public DegreeProgramService(ICacheService cacheService, ILogger<DegreeProgramService> logger, IDegreeProgramRepository degreeProgramRepository, IMapper mapper)
+        public DegreeProgramService(ICacheService cacheService, ILogger<DegreeProgramService> logger, IDegreeProgramRepo degreeProgramRepository, IMapper mapper)
         {
             this._cacheService = cacheService;
             this._logger = logger;

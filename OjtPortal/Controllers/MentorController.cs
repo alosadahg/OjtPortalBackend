@@ -21,7 +21,7 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="newMentorDto"></param>
         /// <returns></returns>
-        [HttpPost("register")]
+        [HttpPost]
         public async Task<IActionResult> RegisterMentorAsync(NewMentorDto newMentorDto)
         {
             var (newMentor, error) = await _mentorService.AddMentorAsync(newMentorDto);
@@ -29,6 +29,11 @@ namespace OjtPortal.Controllers
             return CreatedAtRoute("GetMentorById", new { id = newMentor!.User.Id}, newMentor);
         }
 
+        /// <summary>
+        /// Get mentor by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}", Name = "GetMentorById")]
         public async Task<IActionResult> GetMentorByIdAsync(int id)
         {

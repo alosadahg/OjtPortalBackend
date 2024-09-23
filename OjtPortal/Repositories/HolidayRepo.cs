@@ -5,18 +5,18 @@ using OjtPortal.Infrastructure;
 
 namespace OjtPortal.Repositories
 {
-    public interface IHolidayRepository
+    public interface IHolidayRepo
     {
         Task<Holiday?> AddHolidayAsync(Holiday newHoliday);
         Task<List<Holiday>?> AddAllHolidaysAsync(List<Holiday> newHolidays);
         Task<List<Holiday>?> GetHolidaysAsync(int year);
     }
 
-    public class HolidayRepository : IHolidayRepository
+    public class HolidayRepo : IHolidayRepo
     {
         private readonly OjtPortalContext _context;
 
-        public HolidayRepository(OjtPortalContext context)
+        public HolidayRepo(OjtPortalContext context)
         {
             this._context = context;
         }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
 using OjtPortal.Entities;
 using OjtPortal.Enums;
@@ -8,7 +9,7 @@ namespace OjtPortal.Controllers
 {
     [Route("api/users")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : OjtPortalBaseController
     {
         private readonly IUserService _userService;
 
@@ -17,11 +18,20 @@ namespace OjtPortal.Controllers
             this._userService = userService;
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> AddNewUser(NewUserDto newUser)
+
+        /// <summary>
+        /// Activate user account
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet("activate/account")]
+
+        public async Task<IActionResult> ActivateAccount(int userId, string token)
         {
-            await _userService.CreateUserAsync(newUser, UserType.Admin);
-            return Ok();
+            var (result, error) = await _userService.ActivateAccountAsync(userId, token);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
         }
     }
 }

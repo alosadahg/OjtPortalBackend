@@ -4,17 +4,17 @@ using OjtPortal.Entities;
 
 namespace OjtPortal.Repositories
 {
-    public interface IDegreeProgramRepository
+    public interface IDegreeProgramRepo
     {
         Task<List<DegreeProgram>> GetDegreeProgramsAsync();
         Task<DegreeProgram?> FindDegreeProgramById(int id);
     }
 
-    public class DegreeProgramRepository : IDegreeProgramRepository
+    public class DegreeProgramRepo : IDegreeProgramRepo
     {
         private readonly OjtPortalContext _context;
 
-        public DegreeProgramRepository(OjtPortalContext context)
+        public DegreeProgramRepo(OjtPortalContext context)
         {
             this._context = context;
         }
@@ -26,7 +26,7 @@ namespace OjtPortal.Repositories
 
         public async Task<DegreeProgram?> FindDegreeProgramById(int id)
         {
-            return await _context.DegreePrograms.Include(dp => dp.Department).FirstOrDefaultAsync(dp => dp.Id == id);
+            return await _context.DegreePrograms.Include(dp => dp.Department).Include(dp => dp.Department.Students).FirstOrDefaultAsync(dp => dp.Id == id);
         }
 
         public async Task<DegreeProgram?> FindDegreeProgramByDepartmentId(int id)

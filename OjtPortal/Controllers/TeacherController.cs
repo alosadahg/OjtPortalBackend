@@ -16,7 +16,12 @@ namespace OjtPortal.Controllers
             this._teacherService = teacherService;
         }
 
-        [HttpPost("register")]
+        /// <summary>
+        /// Add new teacher
+        /// </summary>
+        /// <param name="newTeacherDto"></param>
+        /// <returns></returns>
+        [HttpPost]
         public async Task<IActionResult> RegisterTeacherAsync(NewTeacherDto newTeacherDto)
         {
             var (newTeacher, error) = await _teacherService.AddNewTeacherAsync(newTeacherDto);
@@ -24,6 +29,11 @@ namespace OjtPortal.Controllers
             return CreatedAtRoute("GetTeacherById", new { id = newTeacher!.User.Id }, newTeacher);
         }
 
+        /// <summary>
+        /// Get teacher by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}", Name = "GetTeacherById")]
         public async Task<IActionResult> GetteacherByIdAsync(int id)
         {

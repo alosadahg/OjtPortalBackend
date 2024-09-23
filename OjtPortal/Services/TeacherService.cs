@@ -19,10 +19,10 @@ namespace OjtPortal.Services
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
-        private readonly ITeacherRepository _teacherRepository;
+        private readonly ITeacherRepo _teacherRepository;
         private readonly IDepartmentService _departmentService;
 
-        public TeacherService(IUserService userService, IMapper mapper, ITeacherRepository teacherRepository, IDepartmentService departmentService)
+        public TeacherService(IUserService userService, IMapper mapper, ITeacherRepo teacherRepository, IDepartmentService departmentService)
         {
             this._userService = userService;
             this._mapper = mapper;
@@ -48,7 +48,7 @@ namespace OjtPortal.Services
             {
                 return (null, new(HttpStatusCode.NotFound,
                                   LoggingTemplate.DuplicateRecordTitle("teacher"),
-                                  LoggingTemplate.DuplicateRecordDescription(newTeacherDto.Email, "teacher")));
+                                  LoggingTemplate.DuplicateRecordDescription("teacher", newTeacherDto.Email)));
             }
             return (_mapper.Map<TeacherDto>(added), null);
         }

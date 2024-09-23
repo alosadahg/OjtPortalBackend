@@ -12,7 +12,7 @@
             return $"Duplicate {type} exists.";
         }
 
-        public static string DuplicateRecordDescription(string source, string type)
+        public static string DuplicateRecordDescription(string type, string source)
         {
             return $"Existing {type} record found for: {source}";
         }
@@ -22,7 +22,7 @@
             return $"Missing {type} record.";
         }
 
-        public static string MissingRecordDescription(string source, string type)
+        public static string MissingRecordDescription(string type, string source)
         {
             return $"No {type} record found for: {source}";
         }

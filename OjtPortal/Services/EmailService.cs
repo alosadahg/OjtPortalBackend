@@ -38,16 +38,16 @@ namespace OjtPortal.Services
             {
                 IsBodyHtml = true
             };
-            for (int i = 1; i <= 3; i++) {
+            for (int attempt = 1; attempt <= 3; attempt++) {
                 try
                 {
                     await client.SendMailAsync(message);
-                    _logger.LogInformation($"Successfully sent email on attempt {i}.");
+                    _logger.LogInformation($"Successfully sent email on attempt {attempt}.");
                     break;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Attempt {i}: Failed to send email. {ex.Message}");
+                    _logger.LogError($"Attempt {attempt}: Failed to send email. {ex.Message}");
                 }
             }
         }

@@ -4,7 +4,7 @@ using OjtPortal.Entities;
 
 namespace OjtPortal.Repositories
 {
-    public interface IStudentRepository
+    public interface IStudentRepo
     {
         Task<Student?> AddStudentAsync(Student newStudent);
         Task<Student?> GetStudentByIdAsync(int id);
@@ -12,17 +12,18 @@ namespace OjtPortal.Repositories
         Task<bool> IsStudentExistingAsync(Student student);
     }
 
-    public class StudentRepository : IStudentRepository
+    public class StudentRepo : IStudentRepo
     {
         private readonly OjtPortalContext _context;
 
-        public StudentRepository(OjtPortalContext context)
+        public StudentRepo(OjtPortalContext context)
         {
             this._context = context;
         }
 
         public async Task<Student?> AddStudentAsync(Student newStudent)
         {
+            if (await _context.Students.FirstOrDefaultAsync(s => s.StudentId == newStudent.StudentId) != null) return null;
             if (IsStudentExistingAsync(newStudent).Result) return null;
             await _context.Students.AddAsync(newStudent);
             _context.SaveChanges();
@@ -32,18 +33,18 @@ namespace OjtPortal.Repositories
         public async Task<Student?> GetStudentByIdAsync(int id)
         {
             return await _context.Students
-                .Include(s => s.Instructor)
-                .Include(s => s.Mentor)
                 .Include(s => s.DegreeProgram)
+                .Include(s => s.DegreeProgram.Department)
+                .Include(s => s.User)
                 .FirstOrDefaultAsync(s => s.UserId == id);
         }
 
         public async Task<Student?> GetStudentBySchoolIdAsync(string id)
         {
             return await _context.Students
-                .Include(s => s.Instructor)
-                .Include(s => s.Mentor)
                 .Include(s => s.DegreeProgram)
+                .Include(s => s.DegreeProgram.Department)
+                .Include(s => s.User)
                 .FirstOrDefaultAsync(s => s.StudentId == id);
         }
 

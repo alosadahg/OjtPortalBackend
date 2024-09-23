@@ -4,18 +4,18 @@ using OjtPortal.Entities;
 
 namespace OjtPortal.Repositories
 {
-    public interface ITeacherRepository
+    public interface ITeacherRepo
     {
         Task<Teacher?> AddTeacherAsync(Teacher newTeacher);
         Task<Teacher?> GetTeacherByIdAsync(int id);
         Task<bool> IsTeacherExisting(Teacher instructor);
     }
 
-    public class TeacherRepository : ITeacherRepository
+    public class TeacherRepo : ITeacherRepo
     {
         private readonly OjtPortalContext _context;
 
-        public TeacherRepository(OjtPortalContext context)
+        public TeacherRepo(OjtPortalContext context)
         {
             this._context = context;
         }

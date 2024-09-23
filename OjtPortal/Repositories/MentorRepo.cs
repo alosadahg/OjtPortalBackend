@@ -4,18 +4,18 @@ using OjtPortal.Entities;
 
 namespace OjtPortal.Repositories
 {
-    public interface IMentorRepository
+    public interface IMentorRepo
     {
         Task<Mentor?> AddMentorAsync(Mentor newMentor);
         Task<bool> IsMentorExisting(Mentor mentor);
         Task<Mentor?> GetMentorByIdAsync(int id);
     }
 
-    public class MentorRepository : IMentorRepository
+    public class MentorRepo : IMentorRepo
     {
         private readonly OjtPortalContext _context;
 
-        public MentorRepository(OjtPortalContext context)
+        public MentorRepo(OjtPortalContext context)
         {
             this._context = context;
         }

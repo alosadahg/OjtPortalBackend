@@ -1,3 +1,5 @@
+using DotNetEnv;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -30,7 +32,7 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Load Secrets
-DotNetEnv.Env.Load();
+Env.Load();
 builder.Configuration.AddUserSecrets<Program>();
 
 // Connect database to container 
@@ -38,12 +40,17 @@ builder.Services.AddDbContext<OjtPortalContext>(db =>
     db.UseNpgsql(builder.Configuration["DBCONNECTION"]));
 
 // Identity Framework Configuration
-builder.Services.AddIdentityCore<User>(option => {
+builder.Services.AddIdentityCore<User>(option =>
+{
     option.Password.RequireDigit = false;
     option.Password.RequireLowercase = false;
     option.Password.RequireNonAlphanumeric = false;
     option.Password.RequireUppercase = false;
-}).AddEntityFrameworkStores<OjtPortalContext>();
+}).AddEntityFrameworkStores<OjtPortalContext>().AddDefaultTokenProviders();
+
+builder.Services.AddDataProtection();
+
+builder.Services.AddHttpContextAccessor();
 
 // Add HttpClient
 builder.Services.AddHttpClient<HolidayService>();
@@ -70,13 +77,14 @@ builder.Services.AddTransient<IMentorService, MentorService>();
 builder.Services.AddTransient<ITeacherService, TeacherService>();
 
 // Scoped repositories
-builder.Services.AddScoped<IHolidayRepository, HolidayRepository>();
-builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
-builder.Services.AddScoped<IDegreeProgramRepository, DegreeProgramRepository>();
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IMentorRepository, MentorRepository>();
-builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
-builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
+builder.Services.AddScoped<IHolidayRepo, HolidayRepo>();
+builder.Services.AddScoped<IDepartmentRepo, DepartmentRepo>();
+builder.Services.AddScoped<IDegreeProgramRepo, DegreeProgramRepo>();
+builder.Services.AddScoped<IStudentRepo, StudentRepo>();
+builder.Services.AddScoped<IMentorRepo, MentorRepo>();
+builder.Services.AddScoped<ICompanyRepo, CompanyRepo>();
+builder.Services.AddScoped<ITeacherRepo, TeacherRepo>();
+builder.Services.AddScoped<IUserRepo, UserRepo>();
 
 
 builder.Services.AddSwaggerGen(options =>

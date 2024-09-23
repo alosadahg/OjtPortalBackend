@@ -27,6 +27,6 @@ namespace OjtPortal.Dtos
         public int HrsToRender { get; set; } = 0;
         public int ManDays { get; set; } = 0;
         public InternshipStatus InternshipStatus { get; set; } = InternshipStatus.Pending;
-        public ShiftRecordDto ShiftRecord { get; set; } = new();
+        public Shift ShiftRecord { get; set; } = new();
     }
 }

@@ -17,17 +17,19 @@ namespace OjtPortal.Services
 
     public class MentorService : IMentorService
     {
-        private readonly IMentorRepository _mentorRepository;
+        private readonly IMentorRepo _mentorRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly ICompanyRepository _companyRepository;
+        private readonly ICompanyRepo _companyRepository;
+        private readonly IUserRepo _userRepo;
 
-        public MentorService(IMentorRepository mentorRepository, IMapper mapper, IUserService userService, ICompanyRepository companyRepository)
+        public MentorService(IMentorRepo mentorRepository, IMapper mapper, IUserService userService, ICompanyRepo companyRepository, IUserRepo userRepo)
         {
             this._mentorRepository = mentorRepository;
             this._mapper = mapper;
             this._userService = userService;
             this._companyRepository = companyRepository;
+            this._userRepo = userRepo;
         }
 
         public async Task<(FullMentorDto?, ErrorResponseModel?)> AddMentorAsync(NewMentorDto newMentorDto)

@@ -21,4 +21,10 @@ namespace OjtPortal.Dtos
         }
 
     }
+
+    public class FullUserDto : UserDto
+    {
+        public int Id { get; set; }
+        public UserType UserType { get; set; }
+    }
 }

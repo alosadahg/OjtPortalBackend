@@ -9,7 +9,7 @@ namespace OjtPortal.Entities
         public string DepartmentCode { get; set; } = string.Empty;
         public string DepartmentName { get; set; } = string.Empty;
         [JsonIgnore]
-        public IEnumerable<Student>? Students { get; set; }
+        public List<Student>? Students { get; set; }
 
         public Department()
         {

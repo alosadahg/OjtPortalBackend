@@ -1,10 +1,14 @@
 ﻿using OjtPortal.Enums;
+using OjtPortal.Infrastructure.JsonConverters;
+using System.Text.Json.Serialization;
 
 namespace OjtPortal.Entities
 {
     public class Shift
     {
+        [JsonConverter(typeof(TimeOnlyConverter))]
         public TimeOnly Start { get; set; } = new();
+        [JsonConverter(typeof(TimeOnlyConverter))]
         public TimeOnly End { get; set; } = new();
         public int DailyDutyHrs { get; set; } = 0;
         public int LateTimeInCount { get; set; } = 0;

@@ -15,11 +15,11 @@ namespace OjtPortal.Services
     public class DepartmentService : IDepartmentService
     {
         private readonly ICacheService _cacheService;
-        private readonly IDepartmentRepository _departmentRepository;
+        private readonly IDepartmentRepo _departmentRepository;
         private readonly ILogger _logger;
         private static List<Department> _departments = new();
 
-        public DepartmentService(ICacheService cacheService, IDepartmentRepository departmentRepository, ILogger<DepartmentService> logger)
+        public DepartmentService(ICacheService cacheService, IDepartmentRepo departmentRepository, ILogger<DepartmentService> logger)
         {
             this._cacheService = cacheService;
             this._departmentRepository = departmentRepository;
@@ -50,7 +50,7 @@ namespace OjtPortal.Services
             if (!_departments.Any()) await GetDepartmentsAsync();
             var department = _departments.FirstOrDefault(department => department.DepartmentCode == code);
             if (department == null) return (null, new(HttpStatusCode.NotFound,
-                LoggingTemplate.MissingRecordTitle("department"), LoggingTemplate.MissingRecordDescription(code, "department")));
+                LoggingTemplate.MissingRecordTitle("department"), LoggingTemplate.MissingRecordDescription("department", code)));
             return (department, null);
         }
     }

@@ -4,18 +4,18 @@ using OjtPortal.Entities;
 
 namespace OjtPortal.Repositories
 {
-    public interface ICompanyRepository
+    public interface ICompanyRepo
     {
         Task<Company> AddCompanyAsync(Company newCompany);
         Task<bool> IsCompanyExistingAsync(Company newCompany);
         Task<Company?> FindCompanyByNameAsync(string companyName);
     }
 
-    public class CompanyRepository : ICompanyRepository
+    public class CompanyRepo : ICompanyRepo
     {
         private readonly OjtPortalContext _context;
 
-        public CompanyRepository(OjtPortalContext context)
+        public CompanyRepo(OjtPortalContext context)
         {
             this._context = context;
         }

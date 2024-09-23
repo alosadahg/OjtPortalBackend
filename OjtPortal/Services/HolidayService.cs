@@ -16,12 +16,12 @@ namespace OjtPortal.Services
     {
         private readonly ILogger _logger;
         private readonly HttpClient _client;
-        private readonly IHolidayRepository _holidayRepository;
+        private readonly IHolidayRepo _holidayRepository;
         private readonly ICacheService _cacheService;
         private readonly IConfiguration _configuration;
         private static List<Holiday> _holidays = new();
 
-        public HolidayService(ILogger<HolidayService> logger, HttpClient client, IHolidayRepository holidayRepository, ICacheService cacheService, IConfiguration configuration)
+        public HolidayService(ILogger<HolidayService> logger, HttpClient client, IHolidayRepo holidayRepository, ICacheService cacheService, IConfiguration configuration)
         {
             this._logger = logger;
             this._client = client;

@@ -39,15 +39,29 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Register new student
         /// </summary>
         /// <param name="newStudent"></param>
         /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> RegisterStudent(NewStudentDto newStudent)
         {
-            await _studentService.RegisterStudent(newStudent);
-            return Ok();
+            var (result, error) = await _studentService.RegisterStudent(newStudent);
+            if (error != null) return MakeErrorResponse(error);
+            return CreatedAtRoute("GetStudentById", new { id = result!.User.Id }, result);
+        }
+
+        /// <summary>
+        /// Gets student by user id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("{id}", Name = "GetStudentById")]
+        public async Task<IActionResult> GetStudentById(int id)
+        {
+            var (result, error) = await _studentService.GetStudentByIdAsync(id);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
         }
     }
 }

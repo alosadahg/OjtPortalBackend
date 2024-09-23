@@ -4,17 +4,17 @@ using OjtPortal.Entities;
 
 namespace OjtPortal.Repositories
 {
-    public interface IDepartmentRepository
+    public interface IDepartmentRepo
     {
         Task<List<Department>> GetDepartmentsAsync();
         Task<Department?> FindByDepartmentIdAsync(int id);
     }
 
-    public class DepartmentRepository : IDepartmentRepository
+    public class DepartmentRepo : IDepartmentRepo
     {
         private readonly OjtPortalContext _context;
 
-        public DepartmentRepository(OjtPortalContext context)
+        public DepartmentRepo(OjtPortalContext context)
         {
             this._context = context;
         }
