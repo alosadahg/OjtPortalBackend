@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
+using OjtPortal.Dtos;
+using OjtPortal.Entities;
+using OjtPortal.Infrastructure;
 using OjtPortal.Services;
 
 namespace OjtPortal.Controllers
@@ -19,6 +22,8 @@ namespace OjtPortal.Controllers
         /// Gets all college departments
         /// </summary>
         /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Department>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet]
         public async Task<IActionResult> GetDepartmentsAsync()
         {

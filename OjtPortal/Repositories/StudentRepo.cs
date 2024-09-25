@@ -7,7 +7,7 @@ namespace OjtPortal.Repositories
     public interface IStudentRepo
     {
         Task<Student?> AddStudentAsync(Student newStudent);
-        Task<Student?> GetStudentByIdAsync(int id);
+        Task<Student?> GetStudentByIdAsync(int id, bool includeUser);
         Task<Student?> GetStudentBySchoolIdAsync(string id);
         Task<bool> IsStudentExistingAsync(Student student);
     }
@@ -30,13 +30,20 @@ namespace OjtPortal.Repositories
             return newStudent;
         }
 
-        public async Task<Student?> GetStudentByIdAsync(int id)
+        public async Task<Student?> GetStudentByIdAsync(int id, bool includeUser)
         {
-            return await _context.Students
+            var query = (includeUser) ?
+                await _context.Students
                 .Include(s => s.DegreeProgram)
                 .Include(s => s.DegreeProgram.Department)
                 .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.UserId == id) :
+                await _context.Students
+                .Include(s => s.DegreeProgram)
+                .Include(s => s.DegreeProgram.Department)
                 .FirstOrDefaultAsync(s => s.UserId == id);
+
+            return query;
         }
 
         public async Task<Student?> GetStudentBySchoolIdAsync(string id)

@@ -43,6 +43,8 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="newStudent"></param>
         /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpPost]
         public async Task<IActionResult> RegisterStudent(NewStudentDto newStudent)
         {
@@ -56,10 +58,12 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet("{id}", Name = "GetStudentById")]
         public async Task<IActionResult> GetStudentById(int id)
         {
-            var (result, error) = await _studentService.GetStudentByIdAsync(id);
+            var (result, error) = await _studentService.GetStudentByIdAsync(id, true);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
