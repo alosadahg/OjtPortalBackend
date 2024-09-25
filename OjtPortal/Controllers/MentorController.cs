@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
+using OjtPortal.Infrastructure;
 using OjtPortal.Services;
 
 namespace OjtPortal.Controllers
@@ -21,6 +22,8 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="newMentorDto"></param>
         /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullMentorDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpPost]
         public async Task<IActionResult> RegisterMentorAsync(NewMentorDto newMentorDto)
         {
@@ -34,10 +37,12 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullMentorDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet("{id}", Name = "GetMentorById")]
         public async Task<IActionResult> GetMentorByIdAsync(int id)
         {
-            var (response, error) = await _mentorService.GetMentorByIdAsync(id);
+            var (response, error) = await _mentorService.GetMentorByIdAsync(id, true);
             if (error != null) return MakeErrorResponse(error);
             return Ok(response);
         }

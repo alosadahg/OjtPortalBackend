@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OjtPortal.Context;
 using OjtPortal.EmailTemplates;
 using OjtPortal.Entities;
+using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
 using System.Net;
 
@@ -13,6 +14,7 @@ namespace OjtPortal.Repositories
         Task<(User?, ErrorResponseModel?)> CreateAsync(User user, string password);
         Task<(User?, ErrorResponseModel?)> GetUserByIdAsync(int id);
         Task<(User?, ErrorResponseModel?)> GetUserByEmailAsync(string email);
+        Task<User> ActivateAccount(User user);
     }
 
     public class UserRepo : IUserRepo
@@ -47,17 +49,17 @@ namespace OjtPortal.Repositories
 
             if (result == null)
             {
-                return (result, null);
+                _logger.LogError($"User not found for id: {id}");
+                return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle("user"), LoggingTemplate.MissingRecordDescription("user", id.ToString()))));
             }
-            _logger.LogError($"User not found for id: {id}");
-            return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle("user"), LoggingTemplate.MissingRecordDescription("user", id.ToString()))));
+            return (result, null);
         }
 
         public async Task<(User?, ErrorResponseModel?)> GetUserByEmailAsync(string email)
         {
             var result = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
-            if (result == null)
+            if (result != null)
             {
                 return (result, null);
             }
@@ -65,5 +67,12 @@ namespace OjtPortal.Repositories
             return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle("user"), LoggingTemplate.MissingRecordDescription("user", email))));
         }
 
+        public async Task<User> ActivateAccount(User user)
+        {
+            user.AccountStatus = AccountStatus.Active;
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return user;
+        }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using AutoMapper.Configuration.Annotations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace OjtPortal.Entities
 {
@@ -24,6 +26,8 @@ namespace OjtPortal.Entities
         public DateOnly EndDate { get; set; } = new DateOnly();
         public int HrsToRender { get; set; } = 0;
         public int ManDays { get; set; } = 0;
+        [Column(TypeName = "varchar(50)")]
+        [ValueConverter(typeof(EnumToStringConverter<InternshipStatus>))]
         public InternshipStatus InternshipStatus { get; set; }
         public Shift Shift { get; set; } = new();
 
