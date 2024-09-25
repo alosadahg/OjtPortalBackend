@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
-using OjtPortal.Entities;
-using OjtPortal.Infrastructure;
 using OjtPortal.Services;
 
 namespace OjtPortal.Controllers
 {
     [ApiController]
-    [Route("api/teachers")]
+    [Route("api/teacher")]
     public class TeacherController : OjtPortalBaseController
     {
         private readonly ITeacherService _teacherService;
@@ -23,8 +21,6 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="newTeacherDto"></param>
         /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpPost]
         public async Task<IActionResult> RegisterTeacherAsync(NewTeacherDto newTeacherDto)
         {
@@ -38,25 +34,12 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet("{id}", Name = "GetTeacherById")]
-        public async Task<IActionResult> GetTeacherByIdAsync(int id)
+        public async Task<IActionResult> GetteacherByIdAsync(int id)
         {
-            var (response, error) = await _teacherService.GetTeacherByIdAsync(id, true);
+            var (response, error) = await _teacherService.GetTeacherByIdAsync(id);
             if (error != null) return MakeErrorResponse(error);
             return Ok(response);
-        }
-
-        /// <summary>
-        /// Get teachers by department code
-        /// </summary>
-        /// <param name="departmentCode"></param>
-        /// <returns></returns>
-        [HttpGet("departments/{departmentCode}")]
-        public async Task<List<TeacherDto>?> GetTeachersByDepartmentAsync(DepartmentCode departmentCode)
-        {
-            return await _teacherService.FindTeachersByDepartmentCode(departmentCode);
         }
     }
 }

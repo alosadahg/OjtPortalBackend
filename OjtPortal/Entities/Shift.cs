@@ -1,8 +1,5 @@
-﻿using AutoMapper.Configuration.Annotations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using OjtPortal.Enums;
+﻿using OjtPortal.Enums;
 using OjtPortal.Infrastructure.JsonConverters;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace OjtPortal.Entities
@@ -15,8 +12,6 @@ namespace OjtPortal.Entities
         public TimeOnly End { get; set; } = new();
         public int DailyDutyHrs { get; set; } = 0;
         public int LateTimeInCount { get; set; } = 0;
-        [Column(TypeName = "varchar(50)")]
-        [ValueConverter(typeof(EnumToStringConverter<WorkingDays>))]
         public WorkingDays WorkingDays { get; set; } = WorkingDays.WeekdaysOnly;
         public int AbsencesCount { get; set; } = 0;
         public double TotalHrsRendered { get; set; } = 0;

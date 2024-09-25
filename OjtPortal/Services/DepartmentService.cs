@@ -9,8 +9,7 @@ namespace OjtPortal.Services
     public interface IDepartmentService
     {
         Task<(List<Department>?, ErrorResponseModel?)> GetDepartmentsAsync();
-        Task<(Department?, ErrorResponseModel?)> GetByDepartmentCodeAsync(string code);
-        Task<(Department?, ErrorResponseModel?)> GetByIdAsync(int id);
+        Task<(Department?, ErrorResponseModel?)> GetByDepartmentCode(string code);
     }
 
     public class DepartmentService : IDepartmentService
@@ -46,21 +45,12 @@ namespace OjtPortal.Services
             return (_departments, null);
         }
 
-        public async Task<(Department?, ErrorResponseModel?)> GetByDepartmentCodeAsync(string code)
+        public async Task<(Department?, ErrorResponseModel?)> GetByDepartmentCode(string code)
         {
             if (!_departments.Any()) await GetDepartmentsAsync();
             var department = _departments.FirstOrDefault(department => department.DepartmentCode == code);
             if (department == null) return (null, new(HttpStatusCode.NotFound,
                 LoggingTemplate.MissingRecordTitle("department"), LoggingTemplate.MissingRecordDescription("department", code)));
-            return (department, null);
-        }
-
-        public async Task<(Department?, ErrorResponseModel?)> GetByIdAsync(int id)
-        {
-            if (!_departments.Any()) await GetDepartmentsAsync();
-            var department = _departments.FirstOrDefault(d => d.DepartmentId == id);
-            if (department == null) return (null, new(HttpStatusCode.NotFound,
-                LoggingTemplate.MissingRecordTitle("department"), LoggingTemplate.MissingRecordDescription("department", id.ToString())));
             return (department, null);
         }
     }

@@ -12,7 +12,7 @@ namespace OjtPortal.Services
     public interface IMentorService
     {
         Task<(FullMentorDto?, ErrorResponseModel?)> AddMentorAsync(NewMentorDto newMentorDto);
-        Task<(FullMentorDto?, ErrorResponseModel?)> GetMentorByIdAsync(int id, bool includeUser);
+        Task<(FullMentorDto?, ErrorResponseModel?)> GetMentorByIdAsync(int id);
     }
 
     public class MentorService : IMentorService
@@ -22,34 +22,28 @@ namespace OjtPortal.Services
         private readonly IUserService _userService;
         private readonly ICompanyRepo _companyRepository;
         private readonly IUserRepo _userRepo;
-        private readonly IStudentService _studentService;
 
-        public MentorService(IMentorRepo mentorRepository, IMapper mapper, IUserService userService, ICompanyRepo companyRepository, IUserRepo userRepo, IStudentService studentService)
+        public MentorService(IMentorRepo mentorRepository, IMapper mapper, IUserService userService, ICompanyRepo companyRepository, IUserRepo userRepo)
         {
             this._mentorRepository = mentorRepository;
             this._mapper = mapper;
             this._userService = userService;
             this._companyRepository = companyRepository;
             this._userRepo = userRepo;
-            this._studentService = studentService;
         }
 
         public async Task<(FullMentorDto?, ErrorResponseModel?)> AddMentorAsync(NewMentorDto newMentorDto)
         {
-            var (createdUser, error) = await _userService.CreateUserAsync(newMentorDto, newMentorDto.Password, UserType.Mentor);
+            var (createdUser, error) = await _userService.CreateUserAsync(newMentorDto, UserType.Mentor);
             if (error != null) return (null, error);
             var mentorEntity = _mapper.Map<Mentor>(newMentorDto);
-            mentorEntity.User = createdUser!.User;
-            if (createdUser!.IsPasswordGenerated)
+            mentorEntity.User = createdUser;
+            bool isPasswordRandom = false;
+
+            if (!string.IsNullOrEmpty(newMentorDto.Password))
             {
-                newMentorDto.Password = createdUser.Password;
-                var emailError = _userService.SendActivationEmailAsync(newMentorDto.Email, createdUser.User!, newMentorDto.Password);
-                if (emailError.Result != null) return (null, emailError.Result);
-            }
-            else
-            {
-                var emailError = _userService.SendActivationEmailAsync(newMentorDto.Email, createdUser.User!);
-                if (emailError.Result != null) return (null, emailError.Result);
+                newMentorDto.Password = _userService.GeneratePassword();
+                isPasswordRandom = true;
             }
 
             mentorEntity.Company = await _companyRepository.AddCompanyAsync(mentorEntity.Company);
@@ -60,17 +54,11 @@ namespace OjtPortal.Services
             return (_mapper.Map<FullMentorDto>(mentorEntity), null);
         }
 
-        public async Task<(FullMentorDto?, ErrorResponseModel?)> GetMentorByIdAsync(int id, bool includeUser)
+        public async Task<(FullMentorDto?, ErrorResponseModel?)> GetMentorByIdAsync(int id)
         {
-            var existingMentor = await _mentorRepository.GetMentorByIdAsync(id, includeUser);
+            var existingMentor = await _mentorRepository.GetMentorByIdAsync(id);
             if (existingMentor == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("mentor"), LoggingTemplate.MissingRecordDescription("mentor", $"{id}")));
-            var mentorDto = _mapper.Map<FullMentorDto>(existingMentor);
-            if (existingMentor.Students != null)
-            {
-                mentorDto.Interns = _studentService.MapStudentsToDtoList<StudentToMentorOverviewDto>(existingMentor.Students!);
-                mentorDto.InternCount = mentorDto.Interns.Count();
-            }
-            return (mentorDto, null);
+            return (_mapper.Map<FullMentorDto>(existingMentor), null);
         }
     }
 }

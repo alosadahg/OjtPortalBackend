@@ -15,8 +15,7 @@ namespace OjtPortal.Services
     {
         Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly startDate, int manDays, bool includeHolidays, WorkingDays workingDays);
         Task<(StudentDto?, ErrorResponseModel?)> RegisterStudent(NewStudentDto newStudent);
-        Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeUser);
-        List<T> MapStudentsToDtoList<T>(IEnumerable<Student> students) where T : class;
+        Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id);
     }
 
     public class StudentService : IStudentService
@@ -53,23 +52,23 @@ namespace OjtPortal.Services
             if (existingProgram == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.DegreeProgramId.ToString()))));
 
             key = "mentor";
-            var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId, true);
+            var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId);
             if(existingMentor == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.MentorId.ToString()))));
 
-            key = "_teacherService";
-            var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(newStudent.TeacherId, true);
+            key = "teacher";
+            var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(newStudent.TeacherId);
             if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.TeacherId.ToString()))));
 
             key = "student";
             var studentEntity = _mapper.Map<Student>(newStudent);
-            var (createdUser, error) = await _userService.CreateUserAsync(newStudent, newStudent.Password, UserType.Student);
+            var (createdUser, error) = await _userService.CreateUserAsync(newStudent, UserType.Student);
             if(error != null) return (null, error);
 
             // Linking the student to its object fields
             studentEntity.DegreeProgram = existingProgram;
             studentEntity.Instructor = existingTeacher;
             studentEntity.Mentor = existingMentor;
-            studentEntity.User = createdUser!.User;
+            studentEntity.User = createdUser;
 
             existingProgram.Department.Students!.Add(studentEntity);
 
@@ -81,24 +80,15 @@ namespace OjtPortal.Services
             studentEntity = await _studentRepo.AddStudentAsync(studentEntity);
             if (studentEntity == null) return (null, new(HttpStatusCode.UnprocessableEntity, LoggingTemplate.DuplicateRecordTitle(key), LoggingTemplate.DuplicateRecordDescription(key, newStudent.Email)));
 
-            if (createdUser!.IsPasswordGenerated)
-            {
-                newStudent.Password = createdUser.Password;
-                var emailError = _userService.SendActivationEmailAsync(newStudent.Email, studentEntity.User!, newStudent.Password);
-                if (emailError.Result != null) return (null, emailError.Result);
-            }
-            else
-            {
-                var emailError = _userService.SendActivationEmailAsync(newStudent.Email, studentEntity.User!);
-                if (emailError.Result != null) return (null, emailError.Result);
-            }
+            var emailError = _userService.SendActivationEmailAsync(newStudent.Email, studentEntity.User!, newStudent.Password);
+            if (emailError.Result != null) return (null, emailError.Result);
 
             return (_mapper.Map<StudentDto>(studentEntity), null);
         }
 
-        public async Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeUser)
+        public async Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id)
         {
-            var student = await _studentRepo.GetStudentByIdAsync(id, includeUser);
+            var student = await _studentRepo.GetStudentByIdAsync(id);
             if(student == null)
             {
                 return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", id.ToString()))));
@@ -129,18 +119,6 @@ namespace OjtPortal.Services
             }
 
             return (endDate, null);
-        }
-
-        public List<T> MapStudentsToDtoList<T>(IEnumerable<Student> students) where T : class
-        {
-            var list = new List<T>();
-            if (students != null) {
-                foreach (var student in students)
-                {
-                    list.Add(_mapper.Map<T>(student));
-                }
-            }
-            return list;
         }
 
         private int CalculateManDays(int hrs)

@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
-using OjtPortal.Dtos;
-using OjtPortal.Entities;
-using OjtPortal.Infrastructure;
 using OjtPortal.Services;
 
 namespace OjtPortal.Controllers
@@ -22,8 +19,6 @@ namespace OjtPortal.Controllers
         /// Get the holidays in the Philippines
         /// </summary>
         /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Holiday>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet]
         public async Task<IActionResult> GetHolidays()
         {

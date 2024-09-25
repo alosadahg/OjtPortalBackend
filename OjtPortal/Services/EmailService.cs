@@ -9,7 +9,6 @@ namespace OjtPortal.Services
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailService> _logger;
-        private readonly IWebHostEnvironment _environment;
         private readonly SmtpClient client;
         private readonly string _smtpServer;
         private readonly string _smtpEmail;
@@ -17,11 +16,10 @@ namespace OjtPortal.Services
         private readonly int _smtpPort;
 
 
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger, IWebHostEnvironment environment)
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
         {
             _configuration = configuration;
             this._logger = logger;
-            this._environment = environment;
             _smtpServer = _configuration["SMTP_SERVER"]!;
             _smtpEmail = _configuration["SMTP_EMAIL"]!;
             _smtpPassword = _configuration["SMTP_PASSWORD"]!;
@@ -30,7 +28,7 @@ namespace OjtPortal.Services
             this.client = new SmtpClient(_smtpServer, _smtpPort)
             {
                 Credentials = new NetworkCredential(_smtpEmail, _smtpPassword),
-                EnableSsl = _environment.IsProduction() ? true : false
+                EnableSsl = true
             };
         }
 

@@ -40,16 +40,13 @@ builder.Services.AddDbContext<OjtPortalContext>(db =>
     db.UseNpgsql(builder.Configuration["DBCONNECTION"]));
 
 // Identity Framework Configuration
-builder.Services.AddIdentityApiEndpoints<User>(option =>
+builder.Services.AddIdentityCore<User>(option =>
 {
     option.Password.RequireDigit = false;
     option.Password.RequireLowercase = false;
     option.Password.RequireNonAlphanumeric = false;
     option.Password.RequireUppercase = false;
-})
-    .AddSignInManager<SignInManager<User>>()
-    .AddEntityFrameworkStores<OjtPortalContext>()
-    .AddDefaultTokenProviders();
+}).AddEntityFrameworkStores<OjtPortalContext>().AddDefaultTokenProviders();
 
 builder.Services.AddDataProtection();
 
@@ -67,7 +64,6 @@ builder.Services.AddEndpointsApiExplorer();
 
 // Singleton services
 builder.Services.AddSingleton<ICacheService, CacheService>();
-builder.Services.AddSingleton(TimeProvider.System);
 
 // Transient services
 builder.Services.AddTransient<IHolidayService, HolidayService>();
@@ -79,8 +75,6 @@ builder.Services.AddTransient<IDepartmentService, DepartmentService>();
 builder.Services.AddTransient<IDegreeProgramService, DegreeProgramService>();
 builder.Services.AddTransient<IMentorService, MentorService>();
 builder.Services.AddTransient<ITeacherService, TeacherService>();
-builder.Services.AddTransient<IChairService, ChairService>();
-builder.Services.AddTransient<IAdminService, AdminService>();
 
 // Scoped repositories
 builder.Services.AddScoped<IHolidayRepo, HolidayRepo>();
@@ -91,8 +85,6 @@ builder.Services.AddScoped<IMentorRepo, MentorRepo>();
 builder.Services.AddScoped<ICompanyRepo, CompanyRepo>();
 builder.Services.AddScoped<ITeacherRepo, TeacherRepo>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
-builder.Services.AddScoped<IChairRepo, ChairRepo>();
-builder.Services.AddScoped<IAdminRepo, AdminRepo>();
 
 
 builder.Services.AddSwaggerGen(options =>

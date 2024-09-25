@@ -1,8 +1,5 @@
-﻿using AutoMapper.Configuration.Annotations;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+﻿using Microsoft.AspNetCore.Identity;
 using OjtPortal.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OjtPortal.Entities
 {
@@ -10,11 +7,7 @@ namespace OjtPortal.Entities
     {
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
-        [Column(TypeName = "varchar(50)")]
-        [ValueConverter(typeof(EnumToStringConverter<UserType>))]
         public UserType UserType { get; set; }
-        [Column(TypeName = "varchar(50)")]
-        [ValueConverter(typeof(EnumToStringConverter<AccountStatus>))]
         public AccountStatus AccountStatus { get; set; }
 
         public User() { }

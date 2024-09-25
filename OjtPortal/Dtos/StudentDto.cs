@@ -27,6 +27,7 @@ namespace OjtPortal.Dtos
     {
         public string StudentId { get; set; } = string.Empty;
         public int DegreeProgramId { get; set; } = 0;
+
         public string Designation { get; set; } = string.Empty;
         public int MentorId { get; set; } = 0;
         public int TeacherId { get; set; } = 1;

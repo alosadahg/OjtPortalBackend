@@ -11,17 +11,15 @@ namespace OjtPortal.Dtos
         public int StudentCount { get; set; } = 0;
 
         [JsonIgnore]
-        public IEnumerable<StudentToInstructorOverviewDto>? Students { get; set; }
+        public IEnumerable<StudentToInstructorOverviewDto>? Interns { get; set; }
         public TeacherDto()
         {
-            this.StudentCount = (Students != null) ? Students.Count() : 0;
+            this.StudentCount = (Interns != null) ? Interns.Count() : 0;
         }
     }
 
-    public class NewTeacherDto : UserDto
+    public class NewTeacherDto : NewUserDto
     {
-        [JsonIgnore]
-        public string Password { get; set; } = string.Empty;
         public string DepartmentCode { get; set; } = string.Empty;
         [JsonIgnore]
         public Department Department { get; set; } = new();

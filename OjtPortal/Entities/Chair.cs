@@ -13,5 +13,7 @@ namespace OjtPortal.Entities
         public User? User { get; set; }
         public Department Department { get; set; } = new();
         public string Designation { get; set; } = string.Empty;
+
+
     }
 }

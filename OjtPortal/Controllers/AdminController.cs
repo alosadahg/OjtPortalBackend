@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
 using OjtPortal.Enums;
-using OjtPortal.Infrastructure;
 using OjtPortal.Services;
 
 namespace OjtPortal.Controllers
@@ -12,41 +10,18 @@ namespace OjtPortal.Controllers
     [Route("api/admins")]
     public class AdminController: OjtPortalBaseController
     {
-        private readonly IAdminService _adminService;
+        private readonly IUserService _userService;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IUserService userService)
         {
-            this._adminService = adminService;
+            this._userService = userService;
         }
-
-        /// <summary>
-        /// Adds a new admin
-        /// </summary>
-        /// <param name="newUser"></param>
-        /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExistingUserDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpPost]
-        public async Task<IActionResult> AddNewAdmin(UserDto newUser)
+        public async Task<IActionResult> AddNewAdmin(NewUserDto newUser)
         {
-            var (result, error) = await _adminService.CreateAdminAsync(newUser, string.Empty, UserType.Admin);
+            var (result, error) = await _userService.CreateUserAsync(newUser, UserType.Admin);
             if(error != null)  return MakeErrorResponse(error);
-            return CreatedAtRoute("GetAdminById", new {id = result!.Id}, result);
-        }
-
-        /// <summary>
-        /// Get admin by id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExistingUserDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpGet("{id}", Name = "GetAdminById")]
-        public async Task<IActionResult> GetAdminById(int id)
-        {
-            var (result, error) = await _adminService.GetAdminByIdAsync(id);
-            if (error != null) return MakeErrorResponse(error);
-            return Ok(result);
+            return Ok();
         }
     }
 }

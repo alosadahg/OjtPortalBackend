@@ -11,8 +11,6 @@ namespace OjtPortal.Dtos
     public class ExistingUserDto : UserDto
     {
         public int Id { get; set; } = 0;
-        public UserType UserType { get; set; }
-        public AccountStatus AccountStatus { get; set; }
     }
 
     public class NewUserDto : UserDto

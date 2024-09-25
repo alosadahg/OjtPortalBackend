@@ -1,10 +1,7 @@
-﻿using OjtPortal.Infrastructure.JsonConverters;
-using System.ComponentModel;
-using System.Text.Json.Serialization;
+﻿using System.ComponentModel;
 
 namespace OjtPortal.Entities
 {
-    [JsonConverter(typeof(EnumDescriptionConverter<DepartmentCode>))]
     public enum DepartmentCode
     {
         [Description("CEA")]
@@ -20,7 +17,6 @@ namespace OjtPortal.Entities
         [Description("CCJ")]
         CCJ
     }
-    [JsonConverter(typeof(EnumDescriptionConverter<DepartmentName>))]
     public enum DepartmentName
     {
         [Description("College of Engineering and Architecture")]
