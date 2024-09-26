@@ -93,6 +93,7 @@ builder.Services.AddScoped<ITeacherRepo, TeacherRepo>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IChairRepo, ChairRepo>();
 builder.Services.AddScoped<IAdminRepo, AdminRepo>();
+builder.Services.AddScoped<IOtpRepo, OtpRepo>();
 
 
 builder.Services.AddSwaggerGen(options =>

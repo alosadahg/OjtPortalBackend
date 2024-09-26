@@ -64,12 +64,12 @@ namespace OjtPortal.Controllers
                 switch (user.UserType)
                 {
                     case UserType.Student:
-                        var (student, error) =  await _studentService.GetStudentByIdAsync(user.Id, true);
+                        var (student, error) = await _studentService.GetStudentByIdAsync(user.Id, true);
                         if (error != null) return MakeErrorResponse(error);
                         return Ok(student);
                     case UserType.Admin:
                         var (admin, aError) = await _adminService.GetAdminByIdAsync(user.Id);
-                        if(aError != null) return MakeErrorResponse(aError);
+                        if (aError != null) return MakeErrorResponse(aError);
                         return Ok(admin);
                     case UserType.Teacher:
                         var (teacher, tError) = await _teacherService.GetTeacherByIdAsync(user.Id, true);
@@ -118,6 +118,37 @@ namespace OjtPortal.Controllers
         public async Task<IActionResult> ResendActivationEmail(string email)
         {
             var (result, error) = await _userService.ResendActivationEmailAsync(email);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Send forget password otp to email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpPut("forget/password")]
+
+        public async Task<IActionResult> ForgetPasswordAsync(string email)
+        {
+            var (result, error) = await _userService.ForgetPasswordAsync(email);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Reset password with otp
+        /// </summary>
+        /// <param name="resetPasswordDto"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpPut("reset/password")]
+        public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            var (result, error) = await _userService.ResetPasswordAsync(resetPasswordDto);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

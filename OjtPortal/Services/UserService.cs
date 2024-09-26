@@ -23,7 +23,9 @@ namespace OjtPortal.Services
         Task<ErrorResponseModel?> SendActivationEmailAsync(string emailTo, User user);
         Task<(string?, ErrorResponseModel?)> ResendActivationEmailAsync(string emailTo);
         Task<(SignInResult?, ErrorResponseModel?)> LoginAsync(LoginDto loginDto);
-        string GeneratePassword();
+        string GenerateToken(string type);
+        Task<(string?, ErrorResponseModel?)> ForgetPasswordAsync(string email);
+        Task<(string?, ErrorResponseModel?)> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
     }
 
     public class UserService : IUserService
@@ -36,8 +38,9 @@ namespace OjtPortal.Services
         private readonly UserManager<User> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly SignInManager<User> _signInManager;
+        private readonly IOtpRepo _otpRepo;
 
-        public UserService(IMapper mapper, ILogger<UserService> logger, IUserRepo userRepository, LinkGenerator linkGenerator, IEmailSender emailSender, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, SignInManager<User> signInManager)
+        public UserService(IMapper mapper, ILogger<UserService> logger, IUserRepo userRepository, LinkGenerator linkGenerator, IEmailSender emailSender, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, SignInManager<User> signInManager, IOtpRepo otpRepo)
         {
             this._mapper = mapper;
             this._logger = logger;
@@ -47,6 +50,7 @@ namespace OjtPortal.Services
             this._userManager = userManager;
             this._httpContextAccessor = httpContextAccessor;
             this._signInManager = signInManager;
+            this._otpRepo = otpRepo;
         }
 
         public async Task<(CreatedUserDto?, ErrorResponseModel?)> CreateUserAsync(UserDto newUser, string password, UserType userType)
@@ -58,7 +62,7 @@ namespace OjtPortal.Services
 
             if (string.IsNullOrEmpty(password))
             {
-                password = GeneratePassword();
+                password = GenerateToken("password");
                 response.IsPasswordGenerated = true;
                 response.Password = password;
             }
@@ -86,21 +90,34 @@ namespace OjtPortal.Services
         }
 
 
-        public string GeneratePassword()
+        public string GenerateToken(string type)
         {
+            var otp = "1234567890";
             var characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!@()[]";
+            var source = string.Empty;
 
-            StringBuilder result = new StringBuilder(8);
+            var length = 0;
+            if(type.ToLower().Equals("otp"))
+            {
+                length = 6;
+                source = otp;
+            } 
+            else if (type.ToLower().Equals("password"))
+            {
+                length = 15;
+                source = characters;
+            }
+            StringBuilder result = new StringBuilder(length);
 
             using (var rng = RandomNumberGenerator.Create())
             {
                 byte[] randomNumber = new byte[1];
-                for (int i = 0; i < 8; i++)
+                for (int i = 0; i < length; i++)
                 {
                     rng.GetBytes(randomNumber);
-                    int randomIndex = randomNumber[0] % characters.Length;
+                    int randomIndex = randomNumber[0] % source.Length;
 
-                    result.Append(characters[randomIndex]);
+                    result.Append(source[randomIndex]);
                 }
             }
 
@@ -183,7 +200,40 @@ namespace OjtPortal.Services
                 return (null, new(HttpStatusCode.UnprocessableContent, new ErrorModel("Inactive account", "Activate the account first using the activation email")));
             if (user!.AccountStatus == AccountStatus.Deactivated)
                 return (null, new(HttpStatusCode.UnprocessableContent, new ErrorModel("Deactivated account", "Access privileges are revoked for this account")));
-            return (await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, true, false), null);
+            var checkPassword = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            if(checkPassword.Succeeded) return (await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, true, false), null);
+            return (null, new(HttpStatusCode.BadRequest, "Login failed", "Invalid credentials"));
+        }
+
+        public async Task<(string?, ErrorResponseModel?)> ForgetPasswordAsync(string email)
+        {
+            var (user, error) = await _userRepository.GetUserByEmailAsync(email);
+            if (error != null) return (null, error);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
+            var otpCode = GenerateToken("otp");
+            OTP? otp = new OTP
+            {
+                UserId = user!.Id,
+                User = user!,
+                Code = otpCode,
+                Token = token
+            };
+            otp = await _otpRepo.AddOTPAsync(otp);
+            if (otp == null) return (null, new(HttpStatusCode.BadRequest, "Forget Password failed", "Failed to generate otp"));
+            await _emailSender.SendEmailAsync(email, "Forget Password OTP", EmailTemplate.OTPTemplate(otp!.Code));
+            return ("OTP is sent to email", null);
+        }
+
+        public async Task<(string?, ErrorResponseModel?)> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+        {
+            var (user, error) = await _userRepository.GetUserByEmailAsync(resetPasswordDto.Email);
+            if (error != null) return (null, error);
+            var otp = await _otpRepo.GetOTPByIdAsync(user!.Id);
+            if(otp == null) return (null, new(HttpStatusCode.NotFound, "Failed to reset password", "No forget password request"));
+            if (!otp.Code.Equals(resetPasswordDto.Code)) return (null, new(HttpStatusCode.BadRequest, "Invalid OTP", "OTP is either expired or invalid"));
+            await _userManager.ResetPasswordAsync(user, otp.Token, resetPasswordDto.NewPassword);
+            await _otpRepo.RemoveOTP(otp);
+            return ("Successfully changed password", null);
         }
     }
 }

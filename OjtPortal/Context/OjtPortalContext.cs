@@ -30,5 +30,6 @@ namespace OjtPortal.Context
         public DbSet<Company> Companies { get; set; }
         public DbSet<Mentor> Mentors { get; set; }
         public DbSet<Holiday> Holidays {  get; set; }
+        public DbSet<OTP> OTPs { get; set; }
     }
 }

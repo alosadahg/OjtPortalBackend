@@ -38,7 +38,7 @@ namespace OjtPortal.Services
             if (departmentError != null) return (null, departmentError);
             newChairDto.Department = department!;
 
-            newChairDto.Password = _userService.GeneratePassword();
+            newChairDto.Password = _userService.GenerateToken("password");
             var (createdUser, userError) = await _userService.CreateUserAsync(newChairDto, newChairDto.Password, UserType.Chair);
             if (userError != null) return (null, userError);
 

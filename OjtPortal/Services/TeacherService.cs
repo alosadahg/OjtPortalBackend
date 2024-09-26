@@ -40,7 +40,7 @@ namespace OjtPortal.Services
             if (departmentError != null) return (null, departmentError);
             newTeacherDto.Department = department!;
 
-            newTeacherDto.Password = _userService.GeneratePassword();
+            newTeacherDto.Password = _userService.GenerateToken("password");
             var (createdUser, userError) = await _userService.CreateUserAsync(newTeacherDto, newTeacherDto.Password, UserType.Teacher);
             if (userError != null) return (null, userError);
 
