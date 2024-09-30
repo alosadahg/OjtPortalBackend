@@ -13,7 +13,7 @@ namespace OjtPortal.Services
 {
     public interface IStudentService
     {
-        Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly startDate, int manDays, bool includeHolidays, WorkingDays workingDays);
+        Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly? startDate, int manDays, bool includeHolidays, WorkingDays workingDays);
         Task<(StudentDto?, ErrorResponseModel?)> RegisterStudent(NewStudentDto newStudent);
         Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeUser);
         List<T> MapStudentsToDtoList<T>(IEnumerable<Student> students) where T : class;
@@ -52,31 +52,40 @@ namespace OjtPortal.Services
             var existingProgram = await _degreeProgramRepo.FindDegreeProgramById(newStudent.DegreeProgramId);
             if (existingProgram == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.DegreeProgramId.ToString()))));
 
+            var studentEntity = _mapper.Map<Student>(newStudent);
             key = "mentor";
-            var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId, true);
-            if(existingMentor == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.MentorId.ToString()))));
+            if (newStudent.MentorId.HasValue)
+            {
+                var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId.Value, true);
+                studentEntity.Mentor = existingMentor;
+            }
+            //if(existingMentor == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.MentorId.ToString()))));
 
-            key = "_teacherService";
-            var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(newStudent.TeacherId, true);
-            if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.TeacherId.ToString()))));
+            key = "teacher";
+            if (newStudent.TeacherId.HasValue)
+            {
+                var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(newStudent.TeacherId.Value, true);
+                studentEntity.Instructor = existingTeacher;
+            }
+             //if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.TeacherId.ToString()))));
 
             key = "student";
-            var studentEntity = _mapper.Map<Student>(newStudent);
             var (createdUser, error) = await _userService.CreateUserAsync(newStudent, newStudent.Password, UserType.Student);
             if(error != null) return (null, error);
 
             // Linking the student to its object fields
             studentEntity.DegreeProgram = existingProgram;
-            studentEntity.Instructor = existingTeacher;
-            studentEntity.Mentor = existingMentor;
             studentEntity.User = createdUser!.User;
 
             existingProgram.Department.Students!.Add(studentEntity);
 
-            studentEntity.ManDays = CalculateManDays(studentEntity.HrsToRender);
-            var (endDate, dateError) = await GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, false, WorkingDays.WeekdaysOnly);
-            if (dateError != null) return (null, dateError);
-            studentEntity.EndDate = endDate!.Value;
+            if (studentEntity.StartDate != null && studentEntity.HrsToRender > 0)
+            {
+                studentEntity.ManDays = CalculateManDays(studentEntity.HrsToRender);
+                var (endDate, dateError) = await GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, false, WorkingDays.WeekdaysOnly);
+                if (dateError != null) return (null, dateError);
+                studentEntity.EndDate = endDate!.Value;
+            }
 
             studentEntity = await _studentRepo.AddStudentAsync(studentEntity);
             if (studentEntity == null) return (null, new(HttpStatusCode.UnprocessableEntity, LoggingTemplate.DuplicateRecordTitle(key), LoggingTemplate.DuplicateRecordDescription(key, newStudent.Email)));
@@ -106,12 +115,13 @@ namespace OjtPortal.Services
             return (_mapper.Map<StudentDto>(student), null);
         }
 
-        public async Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly startDate, int manDays, bool includeHolidays, WorkingDays workingDays)
+        public async Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly? startDate, int manDays, bool includeHolidays, WorkingDays workingDays)
         {
             var (holidays, error) = await _holidayService.GetHolidaysAsync();
             if (error != null) return (null, error);
             var holidayDates = holidays!.Select(h => h.Date).ToList();
-            DateOnly endDate = startDate;
+            if (!startDate.HasValue) return (null, new(HttpStatusCode.BadRequest, "Missing Start Date", "Start Date is null"));
+            DateOnly endDate = startDate!.Value;
 
             while (manDays > 0)
             {

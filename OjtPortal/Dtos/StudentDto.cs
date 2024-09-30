@@ -28,10 +28,10 @@ namespace OjtPortal.Dtos
         public string StudentId { get; set; } = string.Empty;
         public int DegreeProgramId { get; set; } = 0;
         public string Designation { get; set; } = string.Empty;
-        public int MentorId { get; set; } = 0;
-        public int TeacherId { get; set; } = 1;
+        public int? MentorId { get; set; } = null;
+        public int? TeacherId { get; set; } = null;
         public string Division { get; set; } = string.Empty;
-        public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateOnly? StartDate { get; set; } = null;
         public int HrsToRender { get; set; } = 0;
         public NewShiftDto Shift { get; set; } = new();
     }

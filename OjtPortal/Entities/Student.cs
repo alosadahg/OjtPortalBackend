@@ -16,20 +16,20 @@ namespace OjtPortal.Entities
         public string StudentId { get; set; } = "";
         public DegreeProgram DegreeProgram { get; set; } = new();
         public int DegreeProgramId { get; set; } = 0;
-        public int MentorId { get; set; }
-        public Mentor Mentor { get; set; } = new();
-        public int InstructorId { get; set; }
-        public Teacher Instructor { get; set; } = new();
+        public int? MentorId { get; set; }
+        public Mentor? Mentor { get; set; }
+        public int? InstructorId { get; set; }
+        public Teacher? Instructor { get; set; }
         public string Division { get; set; } = string.Empty;
         public string Designation { get; set; } = string.Empty;
-        public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-        public DateOnly EndDate { get; set; } = new DateOnly();
+        public DateOnly? StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
         public int HrsToRender { get; set; } = 0;
         public int ManDays { get; set; } = 0;
         [Column(TypeName = "varchar(50)")]
         [ValueConverter(typeof(EnumToStringConverter<InternshipStatus>))]
         public InternshipStatus InternshipStatus { get; set; }
-        public Shift Shift { get; set; } = new();
+        public Shift? Shift { get; set; } = new();
 
         public Student()
         {

@@ -10,9 +10,9 @@ namespace OjtPortal.Entities
     public class Shift
     {
         [JsonConverter(typeof(TimeOnlyConverter))]
-        public TimeOnly Start { get; set; } = new();
+        public TimeOnly? Start { get; set; }
         [JsonConverter(typeof(TimeOnlyConverter))]
-        public TimeOnly End { get; set; } = new();
+        public TimeOnly? End { get; set; }
         public int DailyDutyHrs { get; set; } = 0;
         public int LateTimeInCount { get; set; } = 0;
         [Column(TypeName = "varchar(50)")]

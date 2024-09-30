@@ -15,18 +15,27 @@ namespace OjtPortal.Repositories
     public class StudentRepo : IStudentRepo
     {
         private readonly OjtPortalContext _context;
+        private readonly ILogger<StudentRepo> _logger;
 
-        public StudentRepo(OjtPortalContext context)
+        public StudentRepo(OjtPortalContext context, ILogger<StudentRepo> logger)
         {
             this._context = context;
+            this._logger = logger;
         }
 
         public async Task<Student?> AddStudentAsync(Student newStudent)
         {
-            if (await _context.Students.FirstOrDefaultAsync(s => s.StudentId == newStudent.StudentId) != null) return null;
-            if (IsStudentExistingAsync(newStudent).Result) return null;
-            await _context.Students.AddAsync(newStudent);
-            _context.SaveChanges();
+            try
+            {
+                if (await _context.Students.FirstOrDefaultAsync(s => s.StudentId == newStudent.StudentId) != null) return null;
+                if (await IsStudentExistingAsync(newStudent)) return null;
+                await _context.Students.AddAsync(newStudent);
+                await _context.SaveChangesAsync();
+            } catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return null;
+            }
             return newStudent;
         }
 
