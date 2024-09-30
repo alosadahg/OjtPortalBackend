@@ -39,7 +39,7 @@ namespace OjtPortal.Controllers
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullMentorDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpGet("{id}", Name = "GetMentorById")]
+        [HttpGet("{Id}", Name = "GetMentorById")]
         public async Task<IActionResult> GetMentorByIdAsync(int id)
         {
             var (response, error) = await _mentorService.GetMentorByIdAsync(id, true);

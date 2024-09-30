@@ -102,7 +102,11 @@ namespace OjtPortal.Controllers
         {
             var (result, error) = await _userService.ActivateAccountAsync(userId, token);
             if (error != null) return MakeErrorResponse(error);
-            return Ok(result);
+			if (!string.IsNullOrEmpty(result) && result.StartsWith("/ChangeDefaultPassword"))
+			{
+				return Redirect(result);
+			}
+			return Ok(result);
         }
 
         /// <summary>
@@ -129,7 +133,7 @@ namespace OjtPortal.Controllers
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpPut("forget/password")]
+        [HttpPatch("forget/password")]
 
         public async Task<IActionResult> ForgetPasswordAsync(string email)
         {
@@ -145,14 +149,13 @@ namespace OjtPortal.Controllers
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpPut("reset/password")]
+        [HttpPatch("reset/password")]
         public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordDto resetPasswordDto)
         {
             var (result, error) = await _userService.ResetPasswordAsync(resetPasswordDto);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
-
 
     }
 }

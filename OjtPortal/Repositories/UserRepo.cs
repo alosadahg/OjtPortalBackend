@@ -49,7 +49,7 @@ namespace OjtPortal.Repositories
 
             if (result == null)
             {
-                _logger.LogError($"User not found for id: {id}");
+                _logger.LogError($"User not found for Id: {id}");
                 return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle("user"), LoggingTemplate.MissingRecordDescription("user", id.ToString()))));
             }
             return (result, null);

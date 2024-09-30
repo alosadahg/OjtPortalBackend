@@ -26,7 +26,7 @@ namespace OjtPortal.Infrastructure
             ErrorModel errorModel = new ErrorModel("Activation Email Not Delivered", "Cannot send activation email to '" + email + "'");
             if (status.Equals(HttpStatusCode.NotFound))
             {
-                errorModel.message = "No record is associated for this email.";
+                errorModel.Message = "No record is associated for this email.";
             }
             return errorModel;
         }
@@ -62,13 +62,13 @@ namespace OjtPortal.Infrastructure
 
     public class ErrorModel
     {
-        public string? code { get; set; }
-        public string message { get; set; }
+        public string? Code { get; set; }
+        public string Message { get; set; }
 
         public ErrorModel(string? code, string message)
         {
-            this.code = code;
-            this.message = message;
+            this.Code = code;
+            this.Message = message;
         }
     }
 }

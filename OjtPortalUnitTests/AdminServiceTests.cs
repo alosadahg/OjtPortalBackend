@@ -13,7 +13,7 @@ namespace OjtPortalUnitTests
 {
     public class AdminServiceTests
     {
-        private AdminService _mockAdminService;
+        private AdminService _adminService;
         private Mock<IAdminRepo> _mockAdminRepo;
         private Mock<IMapper> _mockMapper;
         private Mock<IUserService> _mockUserService;
@@ -26,7 +26,7 @@ namespace OjtPortalUnitTests
             _mockMapper = new Mock<IMapper>();
             _mockUserService = new Mock<IUserService>();
             _mockLogger = new Mock<ILogger<AdminService>>();
-            _mockAdminService = new AdminService(_mockUserService.Object, _mockMapper.Object, _mockAdminRepo.Object, _mockLogger.Object);
+            _adminService = new AdminService(_mockUserService.Object, _mockMapper.Object, _mockAdminRepo.Object, _mockLogger.Object);
         }
 
         #region CreateAdminAsync_NewAdmin_ShouldReturnExistingUserDto
@@ -59,7 +59,7 @@ namespace OjtPortalUnitTests
                 .Returns(new ExistingUserDto { Id = adminId, Email = fakeUser.Email});
 
             // Act
-            var (result, error) = await _mockAdminService.CreateAdminAsync(fakeUser);
+            var (result, error) = await _adminService.CreateAdminAsync(fakeUser);
 
             // Assert
             Assert.NotNull(result, "Result should not be null.");
@@ -83,10 +83,10 @@ namespace OjtPortalUnitTests
         {
             // Arrange
             var adminId = It.IsAny<int>();
-            Console.WriteLine($"Testing for id {adminId}: GetAdminByIdAsync_AdminIdNotFound_ShouldReturnError");
+            Console.WriteLine($"Testing for Id {adminId}: GetAdminByIdAsync_AdminIdNotFound_ShouldReturnError");
 
             // Act
-            var (result, error) = await _mockAdminService.GetAdminByIdAsync(adminId);
+            var (result, error) = await _adminService.GetAdminByIdAsync(adminId);
 
             // Assert
             Assert.Null(result);
@@ -102,7 +102,7 @@ namespace OjtPortalUnitTests
         {
             // Arrange
             var adminId = 1;
-            Console.WriteLine($"Testing for id {adminId}: GetAdminByIdAsync_AdminIdFound_ShouldReturnAdminDto");
+            Console.WriteLine($"Testing for Id {adminId}: GetAdminByIdAsync_AdminIdFound_ShouldReturnAdminDto");
 
             var fakeAdmin = new Admin { Id = adminId };
             var fakeAdminDto = new ExistingUserDto { Id = adminId };
@@ -111,7 +111,7 @@ namespace OjtPortalUnitTests
             _mockMapper.Setup(m => m.Map<ExistingUserDto>(fakeAdmin)).Returns(fakeAdminDto);
 
             // Act
-            var (result, error) = await _mockAdminService.GetAdminByIdAsync(adminId);
+            var (result, error) = await _adminService.GetAdminByIdAsync(adminId);
 
             // Assert
             Assert.NotNull(result, "Result must not be null");

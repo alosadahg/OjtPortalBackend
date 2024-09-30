@@ -75,7 +75,7 @@ namespace OjtPortal.Services
             {
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception($"Failed to fetch holidays. Status code: {response.StatusCode}, Message: {JObject.Parse(await response.Content.ReadAsStringAsync())["error"]}");
+                    throw new Exception($"Failed to fetch holidays. Status Code: {response.StatusCode}, Message: {JObject.Parse(await response.Content.ReadAsStringAsync())["error"]}");
                 }
             }
             catch (Exception ex)

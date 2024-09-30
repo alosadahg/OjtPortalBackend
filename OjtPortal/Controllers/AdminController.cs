@@ -41,7 +41,7 @@ namespace OjtPortal.Controllers
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExistingUserDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpGet("{id}", Name = "GetAdminById")]
+        [HttpGet("{Id}", Name = "GetAdminById")]
         public async Task<IActionResult> GetAdminById(int id)
         {
             var (result, error) = await _adminService.GetAdminByIdAsync(id);

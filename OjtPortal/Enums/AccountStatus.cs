@@ -10,6 +10,8 @@ namespace OjtPortal.Enums
     {
         [Description("Pending")]
         Pending,
+        [Description("Pending Password Change")]
+        PendingPasswordChange,
         [Description("Active")]
         Active,
         [Description("Deactivated")]

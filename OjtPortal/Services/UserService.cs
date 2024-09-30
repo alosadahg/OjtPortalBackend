@@ -11,6 +11,7 @@ using OjtPortal.Infrastructure;
 using OjtPortal.Repositories;
 using System.Net;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 
 namespace OjtPortal.Services
@@ -26,6 +27,7 @@ namespace OjtPortal.Services
         string GenerateToken(string type);
         Task<(string?, ErrorResponseModel?)> ForgetPasswordAsync(string email);
         Task<(string?, ErrorResponseModel?)> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
+        Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto);
     }
 
     public class UserService : IUserService
@@ -65,6 +67,7 @@ namespace OjtPortal.Services
                 password = GenerateToken("password");
                 response.IsPasswordGenerated = true;
                 response.Password = password;
+                userEntity.AccountStatus = AccountStatus.PendingPasswordChange;
             }
 
             var (result, error) = await _userRepository.CreateAsync(userEntity, password);
@@ -177,6 +180,11 @@ namespace OjtPortal.Services
             {
                 return ("Account is already activated", null);
             }
+            if(user!.AccountStatus == AccountStatus.PendingPasswordChange)
+            {
+                var changePasswordUrl = _linkGenerator.GetPathByPage("/ChangeDefaultPassword", null, new { Id = user.Id });
+                return (changePasswordUrl, null);
+            }
             user = await _userRepository.ActivateAccount(user);
             return ("Thank you for activating your account", null);
         }
@@ -196,7 +204,7 @@ namespace OjtPortal.Services
             var (user, error) = await _userRepository.GetUserByEmailAsync(loginDto.Email);
             if (error != null) return (null, error);
 
-            if (user!.AccountStatus == AccountStatus.Pending)
+            if (user!.AccountStatus == AccountStatus.Pending || user!.AccountStatus == AccountStatus.PendingPasswordChange)
                 return (null, new(HttpStatusCode.UnprocessableContent, new ErrorModel("Inactive account", "Activate the account first using the activation email")));
             if (user!.AccountStatus == AccountStatus.Deactivated)
                 return (null, new(HttpStatusCode.UnprocessableContent, new ErrorModel("Deactivated account", "Access privileges are revoked for this account")));
@@ -233,6 +241,35 @@ namespace OjtPortal.Services
             if (!otp.Code.Equals(resetPasswordDto.Code)) return (null, new(HttpStatusCode.BadRequest, "Invalid OTP", "OTP is either expired or invalid"));
             await _userManager.ResetPasswordAsync(user, otp.Token, resetPasswordDto.NewPassword);
             await _otpRepo.RemoveOTP(otp);
+            return ("Successfully changed password", null);
+        }
+
+        public async Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto)
+        {
+			var (user, error) = await _userRepository.GetUserByIdAsync(changePasswordDto.Id);
+            if (error != null) return (null, error);
+
+            if (user!.AccountStatus == AccountStatus.Active)
+            {
+                return (null, new(HttpStatusCode.BadRequest, "Active Account", "Account is already activated."));
+            }
+            if (user!.AccountStatus == AccountStatus.Deactivated)
+            {
+                return (null, new(HttpStatusCode.BadRequest, "Deactivated Account", "Access Privileges are revoked for this account"));
+            }
+            if (user!.AccountStatus != AccountStatus.PendingPasswordChange)
+            {
+                return (null, new(HttpStatusCode.MethodNotAllowed, "Not Allowed", "This is only for users with default passwords. Use forget password instead."));
+            }
+
+            if (!changePasswordDto.NewPassword.Equals(changePasswordDto.ConfirmPassword))
+            {
+                return (null, new(HttpStatusCode.BadRequest, "Password mismatch", "Re-enter password and try again"));
+            }
+
+            user = await _userRepository.ActivateAccount(user);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
+            await _userManager.ResetPasswordAsync(user!, token, changePasswordDto.NewPassword);
             return ("Successfully changed password", null);
         }
     }

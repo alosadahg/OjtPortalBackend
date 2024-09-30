@@ -15,7 +15,10 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Automapper
+// Add view support
+builder.Services.AddRazorPages();
+
+// Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Add logging configuration
@@ -145,6 +148,10 @@ if (app.Environment.IsProduction())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.MapRazorPages();
 
 app.UseAuthorization();
 
