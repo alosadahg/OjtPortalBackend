@@ -17,7 +17,7 @@ namespace OjtPortal.Infrastructure
                     : new ErrorModel(error.Code, error.Description);
                 errorResponseModel.Errors.Add(errorModel);
             }
-            errorResponseModel.statusCode = HttpStatusCode.BadRequest;
+            errorResponseModel.StatusCode = HttpStatusCode.BadRequest;
             return errorResponseModel;
         }
 
@@ -34,7 +34,7 @@ namespace OjtPortal.Infrastructure
 
     public class ErrorResponseModel
     {
-        public HttpStatusCode statusCode { get; set; }
+        public HttpStatusCode StatusCode { get; set; }
         public List<ErrorModel> Errors { get; set; } = new List<ErrorModel>();
 
         public ErrorResponseModel()
@@ -43,19 +43,19 @@ namespace OjtPortal.Infrastructure
 
         public ErrorResponseModel(HttpStatusCode statusCode, ErrorModel error)
         {
-            this.statusCode = statusCode;
+            this.StatusCode = statusCode;
             Errors.Add(error);
         }
 
         public ErrorResponseModel(HttpStatusCode statusCode, string code, string message)
         {
-            this.statusCode = statusCode;
+            this.StatusCode = statusCode;
             Errors.Add(new ErrorModel(code, message));
         }
 
         public ErrorResponseModel(HttpStatusCode statusCode, List<ErrorModel> errors)
         {
-            this.statusCode = statusCode;
+            this.StatusCode = statusCode;
             Errors = errors;
         }
     }

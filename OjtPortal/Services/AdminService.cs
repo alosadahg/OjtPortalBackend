@@ -11,7 +11,7 @@ namespace OjtPortal.Services
 {
     public interface IAdminService
     {
-        Task<(ExistingUserDto?, ErrorResponseModel?)> CreateAdminAsync(UserDto newUser, string password, UserType userType);
+        Task<(ExistingUserDto?, ErrorResponseModel?)> CreateAdminAsync(UserDto newUser);
         Task<(ExistingUserDto?, ErrorResponseModel?)> GetAdminByIdAsync(int id);
     }
 
@@ -20,22 +20,24 @@ namespace OjtPortal.Services
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly IAdminRepo _adminRepo;
+        private readonly ILogger<AdminService> _logger;
 
-        public AdminService(IUserService userService, IMapper mapper, IAdminRepo adminRepo)
+        public AdminService(IUserService userService, IMapper mapper, IAdminRepo adminRepo, ILogger<AdminService> logger)
         {
             this._userService = userService;
             this._mapper = mapper;
             this._adminRepo = adminRepo;
+            this._logger = logger;
         }
-        public async Task<(ExistingUserDto?, ErrorResponseModel?)> CreateAdminAsync(UserDto newUser, string password, UserType userType)
+        public async Task<(ExistingUserDto?, ErrorResponseModel?)> CreateAdminAsync(UserDto newUser)
         {
-            var (user, error) = await _userService.CreateUserAsync(newUser, password, userType);
+            var (user, error) = await _userService.CreateUserAsync(newUser, string.Empty, UserType.Admin);
             if (error != null) return (null, error);
 
 
             if (user!.IsPasswordGenerated)
             {
-                password = user.Password;
+                var password = user.Password;
                 var emailError = _userService.SendActivationEmailAsync(newUser.Email, user.User!, password);
                 if (emailError.Result != null) return (null, emailError.Result);
             }

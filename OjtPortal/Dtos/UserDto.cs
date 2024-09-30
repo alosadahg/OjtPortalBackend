@@ -1,8 +1,10 @@
 ﻿using OjtPortal.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace OjtPortal.Dtos
 {
-    public class UserDto { 
+    public class UserDto {
+        [Required(ErrorMessage = "Email is required")]
         public string Email { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;

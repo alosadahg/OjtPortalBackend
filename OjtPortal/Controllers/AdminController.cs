@@ -29,7 +29,7 @@ namespace OjtPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNewAdmin(UserDto newUser)
         {
-            var (result, error) = await _adminService.CreateAdminAsync(newUser, string.Empty, UserType.Admin);
+            var (result, error) = await _adminService.CreateAdminAsync(newUser);
             if(error != null)  return MakeErrorResponse(error);
             return CreatedAtRoute("GetAdminById", new {id = result!.Id}, result);
         }

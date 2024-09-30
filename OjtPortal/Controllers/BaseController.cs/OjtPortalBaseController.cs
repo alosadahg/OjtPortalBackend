@@ -9,7 +9,7 @@ namespace OjtPortal.Controllers.BaseController.cs
     {
         protected IActionResult MakeErrorResponse(ErrorResponseModel? errorResponseModel)
         {
-            HttpStatusCode code = errorResponseModel!.statusCode;
+            HttpStatusCode code = errorResponseModel!.StatusCode;
             return code switch
             {
                 HttpStatusCode.BadRequest => BadRequest(errorResponseModel),
@@ -18,7 +18,7 @@ namespace OjtPortal.Controllers.BaseController.cs
                 HttpStatusCode.Unauthorized => Unauthorized(errorResponseModel),
                 HttpStatusCode.UnprocessableEntity => UnprocessableEntity(errorResponseModel),
                 HttpStatusCode.InternalServerError => Problem(JsonSerializer.Serialize(errorResponseModel), statusCode: 500),
-                _ => StatusCode(((int) errorResponseModel.statusCode), errorResponseModel)
+                _ => StatusCode(((int) errorResponseModel.StatusCode), errorResponseModel)
             };
         }
     }
