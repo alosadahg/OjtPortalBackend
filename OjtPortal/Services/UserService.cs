@@ -251,7 +251,7 @@ namespace OjtPortal.Services
 
             if (user!.AccountStatus == AccountStatus.Active)
             {
-                return (null, new(HttpStatusCode.BadRequest, "Active Account", "Account is already activated."));
+                return (null, new(HttpStatusCode.BadRequest, "Active Account", "Account is already activated. New password is not saved. Use forget password instead to reset existing password."));
             }
             if (user!.AccountStatus == AccountStatus.Deactivated)
             {
@@ -259,7 +259,7 @@ namespace OjtPortal.Services
             }
             if (user!.AccountStatus != AccountStatus.PendingPasswordChange)
             {
-                return (null, new(HttpStatusCode.MethodNotAllowed, "Not Allowed", "This is only for users with default passwords. Use forget password instead."));
+                return (null, new(HttpStatusCode.MethodNotAllowed, "Not Allowed", "This is only for users with default system-generated password. Use forget password instead to reset existing password."));
             }
 
             if (!changePasswordDto.NewPassword.Equals(changePasswordDto.ConfirmPassword))
