@@ -112,8 +112,7 @@ namespace OjtPortal.Controllers
         /// <summary>
         /// Resend activation email
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="token"></param>
+        /// <param name="email"></param>
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]

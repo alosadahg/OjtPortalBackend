@@ -28,9 +28,10 @@ namespace OjtPortal.Repositories
             try
             {
                 if (await IsStudentExistingAsync(newStudent)) return null;
+                //_context.Entry(newStudent.User!).State = EntityState.Unchanged;
                 await _context.Students.AddAsync(newStudent);
                 await _context.SaveChangesAsync();
-            } catch(Exception ex)
+            }  catch(Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return null;

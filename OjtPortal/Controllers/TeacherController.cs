@@ -40,7 +40,7 @@ namespace OjtPortal.Controllers
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeacherDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpGet("{Id}", Name = "GetTeacherById")]
+        [HttpGet("{id}", Name = "GetTeacherById")]
         public async Task<IActionResult> GetTeacherByIdAsync(int id)
         {
             var (response, error) = await _teacherService.GetTeacherByIdAsync(id, true);

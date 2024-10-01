@@ -39,7 +39,7 @@ namespace OjtPortal.Controllers
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChairDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpGet("{Id}", Name = "GetChairById")]
+        [HttpGet("{id}", Name = "GetChairById")]
         public async Task<IActionResult> GetChairByIdAsync(int id)
         {
             var (response, error) = await _chairService.GetChairByIdAsync(id, true);

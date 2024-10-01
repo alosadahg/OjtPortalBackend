@@ -22,8 +22,6 @@ namespace OjtPortal.Infrastructure.JsonConverters
                 var enumType = typeof(T);
                 var description = reader.GetString();
     
-                Console.WriteLine($"Received value: {description}");
-
                 foreach (var field in enumType.GetFields(BindingFlags.Public | BindingFlags.Static))
                 {
                     var attribute = field.GetCustomAttribute<DescriptionAttribute>();

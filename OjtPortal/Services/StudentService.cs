@@ -55,7 +55,7 @@ namespace OjtPortal.Services
             var studentEntity = _mapper.Map<Student>(newStudent);
             if (await _studentRepo.IsStudentExistingAsync(studentEntity)) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.DuplicateRecordTitle("student"), LoggingTemplate.DuplicateRecordDescription("student", newStudent.StudentId)));
 
-                key = "mentor";
+            key = "mentor";
             if (newStudent.MentorId.HasValue)
             {
                 var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId.Value, true);
