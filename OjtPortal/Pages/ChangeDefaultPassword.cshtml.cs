@@ -12,6 +12,8 @@ namespace OjtPortal.Pages
 
 		[BindProperty(SupportsGet = true)]
         public int Id { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public string Token { get; set; }
         [BindProperty]
         public string NewPassword { get; set; } = string.Empty;
         [BindProperty]
@@ -49,7 +51,7 @@ namespace OjtPortal.Pages
                 ConfirmPassword = ConfirmPassword
             };
 
-            var (message, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto);
+            var (message, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, Token);
 
             if(error != null)
             {

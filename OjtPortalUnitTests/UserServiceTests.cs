@@ -103,10 +103,10 @@ namespace OjtPortalUnitTests
                 .ReturnsAsync(fakeToken);
             _mockUserManager.Setup(um => um.ResetPasswordAsync(fakeUser, fakeToken, changePasswordDto.NewPassword))
                 .ReturnsAsync(IdentityResult.Success);
-            _mockUserRepository.Setup(ur => ur.ActivateAccount(fakeUser)).ReturnsAsync(fakeUser);
+            _mockUserRepository.Setup(ur => ur.ActivateAccount(fakeUser, fakeToken)).ReturnsAsync(fakeUser);
 
             // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto);
+            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
 
             // Assert
             Assert.NotNull(result);
@@ -131,12 +131,13 @@ namespace OjtPortalUnitTests
                 Id = 1,
                 AccountStatus = AccountStatus.PendingPasswordChange
             };
+            var fakeToken = "fakeToken";
 
             _mockUserRepository.Setup(ur => ur.GetUserByIdAsync(changePasswordDto.Id))
                 .ReturnsAsync((fakeUser, null));
 
             // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto);
+            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
 
             // Assert
             Assert.Null(result);
@@ -162,12 +163,13 @@ namespace OjtPortalUnitTests
                 Id = 1,
                 AccountStatus = AccountStatus.Active
             };
+            var fakeToken = "fakeToken";
 
             _mockUserRepository.Setup(ur => ur.GetUserByIdAsync(changePasswordDto.Id))
                 .ReturnsAsync((fakeUser, null));
 
             // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto);
+            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
 
             // Assert
             Assert.Null(result);
@@ -193,12 +195,13 @@ namespace OjtPortalUnitTests
                 Id = 1,
                 AccountStatus = AccountStatus.Deactivated
             };
+            var fakeToken = "fakeToken";
 
             _mockUserRepository.Setup(ur => ur.GetUserByIdAsync(changePasswordDto.Id))
                 .ReturnsAsync((fakeUser, null));
 
             // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto);
+            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
 
             // Assert
             Assert.Null(result);
@@ -224,12 +227,13 @@ namespace OjtPortalUnitTests
                 Id = 1,
                 AccountStatus = AccountStatus.Pending 
             };
+            var fakeToken = "fakeToken";
 
             _mockUserRepository.Setup(ur => ur.GetUserByIdAsync(changePasswordDto.Id))
                 .ReturnsAsync((fakeUser, null));
 
             // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto);
+            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
 
             // Assert
             Assert.Null(result);

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using OjtPortal.Context;
 using OjtPortal.EmailTemplates;
@@ -6,6 +7,7 @@ using OjtPortal.Entities;
 using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
 using System.Net;
+using System.Text;
 
 namespace OjtPortal.Repositories
 {
@@ -14,7 +16,7 @@ namespace OjtPortal.Repositories
         Task<(User?, ErrorResponseModel?)> CreateAsync(User user, string password);
         Task<(User?, ErrorResponseModel?)> GetUserByIdAsync(int id);
         Task<(User?, ErrorResponseModel?)> GetUserByEmailAsync(string email);
-        Task<User> ActivateAccount(User user);
+        Task<User> ActivateAccount(User use, string token);
     }
 
     public class UserRepo : IUserRepo
@@ -67,10 +69,12 @@ namespace OjtPortal.Repositories
             return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle("user"), LoggingTemplate.MissingRecordDescription("user", email))));
         }
 
-        public async Task<User> ActivateAccount(User user)
+        public async Task<User> ActivateAccount(User user, string token)
         {
             user.AccountStatus = AccountStatus.Active;
             _context.Entry(user).State = EntityState.Modified;
+            token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+            await _userManager.ConfirmEmailAsync(user, token);
             await _context.SaveChangesAsync();
             return user;
         }

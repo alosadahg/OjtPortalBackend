@@ -27,7 +27,7 @@ namespace OjtPortal.Services
         string GenerateToken(string type);
         Task<(string?, ErrorResponseModel?)> ForgetPasswordAsync(string email);
         Task<(string?, ErrorResponseModel?)> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
-        Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto);
+        Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto, string token);
     }
 
     public class UserService : IUserService
@@ -171,7 +171,8 @@ namespace OjtPortal.Services
             var (user, error) = await _userRepository.GetUserByIdAsync(userId);
             if(error != null) return (null, error);
 
-            await _userManager.ConfirmEmailAsync(user!, code);
+            /*var confirmed = await _userManager.ConfirmEmailAsync(user!, code);
+            if (!confirmed.Succeeded) return (null, ErrorHandler.GetIdentityErrorResponse(confirmed.Errors, user.Email));*/
             if(user!.AccountStatus == AccountStatus.Deactivated)
             {
                 return (null, new(HttpStatusCode.UnprocessableContent, "Deactivated Account", "Access privileges are revoked for this account"));
@@ -182,10 +183,10 @@ namespace OjtPortal.Services
             }
             if(user!.AccountStatus == AccountStatus.PendingPasswordChange)
             {
-                var changePasswordUrl = _linkGenerator.GetPathByPage("/ChangeDefaultPassword", null, new { Id = user.Id });
+                var changePasswordUrl = _linkGenerator.GetPathByPage("/ChangeDefaultPassword", null, new { Id = user.Id, Token = code });
                 return (changePasswordUrl, null);
             }
-            user = await _userRepository.ActivateAccount(user);
+            user = await _userRepository.ActivateAccount(user, code);
             return ("Thank you for activating your account", null);
         }
         public async Task<string?> GetActivationLinkAsync(User user)
@@ -244,7 +245,7 @@ namespace OjtPortal.Services
             return ("Successfully changed password", null);
         }
 
-        public async Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto)
+        public async Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto, string token)
         {
 			var (user, error) = await _userRepository.GetUserByIdAsync(changePasswordDto.Id);
             if (error != null) return (null, error);
@@ -267,9 +268,9 @@ namespace OjtPortal.Services
                 return (null, new(HttpStatusCode.BadRequest, "Password mismatch", "Re-enter password and try again"));
             }
 
-            user = await _userRepository.ActivateAccount(user);
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
-            await _userManager.ResetPasswordAsync(user!, token, changePasswordDto.NewPassword);
+            user = await _userRepository.ActivateAccount(user, token);
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user!);
+            await _userManager.ResetPasswordAsync(user!, code, changePasswordDto.NewPassword);
             return ("Successfully changed password", null);
         }
     }
