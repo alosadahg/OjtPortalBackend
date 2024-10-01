@@ -14,7 +14,7 @@ namespace OjtPortal.Services
     public interface IStudentService
     {
         Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly? startDate, int manDays, bool includeHolidays, WorkingDays workingDays);
-        Task<(StudentDto?, ErrorResponseModel?)> RegisterStudent(NewStudentDto newStudent);
+        Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent);
         Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeUser);
         List<T> MapStudentsToDtoList<T>(IEnumerable<Student> students) where T : class;
     }
@@ -46,14 +46,16 @@ namespace OjtPortal.Services
             this._studentRepo = studentRepo;
         }
 
-        public async Task<(StudentDto?, ErrorResponseModel?)> RegisterStudent(NewStudentDto newStudent)
+        public async Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent)
         { 
             var key = "degree program";
             var existingProgram = await _degreeProgramRepo.FindDegreeProgramById(newStudent.DegreeProgramId);
             if (existingProgram == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.DegreeProgramId.ToString()))));
 
             var studentEntity = _mapper.Map<Student>(newStudent);
-            key = "mentor";
+            if (await _studentRepo.IsStudentExistingAsync(studentEntity)) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.DuplicateRecordTitle("student"), LoggingTemplate.DuplicateRecordDescription("student", newStudent.StudentId)));
+
+                key = "mentor";
             if (newStudent.MentorId.HasValue)
             {
                 var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId.Value, true);
@@ -101,6 +103,61 @@ namespace OjtPortal.Services
                 var emailError = _userService.SendActivationEmailAsync(newStudent.Email, studentEntity.User!);
                 if (emailError.Result != null) return (null, emailError.Result);
             }
+
+            return (_mapper.Map<StudentDto>(studentEntity), null);
+        }
+
+        public async Task<(StudentDto?, ErrorResponseModel?)> MentorAddStudentAsync(NewStudentDto newStudent)
+        {
+            var studentEntity = _mapper.Map<Student>(newStudent);
+            var key = "mentor";
+            if (newStudent.MentorId.HasValue)
+            {
+                var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId.Value, true);
+                studentEntity.Mentor = existingMentor;
+            }
+            //if(existingMentor == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.MentorId.ToString()))));
+
+            key = "teacher";
+            if (newStudent.TeacherId.HasValue)
+            {
+                var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(newStudent.TeacherId.Value, true);
+                studentEntity.Instructor = existingTeacher;
+            }
+            //if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.TeacherId.ToString()))));
+
+            key = "student";
+            var (createdUser, error) = await _userService.CreateUserAsync(newStudent, newStudent.Password, UserType.Student);
+            if (error != null) return (null, error);
+
+            /*// Linking the student to its object fields
+            studentEntity.DegreeProgram = existingProgram;
+            studentEntity.User = createdUser!.User;
+
+            existingProgram.Department.Students!.Add(studentEntity);
+
+            if (studentEntity.StartDate != null && studentEntity.HrsToRender > 0)
+            {
+                studentEntity.ManDays = CalculateManDays(studentEntity.HrsToRender);
+                var (endDate, dateError) = await GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, false, WorkingDays.WeekdaysOnly);
+                if (dateError != null) return (null, dateError);
+                studentEntity.EndDate = endDate!.Value;
+            }
+
+            studentEntity = await _studentRepo.AddStudentAsync(studentEntity);
+            if (studentEntity == null) return (null, new(HttpStatusCode.UnprocessableEntity, LoggingTemplate.DuplicateRecordTitle(key), LoggingTemplate.DuplicateRecordDescription(key, newStudent.Email)));
+
+            if (createdUser!.IsPasswordGenerated)
+            {
+                newStudent.Password = createdUser.Password;
+                var emailError = _userService.SendActivationEmailAsync(newStudent.Email, studentEntity.User!, newStudent.Password);
+                if (emailError.Result != null) return (null, emailError.Result);
+            }
+            else
+            {
+                var emailError = _userService.SendActivationEmailAsync(newStudent.Email, studentEntity.User!);
+                if (emailError.Result != null) return (null, emailError.Result);
+            }*/
 
             return (_mapper.Map<StudentDto>(studentEntity), null);
         }

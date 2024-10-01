@@ -27,7 +27,6 @@ namespace OjtPortal.Repositories
         {
             try
             {
-                if (await _context.Students.FirstOrDefaultAsync(s => s.StudentId == newStudent.StudentId) != null) return null;
                 if (await IsStudentExistingAsync(newStudent)) return null;
                 await _context.Students.AddAsync(newStudent);
                 await _context.SaveChangesAsync();
@@ -66,7 +65,14 @@ namespace OjtPortal.Repositories
 
         public async Task<bool> IsStudentExistingAsync(Student student)
         {
-            return await _context.Students.ContainsAsync(student);
+            var containsObject = await _context.Students.ContainsAsync(student);
+            if(!containsObject)
+            {
+                containsObject = (await _context.Students
+                    .Where(s=> s.StudentId.Equals(student.StudentId))
+                    .FirstOrDefaultAsync() != null) ? true : false;
+            }
+            return containsObject;
         }
     }
 }

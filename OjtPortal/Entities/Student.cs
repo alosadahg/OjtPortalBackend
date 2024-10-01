@@ -14,8 +14,8 @@ namespace OjtPortal.Entities
         [ForeignKey("UserId")]
         public User? User { get; set; }
         public string StudentId { get; set; } = "";
-        public DegreeProgram DegreeProgram { get; set; } = new();
-        public int DegreeProgramId { get; set; } = 0;
+        public DegreeProgram? DegreeProgram { get; set; } = new();
+        public int? DegreeProgramId { get; set; } = 0;
         public int? MentorId { get; set; }
         public Mentor? Mentor { get; set; }
         public int? InstructorId { get; set; }

@@ -48,7 +48,7 @@ namespace OjtPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> RegisterStudent(NewStudentDto newStudent)
         {
-            var (result, error) = await _studentService.RegisterStudent(newStudent);
+            var (result, error) = await _studentService.RegisterStudentAsync(newStudent);
             if (error != null) return MakeErrorResponse(error);
             return CreatedAtRoute("GetStudentById", new { id = result!.User.Id }, result);
         }
