@@ -19,7 +19,7 @@ namespace OjtPortal.Dtos
 
     public class NewUserDto : UserDto
     {
-        public string Password { get; set; } = string.Empty;
+        public string? Password { get; set; } = null;
         public NewUserDto()
         {
         }
