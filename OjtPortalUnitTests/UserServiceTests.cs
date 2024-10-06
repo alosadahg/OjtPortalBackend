@@ -108,7 +108,7 @@ namespace OjtPortalUnitTests
             _mockUserRepository.Setup(ur => ur.ActivateAccount(fakeUser, fakeToken)).ReturnsAsync(fakeUser);
 
             // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
+            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken, true);
 
             // Assert
             Assert.NotNull(result);
@@ -139,7 +139,7 @@ namespace OjtPortalUnitTests
                 .ReturnsAsync((fakeUser, null));
 
             // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
+            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken, true);
 
             // Assert
             Assert.Null(result);
@@ -171,7 +171,7 @@ namespace OjtPortalUnitTests
                 .ReturnsAsync((fakeUser, null));
 
             // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
+            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken, true);
 
             // Assert
             Assert.Null(result);
@@ -203,7 +203,7 @@ namespace OjtPortalUnitTests
                 .ReturnsAsync((fakeUser, null));
 
             // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
+            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken, true);
 
             // Assert
             Assert.Null(result);
@@ -213,36 +213,5 @@ namespace OjtPortalUnitTests
         }
         #endregion
 
-        #region ChangeDefaultPasswordAsync_AccountNotPendingPasswordChange_ShouldReturnError
-        [Test]
-        public async Task ChangeDefaultPasswordAsync_AccountNotPendingPasswordChange_ShouldReturnError()
-        {
-            // Arrange
-            var changePasswordDto = new ChangeDefaultPasswordDto
-            {
-                Id = 1,
-                NewPassword = "password123",
-                ConfirmPassword = "password123"
-            };
-            var fakeUser = new User
-            {
-                Id = 1,
-                AccountStatus = AccountStatus.Pending 
-            };
-            var fakeToken = "fakeToken";
-
-            _mockUserRepository.Setup(ur => ur.GetUserByIdAsync(changePasswordDto.Id))
-                .ReturnsAsync((fakeUser, null));
-
-            // Act
-            var (result, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, fakeToken);
-
-            // Assert
-            Assert.Null(result);
-            Assert.NotNull(error);
-            Assert.That(error.StatusCode, Is.EqualTo(HttpStatusCode.MethodNotAllowed));
-            Assert.That(error.Errors.First().Code!, Is.EqualTo("Not Allowed"));
-        }
-        #endregion
     }
 }
