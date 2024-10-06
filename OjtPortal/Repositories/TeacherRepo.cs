@@ -10,6 +10,8 @@ namespace OjtPortal.Repositories
         Task<Teacher?> GetTeacherByIdAsync(int id,bool includeUser);
         Task<bool> IsTeacherExisting(Teacher instructor);
         Task<List<Teacher>?> GetTeacherByDepartmentAsync(Department department);
+        Task<List<Teacher>?> GetTeachersAsync();
+        Task<List<Teacher>?> GetTeacherByDepartmentIdAsync(int departmentId);
     }
 
     public class TeacherRepo : ITeacherRepo
@@ -45,6 +47,17 @@ namespace OjtPortal.Repositories
         public async Task<List<Teacher>?> GetTeacherByDepartmentAsync(Department department)
         {
             return await _context.Teachers.Include(t => t.User).Include(t => t.Department).Include(t => t.Students).Where(t => t.Department == department).ToListAsync();
+        }
+
+        public async Task<List<Teacher>?> GetTeacherByDepartmentIdAsync(int departmentId)
+        {
+            return await _context.Teachers.Include(t => t.User).Include(t => t.Department).Include(t => t.Students).Where(t => t.Department.DepartmentId == departmentId).ToListAsync();
+        }
+
+
+        public async Task<List<Teacher>?> GetTeachersAsync()
+        {
+            return await _context.Teachers.Include(t => t.User).Include(t => t.Department).Include(t => t.Students).ToListAsync();
         }
     }
 }

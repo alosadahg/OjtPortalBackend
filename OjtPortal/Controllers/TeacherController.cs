@@ -58,5 +58,20 @@ namespace OjtPortal.Controllers
         {
             return await _teacherService.FindTeachersByDepartmentCode(departmentCode);
         }
+
+        /// <summary>
+        /// Get teachers by department id
+        /// </summary>
+        /// <param name="departmentId"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TeacherDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpGet("departments/id/{departmentId}")]
+        public async Task<IActionResult> GetTeachersByDepartmentIdAsync(int departmentId)
+        {
+            var (teachers, error) = await _teacherService.GetTeacherByDepartmentIdAsync(departmentId);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(teachers);
+        }
     }
 }

@@ -15,6 +15,7 @@ namespace OjtPortal.Services
         Task<(TeacherDto?, ErrorResponseModel?)> GetTeacherByIdAsync(int id, bool includeUser);
         Task<List<TeacherDto>?> GetTeacherByDepartmentAsync(Department department);
         Task<List<TeacherDto>?> FindTeachersByDepartmentCode(DepartmentCode departmentName);
+        Task<(List<TeacherDto>?, ErrorResponseModel?)> GetTeacherByDepartmentIdAsync(int departmentId);
     }
 
     public class TeacherService : ITeacherService
@@ -101,5 +102,16 @@ namespace OjtPortal.Services
             return teachers;
         }
 
+        public async Task<(List<TeacherDto>?, ErrorResponseModel?)> GetTeacherByDepartmentIdAsync(int departmentId)
+        {
+            var (department, error) = await _departmentService.GetByIdAsync(departmentId);
+            if (error != null) return (null, error);
+            return (await GetTeacherByDepartmentAsync(department!), null);
+        }
+
+       /* public async Task<(StudentDto?, ErrorResponseModel)> TeacherAddStudentAsync()
+        {
+
+        }*/
     }
 }

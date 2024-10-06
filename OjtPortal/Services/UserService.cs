@@ -13,6 +13,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace OjtPortal.Services
 {
@@ -27,7 +28,7 @@ namespace OjtPortal.Services
         string GenerateToken(string type);
         Task<(string?, ErrorResponseModel?)> ForgetPasswordAsync(string email);
         Task<(string?, ErrorResponseModel?)> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
-        Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto, string token);
+        Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto, string token, bool isActive);
     }
 
     public class UserService : IUserService
@@ -171,8 +172,6 @@ namespace OjtPortal.Services
             var (user, error) = await _userRepository.GetUserByIdAsync(userId);
             if(error != null) return (null, error);
 
-            /*var confirmed = await _userManager.ConfirmEmailAsync(user!, code);
-            if (!confirmed.Succeeded) return (null, ErrorHandler.GetIdentityErrorResponse(confirmed.Errors, user.Email));*/
             if(user!.AccountStatus == AccountStatus.Deactivated)
             {
                 return (null, new(HttpStatusCode.UnprocessableContent, "Deactivated Account", "Access privileges are revoked for this account"));
@@ -183,7 +182,14 @@ namespace OjtPortal.Services
             }
             if(user!.AccountStatus == AccountStatus.PendingPasswordChange)
             {
-                var changePasswordUrl = _linkGenerator.GetPathByPage("/ChangeDefaultPassword", null, new { Id = user.Id, Token = code });
+                var changePasswordUrl = _linkGenerator.GetPathByPage("/ChangeDefaultPassword", null,
+                    new
+                    {
+                        Id = user.Id,
+                        Token = code,
+                        PendingStudentUpdate = (user.UserType.Equals(UserType.Student)) ? true : false,
+                        PendingEmailUpdate = !EmailChecker.IsEmailValid(user.Email!)
+                    });
                 return (changePasswordUrl, null);
             }
             user = await _userRepository.ActivateAccount(user, code);
@@ -208,7 +214,7 @@ namespace OjtPortal.Services
             if (user!.AccountStatus == AccountStatus.Pending || user!.AccountStatus == AccountStatus.PendingPasswordChange)
                 return (null, new(HttpStatusCode.UnprocessableContent, new ErrorModel("Inactive account", "Activate the account first using the activation email")));
             if (user!.AccountStatus == AccountStatus.Deactivated)
-                return (null, new(HttpStatusCode.UnprocessableContent, new ErrorModel("Deactivated account", "Access privileges are revoked for this account")));
+                return (null, new(HttpStatusCode.MethodNotAllowed, new ErrorModel("Deactivated account", "Access privileges are revoked for this account")));
             var checkPassword = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
             if(checkPassword.Succeeded) return (await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, true, false), null);
             return (null, new(HttpStatusCode.BadRequest, "Login failed", "Invalid credentials"));
@@ -245,7 +251,7 @@ namespace OjtPortal.Services
             return ("Successfully changed password", null);
         }
 
-        public async Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto, string token)
+        public async Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto, string token, bool isActive)
         {
 			var (user, error) = await _userRepository.GetUserByIdAsync(changePasswordDto.Id);
             if (error != null) return (null, error);
@@ -258,17 +264,17 @@ namespace OjtPortal.Services
             {
                 return (null, new(HttpStatusCode.BadRequest, "Deactivated Account", "Access Privileges are revoked for this account"));
             }
-            if (user!.AccountStatus != AccountStatus.PendingPasswordChange)
-            {
-                return (null, new(HttpStatusCode.MethodNotAllowed, "Not Allowed", "This is only for users with default system-generated password. Use forget password instead to reset existing password."));
-            }
 
             if (!changePasswordDto.NewPassword.Equals(changePasswordDto.ConfirmPassword))
             {
                 return (null, new(HttpStatusCode.BadRequest, "Password mismatch", "Re-enter password and try again"));
             }
 
-            user = await _userRepository.ActivateAccount(user, token);
+            if (isActive)
+            {
+                user = await _userRepository.ActivateAccount(user, token);
+            } 
+
             var code = await _userManager.GeneratePasswordResetTokenAsync(user!);
             await _userManager.ResetPasswordAsync(user!, code, changePasswordDto.NewPassword);
             return ("Successfully changed password", null);

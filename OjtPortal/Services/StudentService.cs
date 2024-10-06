@@ -14,9 +14,12 @@ namespace OjtPortal.Services
     public interface IStudentService
     {
         Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly? startDate, int manDays, bool includeHolidays, WorkingDays workingDays);
+        Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent, bool withEmailChecking);
         Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent);
         Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeUser);
         List<T> MapStudentsToDtoList<T>(IEnumerable<Student> students) where T : class;
+        Task<(StudentDto?, ErrorResponseModel?)> UpdateStudentInfoAsync(UpdateStudentDto updateStudentDto);
+        int CalculateManDays(int hrs);
     }
 
     public class StudentService : IStudentService
@@ -31,8 +34,9 @@ namespace OjtPortal.Services
         private readonly ILogger<StudentService> _logger;
         private readonly IDegreeProgramRepo _degreeProgramRepo;
         private readonly IStudentRepo _studentRepo;
+        private readonly IUserRepo _userRepo;
 
-        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper, IEmailSender emailSender, IUserService userService, ITeacherRepo teacherRepository, IMentorRepo mentorRepository, ILogger<StudentService> logger, IDegreeProgramRepo degreeProgramRepo, IStudentRepo studentRepo)
+        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper, IEmailSender emailSender, IUserService userService, ITeacherRepo teacherRepository, IMentorRepo mentorRepository, ILogger<StudentService> logger, IDegreeProgramRepo degreeProgramRepo, IStudentRepo studentRepo, IUserRepo userRepo)
         {
             this._userManager = userManager;
             this._holidayService = holidayService;
@@ -44,13 +48,19 @@ namespace OjtPortal.Services
             this._logger = logger;
             this._degreeProgramRepo = degreeProgramRepo;
             this._studentRepo = studentRepo;
+            this._userRepo = userRepo;
         }
 
+        public async Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent, bool withEmailChecking)
+        {
+            if(withEmailChecking && !EmailChecker.IsEmailValid(newStudent.Email)) return (null, new(HttpStatusCode.BadRequest, "Invalid email", "Please use your institutional email (ends with @cit.edu or @noopmail.org if testing)"));
+            return await RegisterStudentAsync(newStudent);
+        }
         public async Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent)
-        { 
+        {
             var key = "degree program";
-            var existingProgram = await _degreeProgramRepo.FindDegreeProgramById(newStudent.DegreeProgramId);
-            if (existingProgram == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.DegreeProgramId.ToString()))));
+            var existingProgram = (newStudent.DegreeProgramId.HasValue) ? await _degreeProgramRepo.FindDegreeProgramById(newStudent.DegreeProgramId!.Value) : null;
+            // if (existingProgram == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.DegreeProgramId.ToString()))));
 
             var studentEntity = _mapper.Map<Student>(newStudent);
             if (await _studentRepo.IsStudentExistingAsync(studentEntity)) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.DuplicateRecordTitle("student"), LoggingTemplate.DuplicateRecordDescription("student", newStudent.StudentId)));
@@ -76,15 +86,15 @@ namespace OjtPortal.Services
             if(error != null) return (null, error);
 
             // Linking the student to its object fields
-            studentEntity.DegreeProgram = existingProgram;
+            if(existingProgram!= null) studentEntity.DegreeProgram = existingProgram;
             studentEntity.User = createdUser!.User;
+            
+            if(existingProgram != null) existingProgram.Department.Students!.Add(studentEntity);
 
-            existingProgram.Department.Students!.Add(studentEntity);
-
-            if (studentEntity.StartDate != null && studentEntity.HrsToRender > 0)
+            if (studentEntity.StartDate != null && studentEntity.HrsToRender > 0 && studentEntity.Shift!=null)
             {
                 studentEntity.ManDays = CalculateManDays(studentEntity.HrsToRender);
-                var (endDate, dateError) = await GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, false, WorkingDays.WeekdaysOnly);
+                var (endDate, dateError) = await GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, false, studentEntity.Shift.WorkingDays);
                 if (dateError != null) return (null, dateError);
                 studentEntity.EndDate = endDate!.Value;
             }
@@ -103,61 +113,6 @@ namespace OjtPortal.Services
                 var emailError = _userService.SendActivationEmailAsync(newStudent.Email, studentEntity.User!);
                 if (emailError.Result != null) return (null, emailError.Result);
             }
-
-            return (_mapper.Map<StudentDto>(studentEntity), null);
-        }
-
-        public async Task<(StudentDto?, ErrorResponseModel?)> MentorAddStudentAsync(NewStudentDto newStudent)
-        {
-            var studentEntity = _mapper.Map<Student>(newStudent);
-            var key = "mentor";
-            if (newStudent.MentorId.HasValue)
-            {
-                var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId.Value, true);
-                studentEntity.Mentor = existingMentor;
-            }
-            //if(existingMentor == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.MentorId.ToString()))));
-
-            key = "teacher";
-            if (newStudent.TeacherId.HasValue)
-            {
-                var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(newStudent.TeacherId.Value, true);
-                studentEntity.Instructor = existingTeacher;
-            }
-            //if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.TeacherId.ToString()))));
-
-            key = "student";
-            var (createdUser, error) = await _userService.CreateUserAsync(newStudent, newStudent.Password, UserType.Student);
-            if (error != null) return (null, error);
-
-            /*// Linking the student to its object fields
-            studentEntity.DegreeProgram = existingProgram;
-            studentEntity.User = createdUser!.User;
-
-            existingProgram.Department.Students!.Add(studentEntity);
-
-            if (studentEntity.StartDate != null && studentEntity.HrsToRender > 0)
-            {
-                studentEntity.ManDays = CalculateManDays(studentEntity.HrsToRender);
-                var (endDate, dateError) = await GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, false, WorkingDays.WeekdaysOnly);
-                if (dateError != null) return (null, dateError);
-                studentEntity.EndDate = endDate!.Value;
-            }
-
-            studentEntity = await _studentRepo.AddStudentAsync(studentEntity);
-            if (studentEntity == null) return (null, new(HttpStatusCode.UnprocessableEntity, LoggingTemplate.DuplicateRecordTitle(key), LoggingTemplate.DuplicateRecordDescription(key, newStudent.Email)));
-
-            if (createdUser!.IsPasswordGenerated)
-            {
-                newStudent.Password = createdUser.Password;
-                var emailError = _userService.SendActivationEmailAsync(newStudent.Email, studentEntity.User!, newStudent.Password);
-                if (emailError.Result != null) return (null, emailError.Result);
-            }
-            else
-            {
-                var emailError = _userService.SendActivationEmailAsync(newStudent.Email, studentEntity.User!);
-                if (emailError.Result != null) return (null, emailError.Result);
-            }*/
 
             return (_mapper.Map<StudentDto>(studentEntity), null);
         }
@@ -210,9 +165,20 @@ namespace OjtPortal.Services
             return list;
         }
 
-        private int CalculateManDays(int hrs)
+        public int CalculateManDays(int hrs)
         {
             return (int) Math.Ceiling((hrs / 8.0));
         }
+
+        public async Task<(StudentDto?, ErrorResponseModel?)> UpdateStudentInfoAsync(UpdateStudentDto updateStudentDto)
+        {
+            var student = _mapper.Map<Student>(updateStudentDto);
+            student = await _studentRepo.UpdateStudentInfoAsync(student);
+            if (student == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", updateStudentDto.User!.Id.ToString())));
+            if (!string.IsNullOrEmpty(updateStudentDto.User!.Email)) await  _userService.ResendActivationEmailAsync(updateStudentDto.User.Email);
+            
+            return (_mapper.Map<StudentDto>(student), null);
+        }
     }
 }
+                                            

@@ -10,7 +10,6 @@ namespace OjtPortal.Dtos
         public Company Company { get; set; } = new();
         public string Department { get; set; } = string.Empty;
         public string Designation { get; set; } = string.Empty;
-        public int InternCount { get; set; } = 0;
     }
 
     public class NewMentorDto : NewUserDto
@@ -22,6 +21,7 @@ namespace OjtPortal.Dtos
 
     public class FullMentorDto : MentorDto
     {
+        public int InternCount { get; set; } = 0;
         [JsonIgnore]
         public IEnumerable<StudentToMentorOverviewDto>? Interns { get; set; }
         public FullMentorDto()

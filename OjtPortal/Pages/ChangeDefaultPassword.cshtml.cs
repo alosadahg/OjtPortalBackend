@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using OjtPortal.Dtos;
 using OjtPortal.Entities;
+using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
 using OjtPortal.Repositories;
 using OjtPortal.Services;
@@ -15,6 +16,7 @@ namespace OjtPortal.Pages
         private readonly IDepartmentRepo _departmentRepo;
         private readonly IDegreeProgramRepo _degreeProgramRepo;
         private readonly ITeacherRepo _teacherRepo;
+        private readonly IStudentService _studentService;
 
         // Properties bound to the form fields
         [BindProperty(SupportsGet = true)]
@@ -55,30 +57,33 @@ namespace OjtPortal.Pages
             IUserService userService,
             IDepartmentRepo departmentRepo,
             IDegreeProgramRepo degreeProgramRepo,
-            ITeacherRepo teacherRepo)
+            ITeacherRepo teacherRepo,
+            IStudentService studentService)
         {
             _userService = userService;
             _departmentRepo = departmentRepo;
             _degreeProgramRepo = degreeProgramRepo;
             _teacherRepo = teacherRepo;
+            _studentService = studentService;
         }
 
         public async Task OnGetAsync()
         {
             Departments = await _departmentRepo.GetDepartmentsAsync();
-            DegreePrograms = await _degreeProgramRepo.GetDegreeProgramsAsync();
-            Teachers = await _teacherRepo.GetTeachersAsync();
 
             TempData.Remove("ErrorMessage");
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            Departments = await _departmentRepo.GetDepartmentsAsync();
             DegreePrograms = await _degreeProgramRepo.GetDegreeProgramsAsync();
+            DegreePrograms = DegreePrograms.Where(dp => dp.DepartmentId == Department).ToList();
             Teachers = await _teacherRepo.GetTeachersAsync();
+            Teachers = Teachers!.Where(t => t.Department.DepartmentId == Department).ToList();
 
-            if (Email != null && !EmailChecker.IsEmailValid(Email))
+            Departments = await _departmentRepo.GetDepartmentsAsync();
+
+            if (!string.IsNullOrEmpty(Email) && !EmailChecker.IsEmailValid(Email))
             {
                 TempData["ErrorMessage"] = "Please use your institutional email";
                 ModelState.AddModelError(string.Empty, "Invalid email format.");
@@ -92,6 +97,23 @@ namespace OjtPortal.Pages
                 return Page();
             }
 
+            if(PendingStudentUpdate)
+            {
+                var updatedStudentInfo = new UpdateStudentDto
+                {
+                    User = new(Id, UserType.Student, AccountStatus.Pending, Email!, FirstName, LastName),
+                    StudentId = StudentId,
+                    DegreeProgram = DegreePrograms.Where(dp => dp.Id == DegreeProgram).First(),
+                    InstructorId = Instructor
+                };
+                var (_, updateError) = await _studentService.UpdateStudentInfoAsync(updatedStudentInfo);
+                if(updateError!= null)
+                {
+                    TempData["ErrorMessage"] = updateError.Errors.First().Message;
+                    return Page();
+                }
+            }
+
             var changePasswordDto = new ChangeDefaultPasswordDto
             {
                 Id = Id,
@@ -99,11 +121,11 @@ namespace OjtPortal.Pages
                 ConfirmPassword = ConfirmPassword
             };
 
-            var (message, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, Token);
+            var (message, error) = await _userService.ChangeDefaultPasswordAsync(changePasswordDto, Token, !PendingEmailUpdate);
 
             if (error != null)
             {
-                TempData["Message"] = error.Errors.First().Message;
+                TempData["ErrorMessage"] = error.Errors.First().Message;
                 return Page();
             }
 

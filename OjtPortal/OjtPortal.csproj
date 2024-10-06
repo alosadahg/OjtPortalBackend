@@ -12,7 +12,9 @@
 
   <ItemGroup>
     <None Remove="Infrastructure\EnumToStringConverter.cs~RFa6deb0.TMP" />
+    <None Remove="Pages\ChangeDefaultPassword.cshtml.cs~RF18d614f.TMP" />
     <None Remove="Pages\ChangeDefaultPassword.cshtml.cs~RFb2e7250.TMP" />
+    <None Remove="Pages\ChangeDefaultPassword.cshtml~RF17e6c54.TMP" />
     <None Remove="Program.cs~RF784efd0.TMP" />
     <None Remove="Repositories\2ztavf51.ns3~" />
     <None Remove="Repositories\MentorRepo.cs~RFcfa3d2.TMP" />

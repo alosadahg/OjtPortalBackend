@@ -25,6 +25,7 @@ namespace OjtPortalUnitTests
         private Mock<IHttpContextAccessor> _mockHttpContextAccessor;
         private Mock<SignInManager<User>> _mockSignInManager;
         private Mock<IOtpRepo> _mockOtpRepo;
+        private Mock<IUserRepo> _mockUserRepo;
         private UserService _userService;
 
         #region UserService Dependency Setup
@@ -36,6 +37,7 @@ namespace OjtPortalUnitTests
             _mockUserRepository = new Mock<IUserRepo>();
             _mockLinkGenerator = new Mock<LinkGenerator>();
             _mockEmailSender = new Mock<IEmailSender>();
+            _mockUserRepo = new Mock<IUserRepo>();
 
             var mockUserStore = new Mock<IUserStore<User>>();
             _mockUserManager = new Mock<UserManager<User>>(
