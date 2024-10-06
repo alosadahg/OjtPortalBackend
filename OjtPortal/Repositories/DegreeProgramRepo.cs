@@ -8,6 +8,7 @@ namespace OjtPortal.Repositories
     {
         Task<List<DegreeProgram>> GetDegreeProgramsAsync();
         Task<DegreeProgram?> FindDegreeProgramById(int id);
+        Task<List<DegreeProgram>> FindByDepartmentId(int id);
     }
 
     public class DegreeProgramRepo : IDegreeProgramRepo
@@ -29,9 +30,9 @@ namespace OjtPortal.Repositories
             return await _context.DegreePrograms.Include(dp => dp.Department).Include(dp => dp.Department.Students).FirstOrDefaultAsync(dp => dp.Id == id);
         }
 
-        public async Task<DegreeProgram?> FindDegreeProgramByDepartmentId(int id)
+        public async Task<List<DegreeProgram>> FindByDepartmentId(int id)
         {
-            return await _context.DegreePrograms.Include(dp => dp.Department).FirstOrDefaultAsync(dp => dp.DepartmentId == id);
+            return await _context.DegreePrograms.Include(dp => dp.Department).Where(dp => dp.DepartmentId == id).ToListAsync();
         }
     }
 }

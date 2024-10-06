@@ -11,6 +11,7 @@ namespace OjtPortal.Services
     public interface IDegreeProgramService
     {
         Task<(List<DegreeProgramDto>?, ErrorResponseModel?)> GetDegreeProgramsAsync();
+        Task<(List<DegreeProgramDto>?, ErrorResponseModel?)> GetDegreeProgramsByDepartmentIdAsync(int departmentId);
     }
 
     public class DegreeProgramService : IDegreeProgramService
@@ -55,6 +56,11 @@ namespace OjtPortal.Services
 
         }
 
-        // TODO: Add Get degree programs by given department (Priority: Normal)
+        public async Task<(List<DegreeProgramDto>?, ErrorResponseModel?)> GetDegreeProgramsByDepartmentIdAsync(int departmentId)
+        {
+            var (degreePrograms, error) = await GetDegreeProgramsAsync();
+            if(error != null) return (null, error);
+            return (degreePrograms!.Where(dp => dp.DepartmentId.Equals(departmentId)).ToList(), null);
+        }
     }
 }

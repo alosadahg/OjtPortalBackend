@@ -30,5 +30,20 @@ namespace OjtPortal.Controllers
             if (error != null) return MakeErrorResponse(error);
             return Ok(degreePrograms);
         }
+
+        /// <summary>
+        /// Get degree programs by department id
+        /// </summary>
+        /// <param name="departmentId"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<DegreeProgramDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpGet("department/{departmentId}")]
+        public async Task<IActionResult> GetDegreeProgramsByDepartmentIdAsync(int departmentId)
+        {
+            var (degreePrograms, error) = await _degreeProgramService.GetDegreeProgramsByDepartmentIdAsync(departmentId);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(degreePrograms);
+        }
     }
 }
