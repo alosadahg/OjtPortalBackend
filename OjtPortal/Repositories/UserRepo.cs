@@ -17,6 +17,7 @@ namespace OjtPortal.Repositories
         Task<(User?, ErrorResponseModel?)> GetUserByIdAsync(int id);
         Task<(User?, ErrorResponseModel?)> GetUserByEmailAsync(string email);
         Task<User> ActivateAccount(User use, string token);
+        Task<User?> DeleteByIdAsync(int id);
     }
 
     public class UserRepo : IUserRepo
@@ -75,6 +76,14 @@ namespace OjtPortal.Repositories
             _context.Entry(user).State = EntityState.Modified;
             token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
             await _userManager.ConfirmEmailAsync(user, token);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<User?> DeleteByIdAsync(int id)
+        {
+            var (user, _) = await GetUserByIdAsync(id);
+            _context.Users.Remove(user!);
             await _context.SaveChangesAsync();
             return user;
         }
