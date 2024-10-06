@@ -50,7 +50,7 @@ namespace OjtPortal.Controllers
         {
             var (result, error) = await _studentService.RegisterStudentAsync(newStudent);
             if (error != null) return MakeErrorResponse(error);
-            return CreatedAtRoute("GetStudentById", new { id = result!.User.Id }, result);
+            return CreatedAtRoute("GetStudentById", new { id = result!.User!.Id }, result);
         }
 
         /// <summary>

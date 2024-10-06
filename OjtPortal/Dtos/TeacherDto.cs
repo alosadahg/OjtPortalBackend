@@ -1,4 +1,5 @@
 ﻿using OjtPortal.Entities;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace OjtPortal.Dtos
@@ -22,9 +23,11 @@ namespace OjtPortal.Dtos
     {
         [JsonIgnore]
         public string Password { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Department code is required")]
         public string DepartmentCode { get; set; } = string.Empty;
         [JsonIgnore]
         public Department Department { get; set; } = new();
+        [Required(ErrorMessage = "Designation is required")]
         public string Designation { get; set; } = string.Empty;
     }
 

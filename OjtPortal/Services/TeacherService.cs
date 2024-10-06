@@ -16,6 +16,7 @@ namespace OjtPortal.Services
         Task<List<TeacherDto>?> GetTeacherByDepartmentAsync(Department department);
         Task<List<TeacherDto>?> FindTeachersByDepartmentCode(DepartmentCode departmentName);
         Task<(List<TeacherDto>?, ErrorResponseModel?)> GetTeacherByDepartmentIdAsync(int departmentId);
+        Task<(StudentDto?, ErrorResponseModel?)> TeacherAddStudentAsync(TeacherAddStudentDto studentDto);
     }
 
     public class TeacherService : ITeacherService
@@ -25,14 +26,20 @@ namespace OjtPortal.Services
         private readonly ITeacherRepo _teacherRepository;
         private readonly IDepartmentService _departmentService;
         private readonly IStudentService _studentService;
+        private readonly IUserRepo _userRepo;
+        private readonly IStudentRepo _studentRepo;
+        private readonly IDegreeProgramRepo _degreeProgramRepo;
 
-        public TeacherService(IUserService userService, IMapper mapper, ITeacherRepo teacherRepository, IDepartmentService departmentService, IStudentService studentService)
+        public TeacherService(IUserService userService, IMapper mapper, ITeacherRepo teacherRepository, IDepartmentService departmentService, IStudentService studentService, IUserRepo userRepo, IStudentRepo studentRepo, IDegreeProgramRepo degreeProgramRepo)
         {
             this._userService = userService;
             this._mapper = mapper;
             this._teacherRepository = teacherRepository;
             this._departmentService = departmentService;
             this._studentService = studentService;
+            this._userRepo = userRepo;
+            this._studentRepo = studentRepo;
+            this._degreeProgramRepo = degreeProgramRepo;
         }
 
         public async Task<(TeacherDto?, ErrorResponseModel?)> AddNewTeacherAsync(NewTeacherDto newTeacherDto)
@@ -109,9 +116,31 @@ namespace OjtPortal.Services
             return (await GetTeacherByDepartmentAsync(department!), null);
         }
 
-       /* public async Task<(StudentDto?, ErrorResponseModel)> TeacherAddStudentAsync()
+        public async Task<(StudentDto?, ErrorResponseModel?)> TeacherAddStudentAsync(TeacherAddStudentDto studentToAddDto)
         {
+            var studentEntity = _mapper.Map<Student>(studentToAddDto);
+            var key = "teacher";
 
-        }*/
+            var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(studentToAddDto.InstructorId!.Value, true);
+            if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, studentToAddDto.InstructorId!.ToString()))));
+            studentEntity.Instructor = existingTeacher;
+
+            var (existingStudentUser, _) = await _userRepo.GetUserByEmailAsync(studentToAddDto.Email);
+
+            if (existingStudentUser == null)
+            {
+                var newStudentDto = _mapper.Map<NewStudentDto>(studentToAddDto);
+                var (studentDto, studentRegisterError) = await _studentService.RegisterStudentAsync(newStudentDto, true);
+                if (studentRegisterError != null) return (null, studentRegisterError);
+                return (studentDto, null);
+            }
+
+            key = "degree program";
+            studentEntity.DegreeProgram = await _degreeProgramRepo.FindDegreeProgramById(studentToAddDto.DegreeProgramId!.Value);
+            if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, studentToAddDto.InstructorId!.ToString()))));
+            studentEntity = await _studentRepo.UpdateStudentByTeacherAsync(studentEntity, existingStudentUser.Id);
+
+            return (_mapper.Map<StudentDto>(studentEntity), null);
+        }
     }
 }

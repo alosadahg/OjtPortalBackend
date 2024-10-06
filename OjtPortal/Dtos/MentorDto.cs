@@ -1,5 +1,6 @@
 ﻿
 using OjtPortal.Entities;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace OjtPortal.Dtos
@@ -14,8 +15,11 @@ namespace OjtPortal.Dtos
 
     public class NewMentorDto : NewUserDto
     {
+        [Required(ErrorMessage = "Company information is required")]
         public NewCompanyDto Company { get; set; } = new();
+        [Required(ErrorMessage = "Mentor Department is required")]
         public string Department { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Mentor Designation is required")]
         public string Designation { get; set; } = string.Empty;
     }
 

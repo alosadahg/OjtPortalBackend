@@ -14,6 +14,7 @@ namespace OjtPortal.Repositories
         Task<Student?> GetStudentBySchoolIdAsync(string id);
         Task<bool> IsStudentExistingAsync(Student student);
         Task<Student?> UpdateStudentByMentorAsync(Student student, int id);
+        Task<Student?> UpdateStudentByTeacherAsync(Student student, int id);
         Task<Student?> UpdateStudentInfoAsync(Student student);
     }
 
@@ -128,6 +129,26 @@ namespace OjtPortal.Repositories
 
             if(existingStudent.Shift != null) _context.Entry(existingStudent.Shift).State = EntityState.Unchanged;
             if(existingStudent.Mentor != null) _context.Entry(existingStudent.Mentor).State = EntityState.Unchanged;
+            await _context.SaveChangesAsync();
+            return existingStudent;
+        }
+
+        public async Task<Student?> UpdateStudentByTeacherAsync(Student student, int id)
+        {
+            var existingStudent = await GetStudentByIdAsync(id, true);
+            if (existingStudent == null) return null;
+            if (existingStudent.InstructorId == null) existingStudent.InstructorId = student.InstructorId;
+            
+            if(string.IsNullOrEmpty(existingStudent.StudentId)) existingStudent.StudentId = student.StudentId;
+            if (existingStudent.DegreeProgramId == null)
+            {
+                existingStudent.DegreeProgramId = student.DegreeProgram!.Id;
+                student.DegreeProgram.Department.Students!.Add(existingStudent);
+            }
+
+            if (existingStudent.User != null) _context.Entry(existingStudent.User).State = EntityState.Unchanged;
+            if (existingStudent.Shift != null) _context.Entry(existingStudent.Shift).State = EntityState.Unchanged;
+            if (existingStudent.Mentor != null) _context.Entry(existingStudent.Mentor).State = EntityState.Unchanged;
             await _context.SaveChangesAsync();
             return existingStudent;
         }

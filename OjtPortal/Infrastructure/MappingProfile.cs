@@ -14,6 +14,7 @@ namespace OjtPortal.Infrastructure
             CreateMap<User, ExistingUserDto>().ReverseMap();
             CreateMap<Student, NewStudentDto>().ReverseMap();
             CreateMap<Student, MentorAddStudentDto>().ReverseMap();
+            CreateMap<Student, TeacherAddStudentDto>().ReverseMap();
             CreateMap<Student, StudentDto>().ReverseMap();
             CreateMap<Student, StudentToInstructorOverviewDto>().ReverseMap();
             CreateMap<Student, StudentToMentorOverviewDto>().ReverseMap();
@@ -31,7 +32,8 @@ namespace OjtPortal.Infrastructure
             .ForMember(dto => dto.DepartmentCode,
                        entity => entity.MapFrom(src => src.Department.DepartmentCode))
             .ReverseMap();
-            CreateMap<MentorAddStudentDto, NewStudentDto>().ReverseMap();
+            CreateMap<NewStudentDto, MentorAddStudentDto>().ReverseMap();
+            CreateMap<NewStudentDto, TeacherAddStudentDto>().ReverseMap();
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using OjtPortal.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace OjtPortal.Dtos
 {
@@ -38,13 +40,28 @@ namespace OjtPortal.Dtos
 
     public class MentorAddStudentDto : UserDto
     {
-
+        [Required(ErrorMessage = "Intern designation is required")]
         public string Designation { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Mentor ID is required")]
         public int MentorId { get; set; } = 0;
+        [Required(ErrorMessage = "Assigned division for intern is required")]
         public string Division { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Start date is required")]
         public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        [Required(ErrorMessage = "Hours to render is required")]
         public int HrsToRender { get; set; } = 0;
+        [Required(ErrorMessage = "Shift information is required")]
         public NewShiftDto Shift { get; set; } = new();
+    }
+
+    public class TeacherAddStudentDto : UserDto
+    {
+        [Required(ErrorMessage = "Instructor ID is required")]
+        public int? InstructorId { get; set; } = null;
+        [Required(ErrorMessage = "Student ID is required")]
+        public string StudentId { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Degree program ID is required")]
+        public int? DegreeProgramId { get; set; } = null;
     }
 
     public class UpdateStudentDto
