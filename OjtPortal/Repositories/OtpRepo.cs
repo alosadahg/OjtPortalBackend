@@ -28,7 +28,6 @@ namespace OjtPortal.Repositories
                 var otp = await GetOTPByIdAsync(newOTP.UserId);
                 otp!.Code = newOTP.Code;
                 otp!.Token= newOTP.Token;
-                //_context.Entry(otp).State = EntityState.Modified;
             } 
             else
             {
