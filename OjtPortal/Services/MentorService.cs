@@ -13,6 +13,7 @@ namespace OjtPortal.Services
     {
         Task<(FullMentorDto?, ErrorResponseModel?)> AddMentorAsync(NewMentorDto newMentorDto);
         Task<(FullMentorDto?, ErrorResponseModel?)> GetMentorByIdAsync(int id, bool includeUser);
+        Task<(StudentDto?, ErrorResponseModel?)> MentorAddStudentAsync(MentorAddStudentDto newStudent);
     }
 
     public class MentorService : IMentorService
@@ -23,8 +24,9 @@ namespace OjtPortal.Services
         private readonly ICompanyRepo _companyRepository;
         private readonly IUserRepo _userRepo;
         private readonly IStudentService _studentService;
+        private readonly IStudentRepo _studentRepo;
 
-        public MentorService(IMentorRepo mentorRepository, IMapper mapper, IUserService userService, ICompanyRepo companyRepository, IUserRepo userRepo, IStudentService studentService)
+        public MentorService(IMentorRepo mentorRepository, IMapper mapper, IUserService userService, ICompanyRepo companyRepository, IUserRepo userRepo, IStudentService studentService, IStudentRepo studentRepo)
         {
             this._mentorRepository = mentorRepository;
             this._mapper = mapper;
@@ -32,6 +34,7 @@ namespace OjtPortal.Services
             this._companyRepository = companyRepository;
             this._userRepo = userRepo;
             this._studentService = studentService;
+            this._studentRepo = studentRepo;
         }
 
         public async Task<(FullMentorDto?, ErrorResponseModel?)> AddMentorAsync(NewMentorDto newMentorDto)
@@ -71,6 +74,37 @@ namespace OjtPortal.Services
                 mentorDto.InternCount = mentorDto.Interns.Count();
             }
             return (mentorDto, null);
+        }
+        public async Task<(StudentDto?, ErrorResponseModel?)> MentorAddStudentAsync(MentorAddStudentDto newStudent)
+        {
+            var studentEntity = _mapper.Map<Student>(newStudent);
+            var key = "mentor";
+
+            var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId, true);
+            if (existingMentor == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.MentorId.ToString()))));
+            studentEntity.Mentor = existingMentor;
+
+            var (existingStudentUser, _) = await _userRepo.GetUserByEmailAsync(newStudent.Email);
+
+            if (existingStudentUser == null)
+            {
+                var newStudentDto = _mapper.Map<NewStudentDto>(newStudent);
+                var (studentDto, studentRegisterError) = await _studentService.RegisterStudentAsync(newStudentDto, false);
+                if (studentRegisterError != null) return (null, studentRegisterError);
+                return (studentDto, null);
+            }
+
+            if (studentEntity.StartDate != null && studentEntity.HrsToRender > 0)
+            {
+                studentEntity.ManDays = _studentService.CalculateManDays(studentEntity.HrsToRender);
+                var (endDate, dateError) = await _studentService.GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, false, WorkingDays.WeekdaysOnly);
+                if (dateError != null) return (null, dateError);
+                studentEntity.EndDate = endDate!.Value;
+            }
+
+            studentEntity = await _studentRepo.UpdateStudentByMentorAsync(studentEntity, existingStudentUser.Id);
+
+            return (_mapper.Map<StudentDto>(studentEntity), null);
         }
     }
 }

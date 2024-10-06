@@ -46,5 +46,20 @@ namespace OjtPortal.Controllers
             if (error != null) return MakeErrorResponse(error);
             return Ok(response);
         }
+
+        /// <summary>
+        /// Add student to mentor
+        /// </summary>
+        /// <param name="newStudentDto"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpPut("student")]
+        public async Task<IActionResult> AddStudentToMentorAsync(MentorAddStudentDto newStudentDto)
+        {
+            var (student, error) = await _mentorService.MentorAddStudentAsync(newStudentDto);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(student);
+        }
     }
 }
