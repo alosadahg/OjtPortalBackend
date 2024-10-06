@@ -8,6 +8,17 @@ namespace OjtPortal.Dtos
         public string Email { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+
+        public UserDto(string email, string firstName, string lastName)
+        {
+            Email = email;
+            FirstName = firstName;
+            LastName = lastName;
+        }
+
+        public UserDto()
+        {
+        }
     }
 
     public class ExistingUserDto : UserDto
@@ -15,6 +26,17 @@ namespace OjtPortal.Dtos
         public int Id { get; set; } = 0;
         public UserType UserType { get; set; }
         public AccountStatus AccountStatus { get; set; }
+
+        public ExistingUserDto(int id, UserType userType, AccountStatus accountStatus, string email, string firstName, string lastName) : base(email, firstName, lastName)
+        {
+            Id = id;
+            UserType = userType;
+            AccountStatus = accountStatus;
+        }
+
+        public ExistingUserDto()
+        {
+        }
     }
 
     public class NewUserDto : UserDto
@@ -24,11 +46,5 @@ namespace OjtPortal.Dtos
         {
         }
 
-    }
-
-    public class FullUserDto : UserDto
-    {
-        public int Id { get; set; }
-        public UserType UserType { get; set; }
     }
 }
