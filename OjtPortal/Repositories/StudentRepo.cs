@@ -53,6 +53,8 @@ namespace OjtPortal.Repositories
                 .Include(s => s.DegreeProgram!.Department)
                 .Include(s => s.User)
                 .Include(s => s.Mentor)
+                .Include(s => s.Mentor!.User)
+                .Include(s => s.Mentor!.Company)
                 .Include(s => s.Instructor)
                 .FirstOrDefaultAsync(s => s.UserId == id) :
                 await _context.Students
@@ -111,7 +113,7 @@ namespace OjtPortal.Repositories
             if (existingStudent == null) return null;
             if (!string.IsNullOrEmpty(student.User.Email))
             {
-                existingStudent.User.Email = student.User!.Email;
+                existingStudent.User!.Email = student.User!.Email;
                 existingStudent.User.NormalizedEmail = _userManager.NormalizeEmail(student.User.Email);
                 await _userManager.SetUserNameAsync(existingStudent.User!, student.User.Email!);
                 existingStudent.User.AccountStatus = AccountStatus.Pending;
