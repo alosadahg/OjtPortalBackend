@@ -19,7 +19,7 @@ namespace OjtPortal.Services
         Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeUser);
         List<T> MapStudentsToDtoList<T>(IEnumerable<Student> students) where T : class;
         Task<(StudentDto?, ErrorResponseModel?)> UpdateStudentInfoAsync(UpdateStudentDto updateStudentDto);
-        int CalculateManDays(int hrs);
+        int CalculateManDays(int hrs, int dailyHours);
     }
 
     public class StudentService : IStudentService
@@ -93,7 +93,7 @@ namespace OjtPortal.Services
 
             if (studentEntity.StartDate != null && studentEntity.HrsToRender > 0 && studentEntity.Shift!=null)
             {
-                studentEntity.ManDays = CalculateManDays(studentEntity.HrsToRender);
+                studentEntity.ManDays = CalculateManDays(studentEntity.HrsToRender, studentEntity.Shift.DailyDutyHrs);
                 var (endDate, dateError) = await GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, studentEntity.Shift.IncludePublicPhHolidays, studentEntity.Shift.WorkingDays);
                 if (dateError != null) return (null, dateError);
                 studentEntity.EndDate = endDate!.Value;
@@ -165,9 +165,9 @@ namespace OjtPortal.Services
             return list;
         }
 
-        public int CalculateManDays(int hrs)
+        public int CalculateManDays(int hrs, int dailyHours)
         {
-            return (int) Math.Ceiling((hrs / 8.0));
+            return (int) Math.Ceiling((hrs / (double) dailyHours));
         }
 
         public async Task<(StudentDto?, ErrorResponseModel?)> UpdateStudentInfoAsync(UpdateStudentDto updateStudentDto)
