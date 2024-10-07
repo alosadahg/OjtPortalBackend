@@ -20,6 +20,7 @@ namespace OjtPortal.Entities
         public WorkingDays WorkingDays { get; set; } = WorkingDays.WeekdaysOnly;
         public int AbsencesCount { get; set; } = 0;
         public double TotalHrsRendered { get; set; } = 0;
+        public int TotalManDaysRendered { get; set; } = 0;
         public bool IncludePublicPhHolidays { get; set; } = false;
 
         public Shift()
