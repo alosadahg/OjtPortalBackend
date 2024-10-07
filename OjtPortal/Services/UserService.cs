@@ -29,7 +29,9 @@ namespace OjtPortal.Services
         Task<(string?, ErrorResponseModel?)> ForgetPasswordAsync(string email);
         Task<(string?, ErrorResponseModel?)> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
         Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto, string token, bool isActive);
+        Task<(ExistingUserDto?, ErrorResponseModel?)> PermanentlyRemoveUserAsync(int id);
     }
+
 
     public class UserService : IUserService
     {
@@ -278,6 +280,13 @@ namespace OjtPortal.Services
             var code = await _userManager.GeneratePasswordResetTokenAsync(user!);
             await _userManager.ResetPasswordAsync(user!, code, changePasswordDto.NewPassword);
             return ("Successfully changed password", null);
+        }
+
+        public async Task<(ExistingUserDto?, ErrorResponseModel?)> PermanentlyRemoveUserAsync(int id)
+        {
+            var deletedUser = await _userRepository.DeleteByIdAsync(id);
+            if (deletedUser == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("user"), LoggingTemplate.MissingRecordDescription("user", id.ToString())));
+            return (_mapper.Map<ExistingUserDto>(deletedUser), null);
         }
     }
 }

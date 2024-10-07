@@ -156,5 +156,20 @@ namespace OjtPortal.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Permanently deletes user by id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExistingUserDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpDelete("permanent/delete/{userId}")]
+        public async Task<IActionResult> PermanentlyDeleteUserAsync(int userId)
+        {
+            var (result, error) = await _userService.PermanentlyRemoveUserAsync(userId);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
     }
 }
