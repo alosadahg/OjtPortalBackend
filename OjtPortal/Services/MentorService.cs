@@ -89,7 +89,7 @@ namespace OjtPortal.Services
             if (existingStudentUser == null)
             {
                 var newStudentDto = _mapper.Map<NewStudentDto>(newStudent);
-                var (studentDto, studentRegisterError) = await _studentService.RegisterStudentAsync(newStudentDto, false);
+                var (studentDto, studentRegisterError) = await _studentService.RegisterStudentAsync(newStudentDto, true);
                 if (studentRegisterError != null) return (null, studentRegisterError);
                 return (studentDto, null);
             }
