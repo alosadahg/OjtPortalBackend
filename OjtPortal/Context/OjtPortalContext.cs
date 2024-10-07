@@ -31,5 +31,7 @@ namespace OjtPortal.Context
         public DbSet<Mentor> Mentors { get; set; }
         public DbSet<Holiday> Holidays {  get; set; }
         public DbSet<OTP> OTPs { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<LogbookEntry> LogbookEntries { get; set; }
     }
 }
