@@ -20,6 +20,7 @@ namespace OjtPortal.Entities
         public WorkingDays WorkingDays { get; set; } = WorkingDays.WeekdaysOnly;
         public int AbsencesCount { get; set; } = 0;
         public double TotalHrsRendered { get; set; } = 0;
+        public bool IncludePublicPhHolidays { get; set; } = false;
 
         public Shift()
         {
@@ -33,6 +34,18 @@ namespace OjtPortal.Entities
             DailyDutyHrs = dailyDutyHrs;
             LateTimeInCount = lateTimeInCount;
             AbsencesCount = absencesCount;
+        }
+
+        public Shift(TimeOnly? start, TimeOnly? end, int dailyDutyHrs, int lateTimeInCount, WorkingDays workingDays, int absencesCount, double totalHrsRendered, bool includePublicPhHolidays)
+        {
+            Start = start;
+            End = end;
+            DailyDutyHrs = dailyDutyHrs;
+            LateTimeInCount = lateTimeInCount;
+            WorkingDays = workingDays;
+            AbsencesCount = absencesCount;
+            TotalHrsRendered = totalHrsRendered;
+            IncludePublicPhHolidays = includePublicPhHolidays;
         }
     }
 }

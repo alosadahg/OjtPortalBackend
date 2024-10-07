@@ -97,7 +97,7 @@ namespace OjtPortal.Services
             if (studentEntity.StartDate != null && studentEntity.HrsToRender > 0)
             {
                 studentEntity.ManDays = _studentService.CalculateManDays(studentEntity.HrsToRender);
-                var (endDate, dateError) = await _studentService.GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, false, WorkingDays.WeekdaysOnly);
+                var (endDate, dateError) = await _studentService.GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, newStudent.Shift.IncludePublicPhHolidays, newStudent.Shift.WorkingDays);
                 if (dateError != null) return (null, dateError);
                 studentEntity.EndDate = endDate!.Value;
             }

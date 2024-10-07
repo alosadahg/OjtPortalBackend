@@ -17,5 +17,7 @@ namespace OjtPortal.Dtos
         public int DailyDutyHrs { get; set; } = 0;
         [Required(ErrorMessage = "Working days is required")]
         public WorkingDays WorkingDays { get; set; } = WorkingDays.WeekdaysOnly;
+        [Required(ErrorMessage = "Does working days include holidays is required")]
+        public bool IncludePublicPhHolidays { get; set; } = false;
     }
 }
