@@ -18,27 +18,28 @@ namespace OjtPortal.Services
     {
         private readonly IStudentRepo _studentRepo;
         private readonly IAttendanceRepo _attendanceRepo;
+        private readonly IHolidayService _holidayService;
 
-        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo)
+        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService)
         {
             this._studentRepo = studentRepo;
             this._attendanceRepo = attendanceRepo;
+            this._holidayService = holidayService;
         }
 
         public async Task<(Attendance?, ErrorResponseModel?)> TimeInAsync(int id)
         {
-            var student = await _studentRepo.GetStudentByIdAsync(id, true);
+            var student = await _studentRepo.GetStudentByIdAsync(id, false, false, true);
             if (student == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", id.ToString())));
             var attendance = new Attendance
             {
                 Student = student,
                 TimeIn = DateTime.UtcNow,
             };
-            if (student.Shift == null) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.MissingRecordTitle("shift"), LoggingTemplate.MissingRecordDescription("shift", id.ToString())));           
-            
+            if (student.Shift == null) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.MissingRecordTitle("shift"), LoggingTemplate.MissingRecordDescription("shift", id.ToString())));
+            var dateToday = DateOnly.FromDateTime(DateTime.Now);
             var recentAttendance = _attendanceRepo.GetRecentAttendance(student);
             
-            var dateToday = DateOnly.FromDateTime(DateTime.Now);
             if (recentAttendance != null)
             {
                 recentAttendance!.TimeIn = TimeZoneInfo.ConvertTimeFromUtc(recentAttendance.TimeIn, TimeZoneInfo.Local);
@@ -61,7 +62,7 @@ namespace OjtPortal.Services
 
         public async Task<(Attendance?, ErrorResponseModel?)> TimeOutAsync(int id)
         {
-            var student = await _studentRepo.GetStudentByIdAsync(id, true);
+            var student = await _studentRepo.GetStudentByIdAsync(id, false, false, true);
             if (student == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", id.ToString())));
             if (student.Shift == null) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.MissingRecordTitle("shift"), LoggingTemplate.MissingRecordDescription("shift", id.ToString())));
            

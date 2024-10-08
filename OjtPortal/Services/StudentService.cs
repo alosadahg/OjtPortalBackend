@@ -16,7 +16,7 @@ namespace OjtPortal.Services
         Task<(DateOnly?, ErrorResponseModel?)> GetEndDateAsync(DateOnly? startDate, int manDays, bool includeHolidays, WorkingDays workingDays);
         Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent, bool withEmailChecking);
         Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent);
-        Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeUser);
+        Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeMentor, bool includeTeacher, bool includeAttendance);
         List<T> MapStudentsToDtoList<T>(IEnumerable<Student> students) where T : class;
         Task<(StudentDto?, ErrorResponseModel?)> UpdateStudentInfoAsync(UpdateStudentDto updateStudentDto);
         int CalculateManDays(int hrs, int dailyHours);
@@ -117,9 +117,9 @@ namespace OjtPortal.Services
             return (_mapper.Map<StudentDto>(studentEntity), null);
         }
 
-        public async Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeUser)
+        public async Task<(StudentDto?, ErrorResponseModel?)> GetStudentByIdAsync(int id, bool includeMentor, bool includeTeacher, bool includeAttendance)
         {
-            var student = await _studentRepo.GetStudentByIdAsync(id, includeUser);
+            var student = await _studentRepo.GetStudentByIdAsync(id, includeMentor, includeTeacher, includeAttendance);
             if(student == null)
             {
                 return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", id.ToString()))));

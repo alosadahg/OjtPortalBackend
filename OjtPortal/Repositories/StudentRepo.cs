@@ -10,7 +10,7 @@ namespace OjtPortal.Repositories
     public interface IStudentRepo
     {
         Task<Student?> AddStudentAsync(Student newStudent);
-        Task<Student?> GetStudentByIdAsync(int id, bool includeUser);
+        Task<Student?> GetStudentByIdAsync(int id, bool includeMentor, bool includeInstructor, bool includeAttendance);
         Task<Student?> GetStudentBySchoolIdAsync(string id);
         Task<bool> IsStudentExistingAsync(Student student);
         Task<Student?> UpdateStudentByMentorAsync(Student student, int id);
@@ -47,26 +47,20 @@ namespace OjtPortal.Repositories
             return newStudent;
         }
 
-        public async Task<Student?> GetStudentByIdAsync(int id, bool includeUser)
+        public async Task<Student?> GetStudentByIdAsync(int id, bool includeMentor, bool includeInstructor, bool includeAttendance)
         {
-            var query = (includeUser) ?
-                await _context.Students
+            IQueryable<Student> query = _context.Students
                 .Include(s => s.DegreeProgram)
-                .Include(s => s.DegreeProgram!.Department)
-                .Include(s => s.User)
-                .Include(s => s.Mentor)
-                .Include(s => s.Mentor!.User)
-                .Include(s => s.Mentor!.Company)
-                .Include(s => s.Instructor)
-                .Include(s => s.Attendances)
-                .FirstOrDefaultAsync(s => s.UserId == id) :
-                await _context.Students
-                .Include(s => s.DegreeProgram)
-                .Include(s => s.DegreeProgram!.Department)
-                .FirstOrDefaultAsync(s => s.UserId == id);
+                .ThenInclude(dp => dp.Department)
+                .Include(s => s.User);
 
-            return query;
+            if (includeMentor) query = query.Include(s => s.Mentor).ThenInclude(m => m.User).Include(s => s.Mentor!.Company);
+            if (includeInstructor) query = query.Include(s => s.Instructor).ThenInclude(i => i.User);
+            if (includeAttendance) query = query.Include(s => s.Attendances);
+
+            return await query.FirstOrDefaultAsync(s => s.UserId == id);
         }
+
 
         public async Task<Student?> GetStudentBySchoolIdAsync(string id)
         {
@@ -94,7 +88,7 @@ namespace OjtPortal.Repositories
 
         public async Task<Student?> UpdateStudentByMentorAsync(Student student, int id)
         {
-            var existingStudent = await GetStudentByIdAsync(id, true);
+            var existingStudent = await GetStudentByIdAsync(id, true, true, false);
             if (existingStudent == null) return null;
             if (existingStudent.MentorId == null) existingStudent.MentorId = student.MentorId;
             existingStudent.Designation = student.Designation;
@@ -112,7 +106,7 @@ namespace OjtPortal.Repositories
 
         public async Task<Student?> UpdateStudentInfoAsync(Student student)
         {
-            var existingStudent = await GetStudentByIdAsync(student.User!.Id, true);
+            var existingStudent = await GetStudentByIdAsync(student.User!.Id, false, true, false);
             if (existingStudent == null) return null;
             if (!string.IsNullOrEmpty(student.User.Email))
             {
@@ -137,7 +131,7 @@ namespace OjtPortal.Repositories
 
         public async Task<Student?> UpdateStudentByTeacherAsync(Student student, int id)
         {
-            var existingStudent = await GetStudentByIdAsync(id, true);
+            var existingStudent = await GetStudentByIdAsync(id, false, true, false);
             if (existingStudent == null) return null;
             if (existingStudent.InstructorId == null) existingStudent.InstructorId = student.InstructorId;
             

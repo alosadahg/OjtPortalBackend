@@ -64,7 +64,7 @@ namespace OjtPortal.Controllers
                 switch (user.UserType)
                 {
                     case UserType.Student:
-                        var (student, error) = await _studentService.GetStudentByIdAsync(user.Id, true);
+                        var (student, error) = await _studentService.GetStudentByIdAsync(user.Id, true, true, true);
                         if (error != null) return MakeErrorResponse(error);
                         return Ok(student);
                     case UserType.Admin:

@@ -63,7 +63,7 @@ namespace OjtPortal.Controllers
         [HttpGet("{id}", Name = "GetStudentById")]
         public async Task<IActionResult> GetStudentById(int id)
         {
-            var (result, error) = await _studentService.GetStudentByIdAsync(id, true);
+            var (result, error) = await _studentService.GetStudentByIdAsync(id, true, true, false);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
