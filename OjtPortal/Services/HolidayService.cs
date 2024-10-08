@@ -4,12 +4,14 @@ using OjtPortal.Entities;
 using OjtPortal.Infrastructure;
 using OjtPortal.Repositories;
 using System.Net;
+using System.Security.Permissions;
 
 namespace OjtPortal.Services
 {
     public interface IHolidayService
     {
         Task<(List<Holiday>?, ErrorResponseModel?)> GetHolidaysAsync();
+        Task<bool> IsDateAHoliday(DateOnly date);
     }
 
     public class HolidayService : IHolidayService
@@ -110,6 +112,13 @@ namespace OjtPortal.Services
             _cacheService.AddToPermanentCache(cacheKey, result);
             _holidays = result;
             return (result, null);
+        }
+
+        public async Task<bool> IsDateAHoliday(DateOnly date)
+        {
+            await GetHolidaysAsync();
+            var holidayDates = _holidays!.Select(h => h.Date).ToList();
+            return holidayDates.Contains(date);
         }
     }
 }
