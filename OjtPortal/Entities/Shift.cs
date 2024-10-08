@@ -15,6 +15,7 @@ namespace OjtPortal.Entities
         public TimeOnly? End { get; set; }
         public int DailyDutyHrs { get; set; } = 0;
         public int LateTimeInCount { get; set; } = 0;
+        public int LateTimeOutCount { get; set; } = 0;
         [Column(TypeName = "varchar(50)")]
         [ValueConverter(typeof(EnumToStringConverter<WorkingDays>))]
         public WorkingDays WorkingDays { get; set; } = WorkingDays.WeekdaysOnly;

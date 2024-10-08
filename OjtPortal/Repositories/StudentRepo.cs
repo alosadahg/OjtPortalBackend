@@ -16,6 +16,7 @@ namespace OjtPortal.Repositories
         Task<Student?> UpdateStudentByMentorAsync(Student student, int id);
         Task<Student?> UpdateStudentByTeacherAsync(Student student, int id);
         Task<Student?> UpdateStudentInfoAsync(Student student);
+        Task<Student?> UpdateStudentInternshipStatus(Student student, InternshipStatus status);
     }
 
     public class StudentRepo : IStudentRepo
@@ -57,6 +58,7 @@ namespace OjtPortal.Repositories
                 .Include(s => s.Mentor!.User)
                 .Include(s => s.Mentor!.Company)
                 .Include(s => s.Instructor)
+                .Include(s => s.Attendances)
                 .FirstOrDefaultAsync(s => s.UserId == id) :
                 await _context.Students
                 .Include(s => s.DegreeProgram)
@@ -151,6 +153,13 @@ namespace OjtPortal.Repositories
             if (existingStudent.Mentor != null) _context.Entry(existingStudent.Mentor).State = EntityState.Unchanged;
             await _context.SaveChangesAsync();
             return existingStudent;
+        }
+
+        public async Task<Student?> UpdateStudentInternshipStatus(Student student, InternshipStatus status)
+        {
+            student.InternshipStatus = status;
+            await _context.SaveChangesAsync();
+            return student;
         }
     }
 }

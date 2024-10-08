@@ -16,7 +16,7 @@ namespace OjtPortal.Repositories
         Task<(User?, ErrorResponseModel?)> CreateAsync(User user, string password);
         Task<(User?, ErrorResponseModel?)> GetUserByIdAsync(int id);
         Task<(User?, ErrorResponseModel?)> GetUserByEmailAsync(string email);
-        Task<User> ActivateAccount(User use, string token);
+        Task<User> ActivateAccount(User user, string token);
         Task<User?> DeleteByIdAsync(int id);
     }
 

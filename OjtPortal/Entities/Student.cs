@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using AutoMapper.Configuration.Annotations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json.Serialization;
 
 namespace OjtPortal.Entities
 {
@@ -30,6 +31,8 @@ namespace OjtPortal.Entities
         [ValueConverter(typeof(EnumToStringConverter<InternshipStatus>))]
         public InternshipStatus InternshipStatus { get; set; }
         public Shift? Shift { get; set; } = new();
+        [JsonIgnore]
+        public IEnumerable<Attendance>? Attendances { get; set; }
 
         public Student()
         {
