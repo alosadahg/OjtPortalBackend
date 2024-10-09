@@ -13,7 +13,8 @@ namespace OjtPortal.Entities
         public DateTime TimeIn { get; set; } = DateTime.UtcNow;
         [JsonConverter(typeof(DateTimeConverter))]
         public DateTime? TimeOut { get; set; } = null;
-        public bool IsTimeOutLate {  get; set; } 
+        public bool IsTimeOutLate {  get; set; }
+        public bool IsTimeInLate { get; set; }
         public double RenderedHours { get; set; } = 0;
         public LogbookEntry? LogbookEntry { get; set; } = null;
 
