@@ -32,6 +32,8 @@ namespace OjtPortal.Services
             this._configuration = configuration;
         }
 
+        // TODO: add corporate or local holiday
+
         public async Task<(List<Holiday>?, ErrorResponseModel?)> GetHolidaysAsync()
         {
             if(_holidays.Any())

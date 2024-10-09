@@ -25,14 +25,17 @@ namespace OjtPortal.Controllers
         /// <param name="startDate">The start date of the internship. </param>
         /// <param name="includeHolidays">Include Holidays as working days. </param>
         /// <param name="workingDays">Choose the type of working days. </param>
-        /// <param name="manDays">The number of working days (man-days) required to complete the OJT.</param>
+        /// <param name="requiredHours">The number of hours required to complete the OJT.</param>
+        /// <param name="dailyDutyHours">The number of hours required to complete daily the OJT.</param>
+        /// <returns></returns>
         /// <returns></returns>
         [HttpGet("ojt/end-date")]
         [ProducesResponseType(typeof(DateOnly), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponseModel), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetEndDate(int manDays, string startDate = "2024-01-01", bool includeHolidays = false, WorkingDays workingDays = WorkingDays.WeekdaysOnly)
+        public async Task<IActionResult> GetEndDate(int requiredHours, int dailyDutyHours, string startDate = "2024-01-01", bool includeHolidays = false, WorkingDays workingDays = WorkingDays.WeekdaysOnly)
         {
             var startDateOnly = DateOnly.Parse(startDate);
+            var manDays = _studentService.CalculateManDays(requiredHours, dailyDutyHours);
             var (response, error) = await _studentService.GetEndDateAsync(startDateOnly, manDays, includeHolidays, workingDays);
             if (error != null) return MakeErrorResponse(error);
             return Ok(response);

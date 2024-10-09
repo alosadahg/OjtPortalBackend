@@ -13,6 +13,7 @@ namespace OjtPortal.Services
         Task<(Attendance?, ErrorResponseModel?)> TimeInAsync(int id, bool proceedTimeIn);
         Task<(Attendance?, ErrorResponseModel?)> GetAttendanceById(int id);
         Task<(Attendance?, ErrorResponseModel?)> TimeOutAsync(int id);
+        Task<(string?, ErrorResponseModel?)> IsDateAWorkDay(DateOnly date, Shift shift);
     }
 
     public class AttendanceService : IAttendanceService
@@ -20,12 +21,14 @@ namespace OjtPortal.Services
         private readonly IStudentRepo _studentRepo;
         private readonly IAttendanceRepo _attendanceRepo;
         private readonly IHolidayService _holidayService;
+        private readonly IStudentService _studentService;
 
-        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService)
+        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService, IStudentService studentService)
         {
             this._studentRepo = studentRepo;
             this._attendanceRepo = attendanceRepo;
             this._holidayService = holidayService;
+            this._studentService = studentService;
         }
 
         public async Task<(Attendance?, ErrorResponseModel?)> TimeInAsync(int id, bool proceedTimeIn)
@@ -40,31 +43,44 @@ namespace OjtPortal.Services
             if (student.Shift == null) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.MissingRecordTitle("shift"), LoggingTemplate.MissingRecordDescription("shift", id.ToString())));
             var dateToday = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local));
 
+            #region Check if today is a workday
             // date checking
             if (!proceedTimeIn)
             {
-                if (await _holidayService.IsDateAHoliday(dateToday))
-                {
-                    if (!student.Shift.IncludePublicPhHolidays)
-                    {
-                        return (null, new(HttpStatusCode.UnprocessableContent, "Holiday Off", "Today is a public holiday, if you wish to proceed, please set proceedTimeIn to true."));
-                    }
-                }
-
-                if (dateToday.DayOfWeek == DayOfWeek.Saturday && student.Shift.WorkingDays == WorkingDays.WeekdaysOnly) return (null, new(HttpStatusCode.UnprocessableContent, "Weekend Off", "Today is a weekend, if you wish to proceed, please set proceedTimeIn to true."));
-                if (dateToday.DayOfWeek == DayOfWeek.Sunday && student.Shift.WorkingDays != WorkingDays.WholeWeek) return (null, new(HttpStatusCode.UnprocessableContent, "Sunday Off", "Today is a Sunday, if you wish to proceed, please set proceedTimeIn to true."));
+                var (isWorkDay, error) = await IsDateAWorkDay(dateToday, student.Shift);
+                if (error != null) return (null, error);
             }
+            #endregion
 
+            #region Check if there is no clock in yet and update absences
             var recentAttendance = _attendanceRepo.GetRecentAttendance(student);
-            
+
             if (recentAttendance != null)
             {
-                recentAttendance!.TimeIn = TimeZoneInfo.ConvertTimeFromUtc(recentAttendance.TimeIn, TimeZoneInfo.Local);
+                // convert utc to local 
+                var recentTimeIn = TimeZoneInfo.ConvertTimeFromUtc(recentAttendance.TimeIn, TimeZoneInfo.Local);
                 if (DateOnly.FromDateTime(recentAttendance!.TimeIn).Equals(dateToday)) return (null, new(HttpStatusCode.Conflict, "Time in already recorded", "Today's time in is already recorded."));
                 if (recentAttendance.TimeOut == null) return (null, new(HttpStatusCode.Conflict, "Recent attendance not yet clocked out", "Has not clocked out yet from previous attendance, please clock out."));
+                var lastTimeInDate = DateOnly.FromDateTime(recentTimeIn);
+                // TODO: absent checking
+                var absencesCount = await GetAbsentCountAsync(lastTimeInDate, student);
+                student.Shift.AbsencesCount += absencesCount;
             }
+            
+            #endregion
 
-            if (student.InternshipStatus.Equals(InternshipStatus.Pending)) await _studentRepo.UpdateStudentInternshipStatus(student, InternshipStatus.Ongoing);
+            #region Check if time is valid
+            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+            var earlyTimeIn = student.Shift!.Start!.Value.AddMinutes(-15);
+
+            // current time is before allowed time in
+            if (currentTime < earlyTimeIn) return (null, new(HttpStatusCode.BadRequest, "Time in not yet allowed", $"You can time in later on {earlyTimeIn}"));
+
+            // current time is after shift, time in not allowed
+            if (currentTime >= student.Shift.End!.Value) return (null, new(HttpStatusCode.BadRequest, "Time in not allowed", "Today's shift has already ended."));
+            #endregion
+
+            if (student.InternshipStatus.Equals(InternshipStatus.Pending)) await _studentRepo.UpdateStudentInternshipStatusAsync(student, InternshipStatus.Ongoing);
             await _attendanceRepo.AddAttendanceAsync(attendance);
             return (attendance, null);
         }
@@ -86,7 +102,43 @@ namespace OjtPortal.Services
             if (recentAttendance == null || recentAttendance!.TimeOut != null) return (null, new(HttpStatusCode.Conflict, "No recent clock in", "Has not clocked in yet, please clock in first."));
 
             recentAttendance = await _attendanceRepo.TimeOutAsync(recentAttendance);
+
+            var remainingHrs = student.HrsToRender - student.Shift.TotalHrsRendered;
+            var manDays = (int) Math.Ceiling(remainingHrs / student.Shift.DailyDutyHrs);
+            var (endDate, _) = await _studentService.GetEndDateAsync(DateOnly.FromDateTime(DateTime.Now), manDays, student.Shift.IncludePublicPhHolidays, student.Shift.WorkingDays);
+            student = await _studentRepo.UpdateStudentEndDateAsync(student, endDate!.Value);
+
             return (recentAttendance, null);
+        }
+
+        public async Task<(string?, ErrorResponseModel?)> IsDateAWorkDay(DateOnly date, Shift shift)
+        {
+            if (await _holidayService.IsDateAHoliday(date))
+            {
+                if (!shift.IncludePublicPhHolidays)
+                {
+                    return (null, new(HttpStatusCode.UnprocessableContent, "Holiday Off", "Today is a public holiday, if you wish to proceed, please set proceedTimeIn to true."));
+                }
+            }
+
+            if (date.DayOfWeek == DayOfWeek.Saturday && shift.WorkingDays == WorkingDays.WeekdaysOnly) return (null, new(HttpStatusCode.UnprocessableContent, "Weekend Off", "Today is a weekend, if you wish to proceed, please set proceedTimeIn to true."));
+            if (date.DayOfWeek == DayOfWeek.Sunday && shift.WorkingDays != WorkingDays.WholeWeek) return (null, new(HttpStatusCode.UnprocessableContent, "Sunday Off", "Today is a Sunday, if you wish to proceed, please set proceedTimeIn to true."));
+            return ($"{date} is a workday.", null);
+        }
+
+        public async Task<int> GetAbsentCountAsync(DateOnly recentDate, Student student)
+        {
+            var shift = student.Shift!;
+            var skips = DateOnly.FromDateTime(DateTime.Now).DayNumber - recentDate.DayNumber;
+            var absencesCount = 0;
+            while (skips > 1)
+            {
+                var (_, error) = await IsDateAWorkDay(recentDate, shift);
+                if (error == null) absencesCount++;
+                recentDate = recentDate.AddDays(1);
+                skips--;
+            }
+            return absencesCount;
         }
     }
 }

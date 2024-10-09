@@ -16,7 +16,9 @@ namespace OjtPortal.Repositories
         Task<Student?> UpdateStudentByMentorAsync(Student student, int id);
         Task<Student?> UpdateStudentByTeacherAsync(Student student, int id);
         Task<Student?> UpdateStudentInfoAsync(Student student);
-        Task<Student?> UpdateStudentInternshipStatus(Student student, InternshipStatus status);
+        Task<Student?> UpdateStudentInternshipStatusAsync(Student student, InternshipStatus status);
+        Task<Student?> UpdateStudentEndDateAsync(Student student, DateOnly newEndDate);
+        Task<Student?> UpdateStudentAbsentCountAsync(Student student, int addedAbsent);
     }
 
     public class StudentRepo : IStudentRepo
@@ -149,9 +151,23 @@ namespace OjtPortal.Repositories
             return existingStudent;
         }
 
-        public async Task<Student?> UpdateStudentInternshipStatus(Student student, InternshipStatus status)
+        public async Task<Student?> UpdateStudentInternshipStatusAsync(Student student, InternshipStatus status)
         {
             student.InternshipStatus = status;
+            await _context.SaveChangesAsync();
+            return student;
+        }
+
+        public async Task<Student?> UpdateStudentEndDateAsync(Student student, DateOnly newEndDate)
+        {
+            student.EndDate = newEndDate;
+            await _context.SaveChangesAsync();
+            return student;
+        }
+
+        public async Task<Student?> UpdateStudentAbsentCountAsync(Student student, int addedAbsent)
+        {
+            student.Shift!.AbsencesCount += addedAbsent;
             await _context.SaveChangesAsync();
             return student;
         }

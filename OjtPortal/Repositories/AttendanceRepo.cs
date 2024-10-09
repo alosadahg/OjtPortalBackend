@@ -37,7 +37,11 @@ namespace OjtPortal.Repositories
         public async Task<Attendance?> AddAttendanceAsync(Attendance attendance)
         {
             // time in is 15 mins late
-            if (TimeOnly.FromDateTime(attendance.TimeIn) - attendance.Student.Shift!.Start > TimeSpan.FromMinutes(15)) attendance.Student.Shift.LateTimeInCount++;
+            if (TimeOnly.FromDateTime(DateTime.Now) - attendance.Student.Shift!.Start > TimeSpan.FromMinutes(15))
+            {
+                attendance.Student.Shift.LateTimeInCount++;
+                attendance.IsTimeInLate = true;
+            }
             await _context.Attendances.AddAsync(attendance);
             await _context.SaveChangesAsync();
             return attendance;
@@ -68,5 +72,6 @@ namespace OjtPortal.Repositories
             await _context.SaveChangesAsync();
             return attendance;
         }
+
     }
 }
