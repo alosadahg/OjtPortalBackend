@@ -30,7 +30,7 @@ namespace OjtPortal.Repositories
 
         public async Task<Attendance?> GetAttendanceByIdAsync(long id)
         {
-            var attendance = await _context.Attendances.FindAsync(id);
+            var attendance = await _context.Attendances.Include(a => a.LogbookEntry).FirstOrDefaultAsync(a => a.AttendanceId == id);
             return attendance;
         }
 

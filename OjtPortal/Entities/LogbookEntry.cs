@@ -20,8 +20,8 @@ namespace OjtPortal.Entities
         public string Remarks {  get; set; } = string.Empty;
         [Column(TypeName = "varchar(50)")]
         [ValueConverter(typeof(EnumToStringConverter<SentimentCategory>))]
-        public SentimentCategory RemarkSentimentCategory { get; set; }
-        public double RemarkSentimentScore { get; set; } = 0.0;
+        public SentimentCategory? RemarkSentimentCategory { get; set; } = null;
+        public double? RemarkSentimentScore { get; set; } = null;
         [Column(TypeName = "varchar(50)")]
         [ValueConverter(typeof(EnumToStringConverter<LogbookStatus>))]
         public LogbookStatus LogbookStatus { get; set; }

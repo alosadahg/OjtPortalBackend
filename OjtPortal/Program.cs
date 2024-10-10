@@ -85,6 +85,7 @@ builder.Services.AddTransient<ITeacherService, TeacherService>();
 builder.Services.AddTransient<IChairService, ChairService>();
 builder.Services.AddTransient<IAdminService, AdminService>();
 builder.Services.AddTransient<IAttendanceService, AttendanceService>();
+builder.Services.AddTransient<ILogbookEntryService, LogbookEntryService>();
 
 // Scoped repositories
 builder.Services.AddScoped<IHolidayRepo, HolidayRepo>();
@@ -99,6 +100,7 @@ builder.Services.AddScoped<IChairRepo, ChairRepo>();
 builder.Services.AddScoped<IAdminRepo, AdminRepo>();
 builder.Services.AddScoped<IOtpRepo, OtpRepo>();
 builder.Services.AddScoped<IAttendanceRepo, AttendanceRepo>();
+builder.Services.AddScoped<ILogbookEntryRepo, LogbookEntryRepo>();
 
 
 builder.Services.AddSwaggerGen(options =>
