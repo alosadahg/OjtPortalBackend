@@ -57,16 +57,20 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
-        /// Gets attendance history with logbooks by student
+        /// Get attendance history by student with filtering
         /// </summary>
         /// <param name="studentId"> The unique identifier of the student </param>
+        /// <param name="start"> The date where filtering starts (format: yyyy-mm-dd) </param>
+        /// <param name="end"> The date where filtering ends (format: yyyy-mm-dd)</param>
+        /// <param name="isLateTimeIn"> Gets attendance with late time ins </param>
+        /// <param name="isLateTimeOut"> Gets attendance with late time outs </param>
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AttendanceDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet("student/{studentId}")]
-        public async Task<IActionResult> GetAttendanceByStudentAsync(int studentId)
+        public async Task<IActionResult> GetAttendanceByStudentAsync([Required] int studentId, DateOnly? start, DateOnly? end, bool isLateTimeIn, bool isLateTimeOut)
         {
-            var (result, error) = await _attendanceService.GetAttendanceHistoryByStudentAsync(studentId);
+            var (result, error) = await _attendanceService.GetAttendanceHistoryByStudentAsync(studentId, start, end, isLateTimeIn, isLateTimeOut);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

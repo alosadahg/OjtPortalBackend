@@ -15,7 +15,7 @@ namespace OjtPortal.Services
         Task<(AttendanceDto?, ErrorResponseModel?)> GetAttendanceById(int id);
         Task<(AttendanceDto?, ErrorResponseModel?)> TimeOutAsync(int id);
         Task<(string?, ErrorResponseModel?)> IsDateAWorkDay(DateOnly date, Shift shift);
-        Task<(List<AttendanceDto>?, ErrorResponseModel?)> GetAttendanceHistoryByStudentAsync(int studentId);
+        Task<(List<AttendanceDto>?, ErrorResponseModel?)> GetAttendanceHistoryByStudentAsync(int studentId, DateOnly? start, DateOnly? end, bool? isLateTimeIn, bool? isLateTimeOut);
     }
 
     public class AttendanceService : IAttendanceService
@@ -145,13 +145,20 @@ namespace OjtPortal.Services
             return absencesCount;
         }
 
-        public async Task<(List<AttendanceDto>?, ErrorResponseModel?)> GetAttendanceHistoryByStudentAsync(int studentId)
+        public async Task<(List<AttendanceDto>?, ErrorResponseModel?)> GetAttendanceHistoryByStudentAsync(int studentId, DateOnly? start, DateOnly? end, bool? isLateTimeIn, bool? isLateTimeOut)
         {
             var student = await _studentRepo.GetStudentByIdAsync(studentId, false, false, true);
             if (student == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", $"{studentId}")));
 
             var attendanceList = (student.Attendances != null) ? student.Attendances.ToList() : new();
             var attendanceDtoList = new List<AttendanceDto>();
+
+            attendanceList = attendanceList.OrderByDescending(a => a.AttendanceId).ToList();
+            if (isLateTimeIn != null) attendanceList = attendanceList.Where(a => a.IsTimeInLate == isLateTimeIn).ToList();
+            if (isLateTimeOut != null) attendanceList = attendanceList.Where(a => a.IsTimeOutLate == isLateTimeOut).ToList();
+            if (start != null) attendanceList = attendanceList.Where(a => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(a.TimeIn)) >= start).ToList();
+            if (end != null) attendanceList = attendanceList.Where(a => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(a.TimeIn)) <= end).ToList();
+            
             attendanceList.ForEach(a => attendanceDtoList.Add(_mapper.Map<AttendanceDto>(a)));
             return (attendanceDtoList, null);
         }
