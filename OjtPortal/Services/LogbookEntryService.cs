@@ -11,8 +11,8 @@ namespace OjtPortal.Services
 {
     public interface ILogbookEntryService
     {
-        Task<(LogbookEntry?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId);
-        Task<(LogbookEntry?, ErrorResponseModel)> GetLogbookByIdAsync(long logbookId);
+        Task<(LogbookDto?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId);
+        Task<(LogbookDto?, ErrorResponseModel?)> GetLogbookByIdAsync(long logbookId);
     }
 
     public class LogbookEntryService : ILogbookEntryService
@@ -28,7 +28,7 @@ namespace OjtPortal.Services
             this._logbookEntryRepo = logbookEntryRepo;
         }
 
-        public async Task<(LogbookEntry?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId)
+        public async Task<(LogbookDto?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId)
         {
             var logbook = _mapper.Map<LogbookEntry>(newLogbook);
             var attendance = await _attendanceRepo.GetAttendanceByIdAsync(newLogbook.AttendanceId);
@@ -42,14 +42,22 @@ namespace OjtPortal.Services
             if (status == LogbookStatus.Submitted) logbook.SubmissionTimestamp = DateTime.UtcNow;
             logbook.Attendance = attendance;
             logbook = await _logbookEntryRepo.AddLogbookEntryAsync(logbook);
-            return (logbook, null);
+            return (_mapper.Map<LogbookDto>(logbook), null);
         }
 
-        public async Task<(LogbookEntry?, ErrorResponseModel)> GetLogbookByIdAsync(long logbookId)
+        public async Task<(LogbookDto?, ErrorResponseModel?)> GetLogbookByIdAsync(long logbookId)
         {
             var logbook = await _logbookEntryRepo.GetLogbookByIdAsync(logbookId);
             if (logbook == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("logbook entry"), LoggingTemplate.MissingRecordDescription("logbook entry", $"{logbookId}")));
-            return (logbook, null);
+            return (_mapper.Map<LogbookDto>(logbook), null);
+        }
+
+        public async Task<(LogbookDto?, ErrorResponseModel?)> AddRemarksAsync(long logbookId, int userId, string remarks)
+        {
+            var key = "logbook entry";
+            var logbook = await _logbookEntryRepo.GetLogbookByIdAsync(logbookId);
+            if (logbook == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, logbookId.ToString())));
+            return (null, null);
         }
     }
 }

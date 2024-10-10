@@ -1,4 +1,5 @@
-﻿using OjtPortal.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using OjtPortal.Context;
 using OjtPortal.Entities;
 using System.Diagnostics.Eventing.Reader;
 
@@ -28,7 +29,7 @@ namespace OjtPortal.Repositories
 
         public async Task<LogbookEntry?> GetLogbookByIdAsync(long logbookId)
         {
-            return await _context.LogbookEntries.FindAsync(logbookId);
+            return await _context.LogbookEntries.Include(l => l.Attendance).FirstOrDefaultAsync(l => l.AttendanceId == logbookId);
         }
     }
 }

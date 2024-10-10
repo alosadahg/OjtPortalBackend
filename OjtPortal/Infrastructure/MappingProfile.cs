@@ -34,7 +34,9 @@ namespace OjtPortal.Infrastructure
             .ReverseMap();
             CreateMap<NewStudentDto, MentorAddStudentDto>().ReverseMap();
             CreateMap<NewStudentDto, TeacherAddStudentDto>().ReverseMap();
+            CreateMap<Attendance, AttendanceDto>().ReverseMap();
             CreateMap<LogbookEntry, NewLogbookEntryDto>().ReverseMap();
+            CreateMap<LogbookEntry, LogbookDto>().ReverseMap();
         }
     }
 }

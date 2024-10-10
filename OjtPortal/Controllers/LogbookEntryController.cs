@@ -37,7 +37,7 @@ namespace OjtPortal.Controllers
             var user = await _userManager.GetUserAsync(User);
             var (result, error) = await _logbookEntryService.AddLogbookEntry(logbookEntryDto, user!.Id);
             if(error != null)  return MakeErrorResponse(error);
-            return CreatedAtRoute("GetLogbookByIdAsync", new { id = result!.AttendanceId }, result);
+            return CreatedAtRoute("GetLogbookByIdAsync", new { id = result!.Attendance!.AttendanceId }, result);
         }
 
         /// <summary>

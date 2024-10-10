@@ -1,4 +1,5 @@
-﻿using OjtPortal.Dtos;
+﻿using AutoMapper;
+using OjtPortal.Dtos;
 using OjtPortal.EmailTemplates;
 using OjtPortal.Entities;
 using OjtPortal.Enums;
@@ -10,9 +11,9 @@ namespace OjtPortal.Services
 {
     public interface IAttendanceService
     {
-        Task<(Attendance?, ErrorResponseModel?)> TimeInAsync(int id, bool proceedTimeIn);
-        Task<(Attendance?, ErrorResponseModel?)> GetAttendanceById(int id);
-        Task<(Attendance?, ErrorResponseModel?)> TimeOutAsync(int id);
+        Task<(AttendanceDto?, ErrorResponseModel?)> TimeInAsync(int id, bool proceedTimeIn);
+        Task<(AttendanceDto?, ErrorResponseModel?)> GetAttendanceById(int id);
+        Task<(AttendanceDto?, ErrorResponseModel?)> TimeOutAsync(int id);
         Task<(string?, ErrorResponseModel?)> IsDateAWorkDay(DateOnly date, Shift shift);
     }
 
@@ -22,16 +23,18 @@ namespace OjtPortal.Services
         private readonly IAttendanceRepo _attendanceRepo;
         private readonly IHolidayService _holidayService;
         private readonly IStudentService _studentService;
+        private readonly IMapper _mapper;
 
-        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService, IStudentService studentService)
+        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService, IStudentService studentService, IMapper mapper)
         {
             this._studentRepo = studentRepo;
             this._attendanceRepo = attendanceRepo;
             this._holidayService = holidayService;
             this._studentService = studentService;
+            this._mapper = mapper;
         }
 
-        public async Task<(Attendance?, ErrorResponseModel?)> TimeInAsync(int id, bool proceedTimeIn)
+        public async Task<(AttendanceDto?, ErrorResponseModel?)> TimeInAsync(int id, bool proceedTimeIn)
         {
             var student = await _studentRepo.GetStudentByIdAsync(id, false, false, true);
             if (student == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", id.ToString())));
@@ -82,17 +85,17 @@ namespace OjtPortal.Services
 
             if (student.InternshipStatus.Equals(InternshipStatus.Pending)) await _studentRepo.UpdateStudentInternshipStatusAsync(student, InternshipStatus.Ongoing);
             await _attendanceRepo.AddAttendanceAsync(attendance);
-            return (attendance, null);
+            return (_mapper.Map<AttendanceDto>(attendance), null);
         }
 
-        public async Task<(Attendance?, ErrorResponseModel?)> GetAttendanceById(int id)
+        public async Task<(AttendanceDto?, ErrorResponseModel?)> GetAttendanceById(int id)
         {
             var attendance = await _attendanceRepo.GetAttendanceByIdAsync(id);
             if (attendance == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("attendance"), LoggingTemplate.MissingRecordDescription("attendance", id.ToString())));
-            return (attendance, null);
+            return (_mapper.Map<AttendanceDto>(attendance), null);
         }
 
-        public async Task<(Attendance?, ErrorResponseModel?)> TimeOutAsync(int id)
+        public async Task<(AttendanceDto?, ErrorResponseModel?)> TimeOutAsync(int id)
         {
             var student = await _studentRepo.GetStudentByIdAsync(id, false, false, true);
             if (student == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", id.ToString())));
@@ -108,7 +111,7 @@ namespace OjtPortal.Services
             var (endDate, _) = await _studentService.GetEndDateAsync(DateOnly.FromDateTime(DateTime.Now), manDays, student.Shift.IncludePublicPhHolidays, student.Shift.WorkingDays);
             student = await _studentRepo.UpdateStudentEndDateAsync(student, endDate!.Value);
 
-            return (recentAttendance, null);
+            return (_mapper.Map<AttendanceDto>(recentAttendance), null);
         }
 
         public async Task<(string?, ErrorResponseModel?)> IsDateAWorkDay(DateOnly date, Shift shift)

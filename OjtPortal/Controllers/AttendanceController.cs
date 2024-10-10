@@ -47,12 +47,11 @@ namespace OjtPortal.Controllers
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Attendance))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [Authorize]
         [HttpGet("{id}", Name = "GetAttendanceByIdAsync")]
         public async Task<IActionResult> GetAttendanceByIdAsync(int id)
         {
             var user = await _userManager.GetUserAsync(User);
-            var (result, error) = await _attendanceService.GetAttendanceById(user!.Id);
+            var (result, error) = await _attendanceService.GetAttendanceById(id);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

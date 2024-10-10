@@ -16,6 +16,7 @@ namespace OjtPortal.Entities
         public bool IsTimeOutLate {  get; set; }
         public bool IsTimeInLate { get; set; }
         public double RenderedHours { get; set; } = 0;
+        [JsonIgnore]
         public LogbookEntry? LogbookEntry { get; set; } = null;
 
         public Attendance()
