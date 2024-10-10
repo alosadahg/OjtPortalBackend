@@ -59,7 +59,10 @@ namespace OjtPortal.Repositories
         public async Task<Attendance?> TimeOutAsync(Attendance attendance)
         {
             attendance.TimeOut = DateTime.UtcNow;
-            if (TimeOnly.FromDateTime(attendance.TimeOut.Value) - attendance.Student.Shift!.End > TimeSpan.FromHours(1))
+            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+            var end = attendance.Student.Shift!.End;
+            var timeSpan = currentTime.Hour - attendance.Student.Shift!.End!.Value.Hour;
+            if (TimeSpan.FromHours(timeSpan) > TimeSpan.FromHours(1))
             {
                 attendance.IsTimeOutLate = true;
                 attendance.Student.Shift.LateTimeOutCount++;

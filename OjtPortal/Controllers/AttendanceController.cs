@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
 using OjtPortal.Entities;
@@ -13,24 +15,27 @@ namespace OjtPortal.Controllers
     public class AttendanceController : OjtPortalBaseController
     {
         private readonly IAttendanceService _attendanceService;
+        private readonly UserManager<User> _userManager;
 
-        public AttendanceController(IAttendanceService attendanceService)
+        public AttendanceController(IAttendanceService attendanceService, UserManager<User> userManager)
         {
             this._attendanceService = attendanceService;
+            this._userManager = userManager;
         }
 
         /// <summary>
         /// Records the time in
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="proceedTimeIn"></param>
+        /// <param name="proceedTimeIn"> Set this to true if you wish to time in on a non-working day </param>
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Attendance))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [Authorize]
         [HttpPost("time/in")]
-        public async Task<IActionResult> TimeInAsync([Required]int id, bool proceedTimeIn = false)
+        public async Task<IActionResult> TimeInAsync(bool proceedTimeIn = false)
         {
-            var (result, error) = await _attendanceService.TimeInAsync(id, proceedTimeIn);
+            var user = await _userManager.GetUserAsync(User);
+            var (result, error) = await _attendanceService.TimeInAsync(user!.Id, proceedTimeIn);
             if (error != null) return MakeErrorResponse(error);
             return CreatedAtRoute("GetAttendanceByIdAsync", new {id = result!.AttendanceId}, result);
         }
@@ -38,14 +43,16 @@ namespace OjtPortal.Controllers
         /// <summary>
         /// Gets attendance by id
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id"> The unique identifier of the attendance </param>
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Attendance))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [Authorize]
         [HttpGet("{id}", Name = "GetAttendanceByIdAsync")]
         public async Task<IActionResult> GetAttendanceByIdAsync(int id)
         {
-            var (result, error) = await _attendanceService.GetAttendanceById(id);
+            var user = await _userManager.GetUserAsync(User);
+            var (result, error) = await _attendanceService.GetAttendanceById(user!.Id);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
@@ -53,14 +60,15 @@ namespace OjtPortal.Controllers
         /// <summary>
         /// Records the time out
         /// </summary>
-        /// <param name="id"></param>
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Attendance))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [Authorize]
         [HttpPatch("time/out")]
-        public async Task<IActionResult> TimeOutAsync(int id)
+        public async Task<IActionResult> TimeOutAsync()
         {
-            var (result, error) = await _attendanceService.TimeOutAsync(id);
+            var user = await _userManager.GetUserAsync(User);
+            var (result, error) = await _attendanceService.TimeOutAsync(user!.Id);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
