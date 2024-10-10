@@ -15,7 +15,8 @@ namespace OjtPortal.Services
         Task<(LogbookDto?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId);
         Task<(LogbookDto?, ErrorResponseModel?)> GetLogbookByIdAsync(long logbookId);
         Task<(LogbookDto?, ErrorResponseModel?)> AddRemarksAsync(long logbookId, int mentorId, string remarks);
-        Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByFilteringAsync(int studentId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate);
+        Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByStudentWithFilteringAsync(int studentId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate);
+        Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByMentorWithFilteringAsync(int mentorId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate);
     }
 
     public class LogbookEntryService : ILogbookEntryService
@@ -24,13 +25,15 @@ namespace OjtPortal.Services
         private readonly IAttendanceRepo _attendanceRepo;
         private readonly ILogbookEntryRepo _logbookEntryRepo;
         private readonly IStudentRepo _studentRepo;
+        private readonly IMentorRepo _mentorRepo;
 
-        public LogbookEntryService(IMapper mapper, IAttendanceRepo attendanceRepo, ILogbookEntryRepo logbookEntryRepo, IStudentRepo _studentRepo)
+        public LogbookEntryService(IMapper mapper, IAttendanceRepo attendanceRepo, ILogbookEntryRepo logbookEntryRepo, IStudentRepo studentRepo, IMentorRepo mentorRepo)
         {
             this._mapper = mapper;
             this._attendanceRepo = attendanceRepo;
             this._logbookEntryRepo = logbookEntryRepo;
-            this._studentRepo = _studentRepo;
+            this._studentRepo = studentRepo;
+            this._mentorRepo = mentorRepo;
         }
 
         public async Task<(LogbookDto?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId)
@@ -73,7 +76,7 @@ namespace OjtPortal.Services
             return (_mapper.Map<LogbookDto>(logbook), null);
         }
 
-        public async Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByFilteringAsync(int studentId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate)
+        public async Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByStudentWithFilteringAsync(int studentId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate)
         {
             var key = "student";
             var student = await _studentRepo.GetStudentByIdAsync(studentId, false, false, true);
@@ -90,6 +93,26 @@ namespace OjtPortal.Services
             return (logbookDtoList, null);
         }
 
+        public async Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByMentorWithFilteringAsync(int mentorId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate)
+        {
+            var key = "mentor";
+            var mentor = await _mentorRepo.GetMentorByIdAsync(mentorId, true, true);
+            if (mentor == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, mentorId.ToString())));
 
+            var students = mentor.Students!.ToList();
+            var attendanceList = new List<Attendance>();
+
+            students.ForEach(s => attendanceList.AddRange(s.Attendances!.ToList()));
+
+            var logbookList = new List<LogbookEntry>();
+            attendanceList = attendanceList.Where(a => a.LogbookEntry != null).OrderByDescending(a => a.AttendanceId).ToList();
+            attendanceList.ForEach(a => logbookList.Add(a.LogbookEntry!));
+            if (status != null) logbookList = logbookList.Where(l => l.LogbookStatus == status).ToList();
+            if (startDate != null) logbookList = logbookList.Where(l => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(l.CreationTimestamp!.Value)) >= startDate).ToList();
+            if (endDate != null) logbookList = logbookList.Where(l => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(l.CreationTimestamp!.Value)) <= endDate).ToList();
+            var logbookDtoList = new List<LogbookDto>();
+            logbookList.ForEach(l => logbookDtoList.Add(_mapper.Map<LogbookDto>(l)));
+            return (logbookDtoList, null);
+        }
     }
 }

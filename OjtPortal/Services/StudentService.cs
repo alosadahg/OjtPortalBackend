@@ -68,7 +68,7 @@ namespace OjtPortal.Services
             key = "mentor";
             if (newStudent.MentorId.HasValue)
             {
-                var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId.Value, true);
+                var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId.Value, true, false);
                 studentEntity.Mentor = existingMentor;
             }
             //if(existingMentor == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.MentorId.ToString()))));

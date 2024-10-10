@@ -86,7 +86,25 @@ namespace OjtPortal.Controllers
         [HttpGet("student/{studentId}")]
         public async Task<IActionResult> GetLogbookByStudentWithFiltering([Required] int studentId, LogbookStatus? logbookStatus, DateOnly? start, DateOnly? end)
         {
-            var (result, error) = await _logbookEntryService.GetLogbooksByFilteringAsync(studentId, logbookStatus, start, end);
+            var (result, error) = await _logbookEntryService.GetLogbooksByStudentWithFilteringAsync(studentId, logbookStatus, start, end);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets the logbooks by student with filtering
+        /// </summary>
+        /// <param name="mentorId">The unique identifier of mentor</param>
+        /// <param name="logbookStatus">The status of the logbook</param>
+        /// <param name="start">Start date for filtering (format: yyyy-mm-dd)</param>
+        /// <param name="end">End date for filtering (format: yyyy-mm-dd)</param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<LogbookDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpGet("mentor/{mentorId}")]
+        public async Task<IActionResult> GetLogbookByMentorWithFiltering([Required] int mentorId, LogbookStatus? logbookStatus, DateOnly? start, DateOnly? end)
+        {
+            var (result, error) = await _logbookEntryService.GetLogbooksByMentorWithFilteringAsync(mentorId, logbookStatus, start, end);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

@@ -8,7 +8,7 @@ namespace OjtPortal.Repositories
     {
         Task<Mentor?> AddMentorAsync(Mentor newMentor);
         Task<bool> IsMentorExisting(Mentor mentor);
-        Task<Mentor?> GetMentorByIdAsync(int id, bool includeUser);
+        Task<Mentor?> GetMentorByIdAsync(int id, bool includeStudents, bool includeStudentsAttendance);
     }
 
     public class MentorRepo : IMentorRepo
@@ -33,11 +33,13 @@ namespace OjtPortal.Repositories
             return await _context.Mentors.ContainsAsync(mentor);
         }
 
-        public async Task<Mentor?> GetMentorByIdAsync(int id, bool includeUser)
+        public async Task<Mentor?> GetMentorByIdAsync(int id, bool includeStudents, bool includeStudentsAttendance)
         {
-            var query = (includeUser) ? await _context.Mentors.Include(m => m.User).Include(m => m.Company).Include(m => m.Students).FirstOrDefaultAsync(m => m.UserId == id)
-                : await _context.Mentors.Include(m => m.Company).Include(m => m.Students).FirstOrDefaultAsync(m => m.UserId == id);
-            return query;
+            IQueryable<Mentor> query = _context.Mentors.Include(m => m.User).Include(m => m.Company);
+            if (includeStudents && includeStudentsAttendance)
+                query = query.Include(m => m.Students)!.ThenInclude(s => s.Attendances)!.ThenInclude(a => a.LogbookEntry);
+            else if (includeStudents) query = query.Include(m => m.Students);
+            return await query.FirstOrDefaultAsync(m => m.UserId == id);
         }
     }
 }
