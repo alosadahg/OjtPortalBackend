@@ -9,6 +9,7 @@ namespace OjtPortal.Repositories
     {
         Task<LogbookEntry> AddLogbookEntryAsync(LogbookEntry logbookEntry);
         Task<LogbookEntry?> GetLogbookByIdAsync(long logbookId);
+        Task<LogbookEntry> AddRemarksAsync(LogbookEntry logbook, string remarks);
     }
 
     public class LogbookEntryRepo : ILogbookEntryRepo
@@ -29,7 +30,18 @@ namespace OjtPortal.Repositories
 
         public async Task<LogbookEntry?> GetLogbookByIdAsync(long logbookId)
         {
-            return await _context.LogbookEntries.Include(l => l.Attendance).FirstOrDefaultAsync(l => l.AttendanceId == logbookId);
+            return await _context.LogbookEntries
+                .Include(l => l.Attendance)
+                .FirstOrDefaultAsync(l => l.AttendanceId == logbookId);
+        }
+
+        public async Task<LogbookEntry> AddRemarksAsync(LogbookEntry logbook, string remarks)
+        {
+            logbook.Remarks = remarks;
+            logbook.RemarksTimestamp = DateTime.UtcNow;
+            logbook.SubmissionTimestamp = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return logbook;
         }
     }
 }
