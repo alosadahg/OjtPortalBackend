@@ -12,6 +12,7 @@ namespace OjtPortal.Services
     public interface ILogbookEntryService
     {
         Task<(LogbookEntry?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId);
+        Task<(LogbookEntry?, ErrorResponseModel)> GetLogbookByIdAsync(long logbookId);
     }
 
     public class LogbookEntryService : ILogbookEntryService
@@ -41,6 +42,13 @@ namespace OjtPortal.Services
             if (status == LogbookStatus.Submitted) logbook.SubmissionTimestamp = DateTime.UtcNow;
             logbook.Attendance = attendance;
             logbook = await _logbookEntryRepo.AddLogbookEntryAsync(logbook);
+            return (logbook, null);
+        }
+
+        public async Task<(LogbookEntry?, ErrorResponseModel)> GetLogbookByIdAsync(long logbookId)
+        {
+            var logbook = await _logbookEntryRepo.GetLogbookByIdAsync(logbookId);
+            if (logbook == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("logbook entry"), LoggingTemplate.MissingRecordDescription("logbook entry", $"{logbookId}")));
             return (logbook, null);
         }
     }

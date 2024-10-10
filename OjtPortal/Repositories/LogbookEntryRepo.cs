@@ -1,11 +1,13 @@
 ﻿using OjtPortal.Context;
 using OjtPortal.Entities;
+using System.Diagnostics.Eventing.Reader;
 
 namespace OjtPortal.Repositories
 {
     public interface ILogbookEntryRepo
     {
         Task<LogbookEntry> AddLogbookEntryAsync(LogbookEntry logbookEntry);
+        Task<LogbookEntry?> GetLogbookByIdAsync(long logbookId);
     }
 
     public class LogbookEntryRepo : ILogbookEntryRepo
@@ -22,6 +24,11 @@ namespace OjtPortal.Repositories
             _context.LogbookEntries.Add(logbookEntry);
             await _context.SaveChangesAsync();
             return logbookEntry;
+        }
+
+        public async Task<LogbookEntry?> GetLogbookByIdAsync(long logbookId)
+        {
+            return await _context.LogbookEntries.FindAsync(logbookId);
         }
     }
 }

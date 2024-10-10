@@ -6,6 +6,7 @@ using OjtPortal.Dtos;
 using OjtPortal.Entities;
 using OjtPortal.Infrastructure;
 using OjtPortal.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace OjtPortal.Controllers
 {
@@ -27,7 +28,7 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="logbookEntryDto"></param>
         /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LogbookEntry))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(LogbookEntry))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpPost]
         [Authorize]
@@ -36,6 +37,21 @@ namespace OjtPortal.Controllers
             var user = await _userManager.GetUserAsync(User);
             var (result, error) = await _logbookEntryService.AddLogbookEntry(logbookEntryDto, user!.Id);
             if(error != null)  return MakeErrorResponse(error);
+            return CreatedAtRoute("GetLogbookByIdAsync", new { id = result!.AttendanceId }, result);
+        }
+
+        /// <summary>
+        /// Get the logbook by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LogbookEntry))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpGet("{id}", Name = "GetLogbookByIdAsync")]
+        public async Task<IActionResult> GetLogbookByIdAsync([Required] long id)
+        {
+            var (result, error) = await _logbookEntryService.GetLogbookByIdAsync(id);
+            if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
     }
