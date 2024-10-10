@@ -56,7 +56,7 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
-        /// Get the logbook by id
+        /// Add remarks to a logbook entry (marks the status from pending to submitted)
         /// </summary>
         /// <param name="id"> The unique identifier of the logbook </param>
         /// <param name="remarks"></param>
