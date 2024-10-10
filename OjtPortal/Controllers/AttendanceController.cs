@@ -45,13 +45,28 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="id"> The unique identifier of the attendance </param>
         /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Attendance))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AttendanceDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet("{id}", Name = "GetAttendanceByIdAsync")]
         public async Task<IActionResult> GetAttendanceByIdAsync(int id)
         {
             var user = await _userManager.GetUserAsync(User);
             var (result, error) = await _attendanceService.GetAttendanceById(id);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets attendance history with logbooks by student
+        /// </summary>
+        /// <param name="studentId"> The unique identifier of the student </param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AttendanceDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetAttendanceByStudentAsync(int studentId)
+        {
+            var (result, error) = await _attendanceService.GetAttendanceHistoryByStudentAsync(studentId);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

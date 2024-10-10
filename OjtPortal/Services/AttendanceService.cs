@@ -15,6 +15,7 @@ namespace OjtPortal.Services
         Task<(AttendanceDto?, ErrorResponseModel?)> GetAttendanceById(int id);
         Task<(AttendanceDto?, ErrorResponseModel?)> TimeOutAsync(int id);
         Task<(string?, ErrorResponseModel?)> IsDateAWorkDay(DateOnly date, Shift shift);
+        Task<(List<AttendanceDto>?, ErrorResponseModel?)> GetAttendanceHistoryByStudentAsync(int studentId);
     }
 
     public class AttendanceService : IAttendanceService
@@ -142,6 +143,17 @@ namespace OjtPortal.Services
                 skips--;
             }
             return absencesCount;
+        }
+
+        public async Task<(List<AttendanceDto>?, ErrorResponseModel?)> GetAttendanceHistoryByStudentAsync(int studentId)
+        {
+            var student = await _studentRepo.GetStudentByIdAsync(studentId, false, false, true);
+            if (student == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", $"{studentId}")));
+
+            var attendanceList = (student.Attendances != null) ? student.Attendances.ToList() : new();
+            var attendanceDtoList = new List<AttendanceDto>();
+            attendanceList.ForEach(a => attendanceDtoList.Add(_mapper.Map<AttendanceDto>(a)));
+            return (attendanceDtoList, null);
         }
     }
 }

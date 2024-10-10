@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OjtPortal.Dtos;
 using OjtPortal.EmailTemplates;
 using OjtPortal.Entities;
@@ -14,6 +15,7 @@ namespace OjtPortal.Services
         Task<(LogbookDto?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId);
         Task<(LogbookDto?, ErrorResponseModel?)> GetLogbookByIdAsync(long logbookId);
         Task<(LogbookDto?, ErrorResponseModel?)> AddRemarksAsync(long logbookId, int mentorId, string remarks);
+        Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByFilteringAsync(int studentId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate)
     }
 
     public class LogbookEntryService : ILogbookEntryService
@@ -70,5 +72,24 @@ namespace OjtPortal.Services
             logbook = await _logbookEntryRepo.AddRemarksAsync(logbook, remarks);
             return (_mapper.Map<LogbookDto>(logbook), null);
         }
+
+        public async Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByFilteringAsync(int studentId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate)
+        {
+            var key = "student";
+            var student = await _studentRepo.GetStudentByIdAsync(studentId, false, false, true);
+            if (student == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, studentId.ToString())));
+            var attendanceList = (student.Attendances!=null) ? student.Attendances.ToList() : new();
+            var logbookList = new List<LogbookEntry>();
+            attendanceList = attendanceList.Where(a => a.LogbookEntry != null).OrderByDescending(a => a.AttendanceId).ToList();    
+            attendanceList.ForEach(a => logbookList.Add(a.LogbookEntry!));
+            if (status != null) logbookList = logbookList.Where(l => l.LogbookStatus == status).ToList();
+            if (startDate != null) logbookList = logbookList.Where(l => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(l.CreationTimestamp!.Value)) >= startDate).ToList();
+            if (endDate != null) logbookList = logbookList.Where(l => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(l.CreationTimestamp!.Value)) <= endDate).ToList();
+            var logbookDtoList = new List<LogbookDto>();
+            logbookList.ForEach(l => logbookDtoList.Add(_mapper.Map<LogbookDto>(l)));
+            return (logbookDtoList, null);
+        }
+
+
     }
 }
