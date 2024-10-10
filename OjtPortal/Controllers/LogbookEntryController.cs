@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
 using OjtPortal.Entities;
+using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
 using OjtPortal.Services;
 using System.ComponentModel.DataAnnotations;
@@ -11,13 +12,13 @@ using System.ComponentModel.DataAnnotations;
 namespace OjtPortal.Controllers
 {
     [ApiController]
-    [Route("api/logbook")]
-    public class LogbookDtoController : OjtPortalBaseController
+    [Route("api/logbooks")]
+    public class LogbookEntryController : OjtPortalBaseController
     {
         private readonly ILogbookEntryService _logbookEntryService;
         private readonly UserManager<User> _userManager;
 
-        public LogbookDtoController(ILogbookEntryService logbookEntryService, UserManager<User> userManager)
+        public LogbookEntryController(ILogbookEntryService logbookEntryService, UserManager<User> userManager)
         {
             this._logbookEntryService = logbookEntryService;
             this._userManager = userManager;
@@ -68,6 +69,24 @@ namespace OjtPortal.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             var (result, error) = await _logbookEntryService.AddRemarksAsync(id, user!.Id, remarks);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets the logbooks by student with filtering
+        /// </summary>
+        /// <param name="studentId">The unique identifier of student</param>
+        /// <param name="logbookStatus">The status of the logbook</param>
+        /// <param name="start">Start date for filtering (format: yyyy-mm-dd)</param>
+        /// <param name="end">End date for filtering (format: yyyy-mm-dd)</param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<LogbookDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetLogbookByStudentWithFiltering([Required] int studentId, LogbookStatus? logbookStatus, DateOnly? start, DateOnly? end)
+        {
+            var (result, error) = await _logbookEntryService.GetLogbooksByFilteringAsync(studentId, logbookStatus, start, end);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

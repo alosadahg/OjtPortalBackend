@@ -15,7 +15,7 @@ namespace OjtPortal.Services
         Task<(LogbookDto?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId);
         Task<(LogbookDto?, ErrorResponseModel?)> GetLogbookByIdAsync(long logbookId);
         Task<(LogbookDto?, ErrorResponseModel?)> AddRemarksAsync(long logbookId, int mentorId, string remarks);
-        Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByFilteringAsync(int studentId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate)
+        Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByFilteringAsync(int studentId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate);
     }
 
     public class LogbookEntryService : ILogbookEntryService
