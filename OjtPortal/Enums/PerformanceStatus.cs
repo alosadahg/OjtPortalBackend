@@ -1,9 +1,10 @@
-﻿using System.ComponentModel;
+﻿using OjtPortal.Infrastructure.JsonConverters;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace OjtPortal.Enums
 {
-    [JsonConverter(typeof(PerformanceStatus))]
+    [JsonConverter(typeof(EnumDescriptionConverter<PerformanceStatus>))]
     public enum PerformanceStatus
     {
         [Description("On Track")]

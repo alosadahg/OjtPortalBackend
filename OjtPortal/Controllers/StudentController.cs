@@ -5,6 +5,7 @@ using OjtPortal.Dtos;
 using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
 using OjtPortal.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace OjtPortal.Controllers
 {
@@ -67,6 +68,21 @@ namespace OjtPortal.Controllers
         public async Task<IActionResult> GetStudentById(int id)
         {
             var (result, error) = await _studentService.GetStudentByIdAsync(id, true, true, false);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+        
+        /// <summary>
+        /// The unique identifier of the student
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StudentPerformance))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpGet("{id}/performance")]
+        public async Task<IActionResult> GetStudentPerformanceAsync ([Required] int id)
+        {
+            var (result, error) = await _studentService.GetStudentPerformanceAsync(id);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

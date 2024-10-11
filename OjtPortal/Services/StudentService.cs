@@ -20,6 +20,7 @@ namespace OjtPortal.Services
         List<T> MapStudentsToDtoList<T>(IEnumerable<Student> students) where T : class;
         Task<(StudentDto?, ErrorResponseModel?)> UpdateStudentInfoAsync(UpdateStudentDto updateStudentDto);
         int CalculateManDays(int hrs, int dailyHours);
+        Task<(StudentPerformance?, ErrorResponseModel?)> GetStudentPerformanceAsync(int studentId);
     }
 
     public class StudentService : IStudentService
@@ -35,8 +36,9 @@ namespace OjtPortal.Services
         private readonly IDegreeProgramRepo _degreeProgramRepo;
         private readonly IStudentRepo _studentRepo;
         private readonly IUserRepo _userRepo;
+        private readonly ILogbookEntryService _logbookEntryService;
 
-        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper, IEmailSender emailSender, IUserService userService, ITeacherRepo teacherRepository, IMentorRepo mentorRepository, ILogger<StudentService> logger, IDegreeProgramRepo degreeProgramRepo, IStudentRepo studentRepo, IUserRepo userRepo)
+        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper, IEmailSender emailSender, IUserService userService, ITeacherRepo teacherRepository, IMentorRepo mentorRepository, ILogger<StudentService> logger, IDegreeProgramRepo degreeProgramRepo, IStudentRepo studentRepo, IUserRepo userRepo, ILogbookEntryService logbookEntryService)
         {
             this._userManager = userManager;
             this._holidayService = holidayService;
@@ -49,6 +51,7 @@ namespace OjtPortal.Services
             this._degreeProgramRepo = degreeProgramRepo;
             this._studentRepo = studentRepo;
             this._userRepo = userRepo;
+            this._logbookEntryService = logbookEntryService;
         }
 
         public async Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent, bool withEmailChecking)
@@ -178,6 +181,28 @@ namespace OjtPortal.Services
             if (!string.IsNullOrEmpty(updateStudentDto.User!.Email)) await  _userService.ResendActivationEmailAsync(updateStudentDto.User.Email);
             
             return (_mapper.Map<StudentDto>(student), null);
+        }
+
+        public async Task<(StudentPerformance?, ErrorResponseModel?)> GetStudentPerformanceAsync(int studentId)
+        {
+            var student = await _studentRepo.GetStudentByIdAsync(studentId, false, false, true);
+            if (student == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", studentId.ToString()))));
+            var studentPerformance = _mapper.Map<StudentPerformance>(student);
+            studentPerformance.AttendanceCount = student.Attendances!.Count();
+            var attendanceList = (student.Attendances != null) ? student.Attendances.ToList() : new();
+            var logbookList = new List<LogbookEntry>();
+            attendanceList = attendanceList.Where(a => a.LogbookEntry != null).OrderByDescending(a => a.AttendanceId).ToList();
+            attendanceList.ForEach(a => logbookList.Add(a.LogbookEntry!));
+            studentPerformance.LogbookCount = logbookList.Count();
+            studentPerformance.RemainingHoursToRender = student.HrsToRender - student.Shift!.TotalHrsRendered;
+            studentPerformance.RemainingManDays = student.ManDays - student.Shift.TotalManDaysRendered;
+            studentPerformance.StatusRemarks = (studentPerformance.AttendanceCount > studentPerformance.LogbookCount)
+                ? studentPerformance.StatusRemarks += $"Pending {studentPerformance.AttendanceCount - studentPerformance.LogbookCount} logbook submission."
+                : "No pending logbook submissions.";
+            studentPerformance.PerformanceStatus = (studentPerformance.AttendanceCount > studentPerformance.LogbookCount)
+                ? PerformanceStatus.OffCourse
+                : PerformanceStatus.OnTrack;
+            return (studentPerformance, null);
         }
     }
 }

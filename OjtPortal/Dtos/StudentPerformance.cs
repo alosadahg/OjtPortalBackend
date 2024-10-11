@@ -9,6 +9,10 @@ namespace OjtPortal.Dtos
 {
     public class StudentPerformance
     {
+        public StudentPerformance()
+        {
+        }
+
         public ExistingUserDto? User { get; set; } = null;
         public string StudentId { get; set; } = string.Empty;
         public DegreeProgramDto? DegreeProgram { get; set; } = null;
@@ -26,6 +30,7 @@ namespace OjtPortal.Dtos
         public int LogbookCount { get; set; } = 0;
         public double RemainingHoursToRender { get; set; } = 0;
         public int RemainingManDays { get; set; } = 0;
+
 
     }
 }
