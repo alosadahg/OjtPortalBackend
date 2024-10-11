@@ -41,6 +41,22 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
+        /// Records the time out
+        /// </summary>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Attendance))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [Authorize]
+        [HttpPatch("time/out")]
+        public async Task<IActionResult> TimeOutAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var (result, error) = await _attendanceService.TimeOutAsync(user!.Id);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Gets attendance by id
         /// </summary>
         /// <param name="id"> The unique identifier of the attendance </param>
@@ -76,17 +92,16 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
-        /// Records the time out
+        /// Get attendance without logbook by student
         /// </summary>
+        /// <param name="studentId"> The unique identifier of the student </param>
         /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Attendance))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AttendanceDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [Authorize]
-        [HttpPatch("time/out")]
-        public async Task<IActionResult> TimeOutAsync()
+        [HttpGet("student/{studentId}/logbook")]
+        public async Task<IActionResult> GetAttendanceWithoutLogbooks ([Required] int studentId)
         {
-            var user = await _userManager.GetUserAsync(User);
-            var (result, error) = await _attendanceService.TimeOutAsync(user!.Id);
+            var (result, error) = await _attendanceService.GetAttendanceWithoutLogbookAsync(studentId);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

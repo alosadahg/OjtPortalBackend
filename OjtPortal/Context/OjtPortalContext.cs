@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using OjtPortal.Dtos;
 using OjtPortal.Entities;
 
 namespace OjtPortal.Context
@@ -33,6 +34,5 @@ namespace OjtPortal.Context
         public DbSet<OTP> OTPs { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<LogbookEntry> LogbookEntries { get; set; }
-        public DbSet<StudentPerformance> StudentPerformances { get; set; }
     }
 }

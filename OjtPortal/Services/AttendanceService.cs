@@ -16,6 +16,7 @@ namespace OjtPortal.Services
         Task<(AttendanceDto?, ErrorResponseModel?)> TimeOutAsync(int id);
         Task<(string?, ErrorResponseModel?)> IsDateAWorkDay(DateOnly date, Shift shift);
         Task<(List<AttendanceDto>?, ErrorResponseModel?)> GetAttendanceHistoryByStudentAsync(int studentId, DateOnly? start, DateOnly? end, bool? isLateTimeIn, bool? isLateTimeOut);
+        Task<(List<AttendanceDto>?, ErrorResponseModel?)> GetAttendanceWithoutLogbookAsync(int studentId);
     }
 
     public class AttendanceService : IAttendanceService
@@ -25,16 +26,14 @@ namespace OjtPortal.Services
         private readonly IHolidayService _holidayService;
         private readonly IStudentService _studentService;
         private readonly IMapper _mapper;
-        private readonly IStudentPerformanceRepo _studentPerformanceRepo;
 
-        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService, IStudentService studentService, IMapper mapper, IStudentPerformanceRepo studentPerformanceRepo)
+        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService, IStudentService studentService, IMapper mapper)
         {
             this._studentRepo = studentRepo;
             this._attendanceRepo = attendanceRepo;
             this._holidayService = holidayService;
             this._studentService = studentService;
             this._mapper = mapper;
-            this._studentPerformanceRepo = studentPerformanceRepo;
         }
 
         public async Task<(AttendanceDto?, ErrorResponseModel?)> TimeInAsync(int id, bool proceedTimeIn)
@@ -162,6 +161,20 @@ namespace OjtPortal.Services
             if (start != null) attendanceList = attendanceList.Where(a => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(a.TimeIn)) >= start).ToList();
             if (end != null) attendanceList = attendanceList.Where(a => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(a.TimeIn)) <= end).ToList();
             
+            attendanceList.ForEach(a => attendanceDtoList.Add(_mapper.Map<AttendanceDto>(a)));
+            return (attendanceDtoList, null);
+        }
+
+        public async Task<(List<AttendanceDto>?, ErrorResponseModel?)> GetAttendanceWithoutLogbookAsync (int studentId)
+        {
+            var student = await _studentRepo.GetStudentByIdAsync(studentId, false, false, true);
+            if (student == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", $"{studentId}")));
+
+            var attendanceList = (student.Attendances != null) ? student.Attendances.ToList() : new();
+            var attendanceDtoList = new List<AttendanceDto>();
+
+            attendanceList = attendanceList.Where(a => a.LogbookEntry == null).OrderByDescending(a => a.AttendanceId).ToList();
+           
             attendanceList.ForEach(a => attendanceDtoList.Add(_mapper.Map<AttendanceDto>(a)));
             return (attendanceDtoList, null);
         }

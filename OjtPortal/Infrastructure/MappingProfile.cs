@@ -19,6 +19,7 @@ namespace OjtPortal.Infrastructure
             CreateMap<Student, StudentToInstructorOverviewDto>().ReverseMap();
             CreateMap<Student, StudentToMentorOverviewDto>().ReverseMap();
             CreateMap<Student, UpdateStudentDto>().ReverseMap();
+            CreateMap<Student, StudentPerformance>().ReverseMap();
             CreateMap<Company, NewCompanyDto>().ReverseMap();
             CreateMap<Mentor, NewMentorDto>().ReverseMap();
             CreateMap<Mentor, FullMentorDto>().ReverseMap();
