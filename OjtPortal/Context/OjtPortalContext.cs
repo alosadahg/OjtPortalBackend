@@ -33,5 +33,6 @@ namespace OjtPortal.Context
         public DbSet<OTP> OTPs { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<LogbookEntry> LogbookEntries { get; set; }
+        public DbSet<StudentPerformance> StudentPerformances { get; set; }
     }
 }

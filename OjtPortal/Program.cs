@@ -101,6 +101,7 @@ builder.Services.AddScoped<IAdminRepo, AdminRepo>();
 builder.Services.AddScoped<IOtpRepo, OtpRepo>();
 builder.Services.AddScoped<IAttendanceRepo, AttendanceRepo>();
 builder.Services.AddScoped<ILogbookEntryRepo, LogbookEntryRepo>();
+builder.Services.AddScoped<IStudentPerformanceRepo, StudentPerformanceRepo>();
 
 
 builder.Services.AddSwaggerGen(options =>

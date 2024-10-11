@@ -25,14 +25,16 @@ namespace OjtPortal.Services
         private readonly IHolidayService _holidayService;
         private readonly IStudentService _studentService;
         private readonly IMapper _mapper;
+        private readonly IStudentPerformanceRepo _studentPerformanceRepo;
 
-        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService, IStudentService studentService, IMapper mapper)
+        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService, IStudentService studentService, IMapper mapper, IStudentPerformanceRepo studentPerformanceRepo)
         {
             this._studentRepo = studentRepo;
             this._attendanceRepo = attendanceRepo;
             this._holidayService = holidayService;
             this._studentService = studentService;
             this._mapper = mapper;
+            this._studentPerformanceRepo = studentPerformanceRepo;
         }
 
         public async Task<(AttendanceDto?, ErrorResponseModel?)> TimeInAsync(int id, bool proceedTimeIn)
@@ -86,6 +88,7 @@ namespace OjtPortal.Services
 
             if (student.InternshipStatus.Equals(InternshipStatus.Pending)) await _studentRepo.UpdateStudentInternshipStatusAsync(student, InternshipStatus.Ongoing);
             await _attendanceRepo.AddAttendanceAsync(attendance);
+
             return (_mapper.Map<AttendanceDto>(attendance), null);
         }
 

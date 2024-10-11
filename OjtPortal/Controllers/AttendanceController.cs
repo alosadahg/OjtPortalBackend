@@ -68,7 +68,7 @@ namespace OjtPortal.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AttendanceDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet("student/{studentId}")]
-        public async Task<IActionResult> GetAttendanceByStudentAsync([Required] int studentId, DateOnly? start, DateOnly? end, bool isLateTimeIn, bool isLateTimeOut)
+        public async Task<IActionResult> GetAttendanceByStudentAsync([Required] int studentId, DateOnly? start, DateOnly? end, bool? isLateTimeIn, bool? isLateTimeOut)
         {
             var (result, error) = await _attendanceService.GetAttendanceHistoryByStudentAsync(studentId, start, end, isLateTimeIn, isLateTimeOut);
             if (error != null) return MakeErrorResponse(error);

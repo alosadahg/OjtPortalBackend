@@ -69,7 +69,7 @@ namespace OjtPortal.Services
             var student = await _studentRepo.GetStudentByIdAsync(logbook.Attendance.StudentId, true, false, false);
             if (student!.MentorId != mentorId) return (null, new(HttpStatusCode.Forbidden, "Forbidden Request", $"Access is not given to this mentor: {mentorId}"));
 
-            if (!string.IsNullOrEmpty(logbook.Remarks)) return (null, new(HttpStatusCode.UnprocessableContent, "Remarks Already Recorded", "This logbook entry has already been given remarks"));
+            if (!string.IsNullOrEmpty(logbook.Remarks)) return (null, new(HttpStatusCode.UnprocessableContent, "LogbookStatusRemarks Already Recorded", "This logbook entry has already been given remarks"));
             if (logbook.LogbookStatus != LogbookStatus.Submitted) logbook.LogbookStatus = LogbookStatus.Submitted;
 
             logbook = await _logbookEntryRepo.AddRemarksAsync(logbook, remarks);
