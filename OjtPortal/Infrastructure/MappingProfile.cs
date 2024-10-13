@@ -29,6 +29,7 @@ namespace OjtPortal.Infrastructure
             CreateMap<Chair, NewTeacherDto>().ReverseMap();
             CreateMap<Teacher, NewTeacherDto>().ReverseMap();
             CreateMap<Teacher, TeacherDto>().ReverseMap();
+            CreateMap<Teacher, TeacherNoStudentsDto>().ReverseMap();
             CreateMap<Teacher, TeacherDtoWithStudents>().ReverseMap();
             CreateMap<Shift, NewShiftDto>().ReverseMap();
             CreateMap<DegreeProgram, DegreeProgramDto>()

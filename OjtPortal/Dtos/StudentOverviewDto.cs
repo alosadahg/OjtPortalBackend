@@ -5,9 +5,9 @@ namespace OjtPortal.Dtos
     public class StudentToMentorOverviewDto 
     {
         public ExistingUserDto User { get; set; } = new();
-        public Department? Department { get; set; } = null;
         public string Designation { get; set; } = string.Empty;
         public string Division { get; set; } = string.Empty;
+        public TeacherNoStudentsDto? Instructor { get; set; }
         public DateOnly? StartDate { get; set; } = null;
         public DateOnly? EndDate { get; set; } = null;
         public int HrsToRender { get; set; } = 0;
@@ -21,9 +21,8 @@ namespace OjtPortal.Dtos
         public ExistingUserDto User { get; set; } = new();
         public string StudentId { get; set; } = string.Empty;
         public DegreeProgram DegreeProgram { get; set; } = new();
-        public Department Department { get; set; } = new();
+        public MentorDto? Mentor { get; set; }
         public string Designation { get; set; } = string.Empty;
-        public int? MentorId { get; set; } = null;
         public string Division { get; set; } = string.Empty;
         public DateOnly? StartDate { get; set; } = null;
         public DateOnly? EndDate { get; set; } = null;

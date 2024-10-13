@@ -18,6 +18,12 @@ namespace OjtPortal.Dtos
         }
     }
 
+    public class TeacherNoStudentsDto
+    {
+        public ExistingUserDto User { get; set; } = new();
+        public string Designation { get; set; } = string.Empty;
+    }
+
     public class TeacherDtoWithStudents
     {
         public IEnumerable<StudentToInstructorOverviewDto>? Students { get; set; }

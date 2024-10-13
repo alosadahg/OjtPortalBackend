@@ -41,7 +41,7 @@ namespace OjtPortal.Repositories
             else if (includeStudents)
             {
                 query = query.Include(m => m.Students)!.ThenInclude(s => s.User);
-                query.Include(m => m.Students)!.ThenInclude(s => s.Instructor);
+                query = query.Include(m => m.Students)!.ThenInclude(s => s.Instructor).ThenInclude(i => i.User);
             }
             return await query.FirstOrDefaultAsync(m => m.UserId == id);
         }
