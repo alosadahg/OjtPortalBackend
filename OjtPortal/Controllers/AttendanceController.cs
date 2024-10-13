@@ -75,7 +75,7 @@ namespace OjtPortal.Controllers
         /// <summary>
         /// Get attendance history by student with filtering
         /// </summary>
-        /// <param name="studentId"> The unique identifier of the student </param>
+        /// <param name="id"> The unique identifier of the student </param>
         /// <param name="start"> The date where filtering starts (format: yyyy-mm-dd) </param>
         /// <param name="end"> The date where filtering ends (format: yyyy-mm-dd)</param>
         /// <param name="isLateTimeIn"> Gets attendance with late time ins </param>
@@ -83,10 +83,10 @@ namespace OjtPortal.Controllers
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AttendanceDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpGet("student/{studentId}")]
-        public async Task<IActionResult> GetAttendanceByStudentAsync([Required] int studentId, DateOnly? start, DateOnly? end, bool? isLateTimeIn, bool? isLateTimeOut)
+        [HttpGet("student/{id}")]
+        public async Task<IActionResult> GetAttendanceByStudentAsync([Required] int id, DateOnly? start, DateOnly? end, bool? isLateTimeIn, bool? isLateTimeOut)
         {
-            var (result, error) = await _attendanceService.GetAttendanceHistoryByStudentAsync(studentId, start, end, isLateTimeIn, isLateTimeOut);
+            var (result, error) = await _attendanceService.GetAttendanceHistoryByStudentAsync(id, start, end, isLateTimeIn, isLateTimeOut);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
@@ -94,14 +94,14 @@ namespace OjtPortal.Controllers
         /// <summary>
         /// Get attendance without logbook by student
         /// </summary>
-        /// <param name="studentId"> The unique identifier of the student </param>
+        /// <param name="id"> The unique identifier of the student </param>
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AttendanceDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpGet("student/{studentId}/logbook")]
-        public async Task<IActionResult> GetAttendanceWithoutLogbooks ([Required] int studentId)
+        [HttpGet("student/{id}/logbook")]
+        public async Task<IActionResult> GetAttendanceWithoutLogbooks ([Required] int id)
         {
-            var (result, error) = await _attendanceService.GetAttendanceWithoutLogbookAsync(studentId);
+            var (result, error) = await _attendanceService.GetAttendanceWithoutLogbookAsync(id);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
