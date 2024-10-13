@@ -190,7 +190,7 @@ namespace OjtPortal.Services
                         Id = user.Id,
                         Token = code,
                         PendingStudentUpdate = (user.UserType.Equals(UserType.Student)) ? true : false,
-                        PendingEmailUpdate = !EmailChecker.IsEmailValid(user.Email!)
+                        PendingEmailUpdate = (user.UserType.Equals(UserType.Student)) && !EmailChecker.IsEmailValid(user.Email!)
                     });
                 return (changePasswordUrl, null);
             }
