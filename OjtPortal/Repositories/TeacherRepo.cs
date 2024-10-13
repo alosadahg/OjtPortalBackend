@@ -37,11 +37,16 @@ namespace OjtPortal.Repositories
             return await _context.Teachers.ContainsAsync(instructor);
         }
 
-        public async Task<Teacher?> GetTeacherByIdAsync(int id, bool includeUser)
+        public async Task<Teacher?> GetTeacherByIdAsync(int id, bool includeStudents)
         {
-            var query = (includeUser) ? await _context.Teachers.Include(t => t.User).Include(t => t.Department).Include(t => t.Students).FirstOrDefaultAsync(t => t.UserId == id)
-                : await _context.Teachers.Include(t => t.Department).Include(t => t.Students).FirstOrDefaultAsync(t => t.UserId == id);
-            return query;
+            IQueryable<Teacher> query = _context.Teachers.Include(t => t.User).Include(t => t.Department);
+            if (includeStudents)
+            {
+                query = query.Include(m => m.Students)!.ThenInclude(s => s.DegreeProgram);
+                query = query.Include(m => m.Students)!.ThenInclude(s => s.User);
+                query = query = query.Include(m => m.Students)!.ThenInclude(s => s.Mentor);
+            }
+            return await query.FirstOrDefaultAsync(m => m.UserId == id);
         }
 
         public async Task<List<Teacher>?> GetTeacherByDepartmentAsync(Department department)

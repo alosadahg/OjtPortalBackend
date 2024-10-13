@@ -14,6 +14,7 @@ namespace OjtPortal.Services
         Task<(FullMentorDto?, ErrorResponseModel?)> AddMentorAsync(NewMentorDto newMentorDto);
         Task<(FullMentorDto?, ErrorResponseModel?)> GetMentorByIdAsync(int id, bool includeStudent);
         Task<(StudentDto?, ErrorResponseModel?)> MentorAddStudentAsync(MentorAddStudentDto newStudent);
+        Task<(FullMentorDtoWithStudents?, ErrorResponseModel?)> GetStudentsByMentor(int mentorId);
     }
 
     public class MentorService : IMentorService
@@ -105,6 +106,19 @@ namespace OjtPortal.Services
             studentEntity = await _studentRepo.UpdateStudentByMentorAsync(studentEntity, existingStudentUser.Id);
 
             return (_mapper.Map<StudentDto>(studentEntity), null);
+        }
+
+        public async Task<(FullMentorDtoWithStudents?, ErrorResponseModel?)> GetStudentsByMentor(int mentorId)
+        {
+            var existingMentor = await _mentorRepository.GetMentorByIdAsync(mentorId, true, false);
+            if (existingMentor == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("mentor"), LoggingTemplate.MissingRecordDescription("mentor", $"{mentorId}")));
+            var mentorDto = _mapper.Map<FullMentorDtoWithStudents>(existingMentor);
+            if (existingMentor.Students != null)
+            {
+                mentorDto.Interns = _studentService.MapStudentsToDtoList<StudentToMentorOverviewDto>(existingMentor.Students!);
+                mentorDto.InternCount = mentorDto.Interns.Count();
+            }
+            return (mentorDto, null);
         }
     }
 }

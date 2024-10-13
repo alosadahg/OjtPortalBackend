@@ -34,4 +34,16 @@ namespace OjtPortal.Dtos
         }
 
     }
+
+    public class FullMentorDtoWithStudents : MentorDto
+    {
+        public IEnumerable<StudentToMentorOverviewDto>? Interns { get; set; }
+        public int InternCount { get; set; } = 0;
+        public FullMentorDtoWithStudents()
+        {
+            this.InternCount = (Interns != null) ? Interns.Count() : 0;
+        }
+
+    }
+
 }

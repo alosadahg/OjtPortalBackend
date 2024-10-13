@@ -38,7 +38,11 @@ namespace OjtPortal.Repositories
             IQueryable<Mentor> query = _context.Mentors.Include(m => m.User).Include(m => m.Company);
             if (includeStudents && includeStudentsAttendance)
                 query = query.Include(m => m.Students)!.ThenInclude(s => s.Attendances)!.ThenInclude(a => a.LogbookEntry);
-            else if (includeStudents) query = query.Include(m => m.Students);
+            else if (includeStudents)
+            {
+                query = query.Include(m => m.Students)!.ThenInclude(s => s.User);
+                query.Include(m => m.Students)!.ThenInclude(s => s.Instructor);
+            }
             return await query.FirstOrDefaultAsync(m => m.UserId == id);
         }
     }

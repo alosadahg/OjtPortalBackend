@@ -48,6 +48,21 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
+        /// Get students by mentor id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullMentorDtoWithStudents))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpGet("{id}/students")]
+        public async Task<IActionResult> GetStudentsByMentorAsync(int id)
+        {
+            var (response, error) = await _mentorService.GetStudentsByMentor(id);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(response);
+        }
+
+        /// <summary>
         /// Add student to mentor
         /// </summary>
         /// <param name="newStudentDto"></param>

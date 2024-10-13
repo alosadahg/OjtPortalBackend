@@ -17,7 +17,8 @@ namespace OjtPortal.Services
         Task<List<TeacherDto>?> FindTeachersByDepartmentCode(DepartmentCode departmentName);
         Task<(List<TeacherDto>?, ErrorResponseModel?)> GetTeacherByDepartmentIdAsync(int departmentId);
         Task<(StudentDto?, ErrorResponseModel?)> TeacherAddStudentAsync(TeacherAddStudentDto studentDto);
-    }
+        Task<(TeacherDtoWithStudents?, ErrorResponseModel?)> GetStudentsByTeacherAsync(int teacherId);
+        }
 
     public class TeacherService : ITeacherService
     {
@@ -76,12 +77,23 @@ namespace OjtPortal.Services
             return (_mapper.Map<TeacherDto>(added), null);
         }
 
-        public async Task<(TeacherDto?, ErrorResponseModel?)> GetTeacherByIdAsync(int id, bool includeUser)
+        public async Task<(TeacherDto?, ErrorResponseModel?)> GetTeacherByIdAsync(int id, bool includeStudents)
         {
-            var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(id, includeUser);
+            var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(id, includeStudents);
             if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("_teacherService"), LoggingTemplate.MissingRecordDescription("_teacherService", $"{id}")));
 
             var teacherDto = _mapper.Map<TeacherDto>(existingTeacher);
+            teacherDto.Students = _studentService.MapStudentsToDtoList<StudentToInstructorOverviewDto>(existingTeacher.Students!);
+            teacherDto.StudentCount = teacherDto.Students.Count();
+            return (teacherDto, null);
+        }
+
+        public async Task<(TeacherDtoWithStudents?, ErrorResponseModel?)> GetStudentsByTeacherAsync (int teacherId)
+        {
+            var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(teacherId, true);
+            if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("_teacherService"), LoggingTemplate.MissingRecordDescription("_teacherService", $"{teacherId}")));
+
+            var teacherDto = _mapper.Map<TeacherDtoWithStudents>(existingTeacher);
             teacherDto.Students = _studentService.MapStudentsToDtoList<StudentToInstructorOverviewDto>(existingTeacher.Students!);
             teacherDto.StudentCount = teacherDto.Students.Count();
             return (teacherDto, null);
