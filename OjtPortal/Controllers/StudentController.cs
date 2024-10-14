@@ -73,7 +73,7 @@ namespace OjtPortal.Controllers
         }
         
         /// <summary>
-        /// The unique identifier of the student
+        /// Get the student performance
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>

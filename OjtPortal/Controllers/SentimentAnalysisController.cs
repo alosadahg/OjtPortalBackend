@@ -16,6 +16,11 @@ namespace OjtPortal.Controllers
             this._sentimentalAnalysisService = sentimentalAnalysisService;
         }
 
+        /// <summary>
+        /// Get the sentiment analysis 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetSentimentAnalysis (string input)
         {
