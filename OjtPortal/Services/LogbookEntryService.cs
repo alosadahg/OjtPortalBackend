@@ -26,14 +26,16 @@ namespace OjtPortal.Services
         private readonly ILogbookEntryRepo _logbookEntryRepo;
         private readonly IStudentRepo _studentRepo;
         private readonly IMentorRepo _mentorRepo;
+        private readonly ISentimentalAnalysisService _sentimentalAnalysisService;
 
-        public LogbookEntryService(IMapper mapper, IAttendanceRepo attendanceRepo, ILogbookEntryRepo logbookEntryRepo, IStudentRepo studentRepo, IMentorRepo mentorRepo)
+        public LogbookEntryService(IMapper mapper, IAttendanceRepo attendanceRepo, ILogbookEntryRepo logbookEntryRepo, IStudentRepo studentRepo, IMentorRepo mentorRepo, ISentimentalAnalysisService sentimentalAnalysisService)
         {
             this._mapper = mapper;
             this._attendanceRepo = attendanceRepo;
             this._logbookEntryRepo = logbookEntryRepo;
             this._studentRepo = studentRepo;
             this._mentorRepo = mentorRepo;
+            this._sentimentalAnalysisService = sentimentalAnalysisService;
         }
 
         public async Task<(LogbookDto?, ErrorResponseModel?)> AddLogbookEntry(NewLogbookEntryDto newLogbook, int userId)
@@ -70,7 +72,19 @@ namespace OjtPortal.Services
             if (student!.MentorId != mentorId) return (null, new(HttpStatusCode.Forbidden, "Forbidden Request", $"Access is not given to this mentor: {mentorId}"));
 
             if (!string.IsNullOrEmpty(logbook.Remarks)) return (null, new(HttpStatusCode.UnprocessableContent, "LogbookStatusRemarks Already Recorded", "This logbook entry has already been given remarks"));
-            if (logbook.LogbookStatus != LogbookStatus.Submitted) logbook.LogbookStatus = LogbookStatus.Submitted;
+            if (logbook.LogbookStatus != LogbookStatus.Submitted)
+            {
+                logbook.LogbookStatus = LogbookStatus.Submitted;
+                logbook.SubmissionTimestamp = DateTime.UtcNow;
+            }
+
+            var (analysis, error) = await _sentimentalAnalysisService.AnalyzeSentimentAsync(remarks);
+            if (error != null) return (null, error);
+            var category = SentimentCategory.Positive;
+            if (analysis!.Label.Equals("neutral")) category = SentimentCategory.Neutral;
+            if (analysis!.Label.Equals("negative")) category = SentimentCategory.Negative;
+            logbook.RemarkSentimentCategory = category;
+            logbook.RemarkSentimentScore = analysis.Score;
 
             logbook = await _logbookEntryRepo.AddRemarksAsync(logbook, remarks);
             return (_mapper.Map<LogbookDto>(logbook), null);

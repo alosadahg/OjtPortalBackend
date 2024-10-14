@@ -288,5 +288,14 @@ namespace OjtPortal.Services
             if (deletedUser == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("user"), LoggingTemplate.MissingRecordDescription("user", id.ToString())));
             return (_mapper.Map<ExistingUserDto>(deletedUser), null);
         }
+
+       /* public async Task<(ExistingUserDto?, ErrorResponseModel?)> ChangeEmailAsync(string existingEmail, string newEmail)
+        {
+            var (user, error) = await _userRepository.GetUserByEmailAsync(existingEmail);
+            if (error != null) return (null, error);
+            var (existingUser, _) = await _userRepository.GetUserByEmailAsync(newEmail);
+            if (existingUser != null) return (null, new(HttpStatusCode.BadRequest, "Email unavailable", "Cannot use this email"));
+            if(!user.AccountStatus.Equals(AccountStatus.Active)) return (null, new(HttpStatusCode.BadRequest, "Account not active", "Activate account first"));
+        }*/
     }
 }

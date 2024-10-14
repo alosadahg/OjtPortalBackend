@@ -65,10 +65,11 @@ namespace OjtPortal.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LogbookDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpPatch("{id}/remarks")]
-        public async Task<IActionResult> AddLogbookRemarksAsync([Required] long id, [FromBody] string remarks)
+        [Authorize]
+        public async Task<IActionResult> AddLogbookRemarksAsync([Required] long id, [FromBody] LogbookRemarksRequest remarks)
         {
             var user = await _userManager.GetUserAsync(User);
-            var (result, error) = await _logbookEntryService.AddRemarksAsync(id, user!.Id, remarks);
+            var (result, error) = await _logbookEntryService.AddRemarksAsync(id, user!.Id, remarks.Remarks);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

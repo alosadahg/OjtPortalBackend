@@ -88,5 +88,14 @@ namespace OjtPortal.Repositories
             await _context.SaveChangesAsync();
             return user;
         }
+/*
+        public async Task<User?> ChangeEmailAsync (User user, string newEmail)
+        {
+            var (user, _) = await GetUserByIdAsync(id);
+            if (user == null) return null;
+            _context.Users.Remove(user!);
+            await _context.SaveChangesAsync();
+            return user;
+        }*/
     }
 }

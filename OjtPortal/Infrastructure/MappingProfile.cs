@@ -41,6 +41,10 @@ namespace OjtPortal.Infrastructure
             CreateMap<Attendance, AttendanceDto>().ReverseMap();
             CreateMap<LogbookEntry, NewLogbookEntryDto>().ReverseMap();
             CreateMap<LogbookEntry, LogbookDto>().ReverseMap();
+            CreateMap<TrainingPlan, NewTrainingPlanDto>().ReverseMap();
+            CreateMap<TrainingTask, NewTaskDto>().ReverseMap();
+            CreateMap<Skill, NewSkillDto>().ReverseMap();
+            CreateMap<TechStack, NewTechStackDto>().ReverseMap();
         }
     }
 }

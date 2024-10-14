@@ -39,7 +39,6 @@ namespace OjtPortal.Repositories
         {
             logbook.Remarks = remarks;
             logbook.RemarksTimestamp = DateTime.UtcNow;
-            logbook.SubmissionTimestamp = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return logbook;
         }

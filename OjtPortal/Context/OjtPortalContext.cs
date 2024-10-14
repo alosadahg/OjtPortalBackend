@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using OjtPortal.Dtos;
 using OjtPortal.Entities;
 
 namespace OjtPortal.Context
@@ -20,6 +18,14 @@ namespace OjtPortal.Context
             modelBuilder.Entity<Student>().ToTable("Students").OwnsOne(s => s.Shift);
             modelBuilder.Entity<Mentor>().ToTable("Mentors");
             modelBuilder.Entity<Company>().OwnsOne(c => c.Address);
+            modelBuilder.Entity<TrainingTask>()
+               .HasMany(t => t.TechStacks) 
+               .WithMany(t => t.Tasks) 
+               .UsingEntity(j => j.ToTable("TaskStack"));
+            modelBuilder.Entity<TrainingTask>()
+               .HasMany(t => t.Skills)
+               .WithMany(t => t.Tasks)
+               .UsingEntity(j => j.ToTable("TaskSkill"));
         }
 
         public DbSet<User> Users { get; set; }
@@ -34,5 +40,11 @@ namespace OjtPortal.Context
         public DbSet<OTP> OTPs { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<LogbookEntry> LogbookEntries { get; set; }
+        public DbSet<TrainingPlan> TrainingPlans { get; set; }
+        public DbSet<TrainingTask> TrainingTasks { get; set; }
+        public DbSet<TechStack> TechStacks { get; set; }
+        public DbSet<Skill> Skills { get; set; }
+        public DbSet<StudentTask> StudentTasks { get; set; }
+        public DbSet<StudentTraining> StudentTrainings { get; set; }
     }
 }
