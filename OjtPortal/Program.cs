@@ -60,6 +60,7 @@ builder.Services.AddHttpContextAccessor();
 
 // Add HttpClient
 builder.Services.AddHttpClient<HolidayService>();
+builder.Services.AddHttpClient<SentimentalAnalysisService>();
 
 // Add services to the container.
 
