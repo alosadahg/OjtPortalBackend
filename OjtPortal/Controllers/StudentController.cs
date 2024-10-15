@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
+using OjtPortal.Entities;
 using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
 using OjtPortal.Services;
@@ -85,6 +86,25 @@ namespace OjtPortal.Controllers
             var (result, error) = await _studentService.GetStudentPerformanceAsync(id);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Get all students with filtering
+        /// </summary>
+        /// <param name="programCode">Degree program code (ex: BSCS, BSCPE)</param>
+        /// <param name="companyName">The name of the company</param>
+        /// <param name="instructorId">The unique identifier of the instructor</param>
+        /// <param name="designation">Designation of the intern</param>
+        /// <param name="startDate">Start date of internship (format: yyyy-mm-dd)</param>
+        /// <param name="endDate">End date of internship (format: yyyy-mm-dd)</param>
+        /// <param name="hrsToRender">Required number of hours</param>
+        /// <param name="internshipStatus">Status of the internship</param>
+        /// <param name="departmentCode">Department code (ex: CCS, CEA)</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<List<StudentDto>> GetStudentsWithFiltering(string? programCode, string? companyName, int? instructorId, string? designation, DateOnly? startDate, DateOnly? endDate, int? hrsToRender, InternshipStatus? internshipStatus, string? departmentCode)
+        {
+            return await _studentService.GetStudentWithFilteringAsync(companyName,programCode, instructorId, designation, startDate, endDate, hrsToRender, internshipStatus, departmentCode);
         }
     }
 }

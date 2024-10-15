@@ -21,6 +21,7 @@ namespace OjtPortal.Services
         Task<(StudentDto?, ErrorResponseModel?)> UpdateStudentInfoAsync(UpdateStudentDto updateStudentDto);
         int CalculateManDays(int hrs, int dailyHours);
         Task<(StudentPerformance?, ErrorResponseModel?)> GetStudentPerformanceAsync(int studentId);
+        Task<List<StudentDto>> GetStudentWithFilteringAsync(string? companyName, string? programCode, int? instructorId, string? designation, DateOnly? startDate, DateOnly? endDate, int? hrsToRender, InternshipStatus? internshipStatus, string? departmentCode);
     }
 
     public class StudentService : IStudentService
@@ -203,6 +204,21 @@ namespace OjtPortal.Services
                 ? PerformanceStatus.OffCourse
                 : PerformanceStatus.OnTrack;
             return (studentPerformance, null);
+        }
+
+        public async Task<List<StudentDto>> GetStudentWithFilteringAsync(string? companyName, string? programCode, int? instructorId, string? designation, DateOnly? startDate, DateOnly? endDate, int? hrsToRender, InternshipStatus? internshipStatus, string? departmentCode)
+        {
+            var students = await _studentRepo.GetAllStudentsAsync(true, true, false);
+            if (programCode != null) students = students.Where(s => s.DegreeProgram!=null && string.Equals(s.DegreeProgram!.ProgramAlias, programCode, StringComparison.OrdinalIgnoreCase)).ToList();
+            if(instructorId != null) students = students.Where(s => s.InstructorId == instructorId).ToList(); ;
+            if (designation != null) students = students.Where(s => string.Equals(s.Designation, designation, StringComparison.OrdinalIgnoreCase)).ToList();
+            if(startDate != null) students = students.Where(s => s.StartDate!=null && s.StartDate >= startDate).ToList();
+            if(endDate != null) students = students.Where(s => s.EndDate != null && s.EndDate <= endDate).ToList();
+            if (departmentCode != null) students = students.Where(s => s.DegreeProgram != null && string.Equals(s.DegreeProgram.Department.DepartmentCode, departmentCode, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (hrsToRender != null) students = students.Where(s => s.HrsToRender == hrsToRender).ToList();
+            if (internshipStatus != null) students = students.Where(s => s.InternshipStatus == internshipStatus).ToList();
+            if (companyName != null) students = students.Where(s => s.Mentor != null && string.Equals(s.Mentor.Company.CompanyName, companyName, StringComparison.OrdinalIgnoreCase)).ToList();
+            return _mapper.Map<List<StudentDto>>(students);
         }
     }
 }
