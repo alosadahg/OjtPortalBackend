@@ -26,14 +26,16 @@ namespace OjtPortal.Services
         private readonly IHolidayService _holidayService;
         private readonly IStudentService _studentService;
         private readonly IMapper _mapper;
+        private readonly ILogger<AttendanceService> _logger;
 
-        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService, IStudentService studentService, IMapper mapper)
+        public AttendanceService(IStudentRepo studentRepo, IAttendanceRepo attendanceRepo, IHolidayService holidayService, IStudentService studentService, IMapper mapper, ILogger<AttendanceService> logger)
         {
             this._studentRepo = studentRepo;
             this._attendanceRepo = attendanceRepo;
             this._holidayService = holidayService;
             this._studentService = studentService;
             this._mapper = mapper;
+            this._logger = logger;
         }
 
         public async Task<(AttendanceDto?, ErrorResponseModel?)> TimeInAsync(int id, bool proceedTimeIn)
@@ -64,9 +66,11 @@ namespace OjtPortal.Services
             {
                 // convert utc to local 
                 var recentTimeIn = TimeZoneInfo.ConvertTimeFromUtc(recentAttendance.TimeIn, TimeZoneInfo.Local);
-                if (DateOnly.FromDateTime(recentAttendance!.TimeIn).Equals(dateToday)) return (null, new(HttpStatusCode.Conflict, "Time in already recorded", "Today's time in is already recorded."));
-                if (recentAttendance.TimeOut == null) return (null, new(HttpStatusCode.Conflict, "Recent attendance not yet clocked out", "Has not clocked out yet from previous attendance, please clock out."));
                 var lastTimeInDate = DateOnly.FromDateTime(recentTimeIn);
+                _logger.LogInformation("Recent time in: " + recentTimeIn);
+                _logger.LogInformation("Current date: " + dateToday);
+                if (lastTimeInDate.Equals(dateToday)) return (null, new(HttpStatusCode.Conflict, "Time in already recorded", "Today's time in is already recorded."));
+                if (recentAttendance.TimeOut == null) return (null, new(HttpStatusCode.Conflict, "Recent attendance not yet clocked out", "Has not clocked out yet from previous attendance, please clock out."));
                 // TODO: absent checking
                 var absencesCount = await GetAbsentCountAsync(lastTimeInDate, student);
                 student.Shift.AbsencesCount += absencesCount;
