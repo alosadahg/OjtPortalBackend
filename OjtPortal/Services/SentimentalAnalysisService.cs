@@ -53,7 +53,7 @@ namespace OjtPortal.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError("Sentiment analysis error: " + ex.Message + ex.Source + ex.StackTrace);
             }
 
             return (null, new(HttpStatusCode.BadRequest, "Failed to get analysis", "Please try again."));
