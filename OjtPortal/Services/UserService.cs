@@ -31,6 +31,7 @@ namespace OjtPortal.Services
         Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto, string token, bool isActive);
         Task<(ExistingUserDto?, ErrorResponseModel?)> PermanentlyRemoveUserAsync(int id);
         Task<List<ExistingUserDto>> GetUsersWithFilteringAsync(string? name, UserType? userType, AccountStatus? accountStatus, string? email);
+        Task<(ExistingUserDto, ErrorResponseModel?)> DeactivateUserAsync(int id);
     }
 
 
@@ -307,6 +308,14 @@ namespace OjtPortal.Services
             if (accountStatus != null) users = users.Where(u => u.AccountStatus.Equals(accountStatus)).ToList();
             if (email != null) users = users.Where(u => u.Email != null && u.Email.Contains(email, StringComparison.OrdinalIgnoreCase)).ToList();
             return _mapper.Map<List<ExistingUserDto>>(users);
+        }
+
+        public async Task<(ExistingUserDto, ErrorResponseModel?)> DeactivateUserAsync(int id)
+        {
+            var (user, error) = await _userRepository.GetUserByIdAsync(id);
+            if (error != null) return (null, error);
+            user = await _userRepository.DeactivateUserAsync(user);
+            return (_mapper.Map<ExistingUserDto>(user), null);
         }
     }
 }

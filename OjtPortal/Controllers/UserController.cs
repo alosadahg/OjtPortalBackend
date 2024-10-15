@@ -185,5 +185,20 @@ namespace OjtPortal.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Deactivate user by id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExistingUserDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpDelete("deactivate/{userId}")]
+        public async Task<IActionResult> DeactivateUserAsync (int userId)
+        {
+            var (result, error) = await _userService.DeactivateUserAsync(userId);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
     }
 }

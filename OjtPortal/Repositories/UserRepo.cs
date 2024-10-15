@@ -7,6 +7,7 @@ using OjtPortal.Entities;
 using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace OjtPortal.Repositories
@@ -19,6 +20,7 @@ namespace OjtPortal.Repositories
         Task<User> ActivateAccount(User user, string token);
         Task<User?> DeleteByIdAsync(int id);
         Task<List<User>> GetAllUsersAsync();
+        Task<User> DeactivateUserAsync(User user);
     }
 
     public class UserRepo : IUserRepo
@@ -93,6 +95,13 @@ namespace OjtPortal.Repositories
         public async Task<List<User>> GetAllUsersAsync()
         {
             return await _context.Users.ToListAsync();
+        }
+
+        public async Task<User> DeactivateUserAsync(User user)
+        {
+            user.AccountStatus = AccountStatus.Deactivated;
+            await _context.SaveChangesAsync();
+            return user;
         }
 /*
         public async Task<User?> ChangeEmailAsync (User user, string newEmail)
