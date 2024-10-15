@@ -4,7 +4,9 @@
     {
         public static DateTime FromUtcToLocal(DateTime dateTime)
         {
-            return TimeZoneInfo.ConvertTimeFromUtc(dateTime, TimeZoneInfo.Local);
+            var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+            var currentDateTimeInManila = TimeZoneInfo.ConvertTime(DateTime.Now, manilaTimeZone);
+            return currentDateTimeInManila;
         }
     }
 }

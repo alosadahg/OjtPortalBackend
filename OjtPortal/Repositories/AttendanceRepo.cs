@@ -38,7 +38,9 @@ namespace OjtPortal.Repositories
         public async Task<Attendance?> AddAttendanceAsync(Attendance attendance)
         {
             // time in is 15 mins late
-            if (TimeOnly.FromDateTime(DateTime.Now) - attendance.Student.Shift!.Start > TimeSpan.FromMinutes(15))
+            var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+            var currentDateTimeInManila = TimeZoneInfo.ConvertTime(DateTime.Now, manilaTimeZone);
+            if (TimeOnly.FromDateTime(currentDateTimeInManila) - attendance.Student.Shift!.Start > TimeSpan.FromMinutes(15))
             {
                 attendance.Student.Shift.LateTimeInCount++;
                 attendance.IsTimeInLate = true;
@@ -59,9 +61,11 @@ namespace OjtPortal.Repositories
 
         public async Task<Attendance?> TimeOutAsync(Attendance attendance)
         {
+            var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+            var currentDateTimeInManila = TimeZoneInfo.ConvertTime(DateTime.Now, manilaTimeZone);
             attendance.TimeOut = DateTime.UtcNow;
-            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
-            var currentDate = DateOnly.FromDateTime(DateTime.Now);
+            var currentTime = TimeOnly.FromDateTime(currentDateTimeInManila);
+            var currentDate = DateOnly.FromDateTime(currentDateTimeInManila);
             var end = attendance.Student.Shift!.End;
             var timeSpan = currentTime.Hour - attendance.Student.Shift!.End!.Value.Hour;
             var lastDate = DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(attendance.TimeIn));

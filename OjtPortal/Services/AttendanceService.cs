@@ -48,30 +48,29 @@ namespace OjtPortal.Services
                 TimeIn = DateTime.UtcNow,
             };
             if (student.Shift == null) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.MissingRecordTitle("shift"), LoggingTemplate.MissingRecordDescription("shift", id.ToString())));
-            var dateToday = DateOnly.FromDateTime(DateTime.Now);
+            var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+            var currentDateTimeInManila = TimeZoneInfo.ConvertTime(DateTime.Now, manilaTimeZone);
+            var currentDateInManila = DateOnly.FromDateTime(currentDateTimeInManila);
+            var currentTimeInManila = TimeOnly.FromDateTime(currentDateTimeInManila);
 
             #region Check if today is a workday
             // date checking
             if (!proceedTimeIn)
             {
-                var (isWorkDay, error) = await IsDateAWorkDay(dateToday, student.Shift);
+                var (isWorkDay, error) = await IsDateAWorkDay(currentDateInManila, student.Shift);
                 if (error != null) return (null, error);
             }
             #endregion
 
             #region Check if there is no clock in yet and update absences
             var recentAttendance = _attendanceRepo.GetRecentAttendance(student);
-            var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
-            var currentDateInManila = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTime.Now, manilaTimeZone));
-
+            
             if (recentAttendance != null)
             {
                 // convert utc to local 
                 var recentTimeIn = TimeZoneInfo.ConvertTimeFromUtc(recentAttendance.TimeIn, manilaTimeZone);
                 var lastTimeInDate = DateOnly.FromDateTime(recentTimeIn);
-                _logger.LogInformation("Recent time in: " + recentTimeIn);
-                _logger.LogInformation("Current date: " + dateToday);
-                if (currentDateInManila.Equals(recentAttendance)) return (null, new(HttpStatusCode.Conflict, $"Time in already recorded for {currentDateInManila}", $"Today's time in is already recorded in {recentTimeIn}."));
+                if (currentDateInManila.Equals(lastTimeInDate)) return (null, new(HttpStatusCode.Conflict, $"Time in already recorded for {currentDateInManila}", $"Today's time in is already recorded in {recentTimeIn}."));
                 if (recentAttendance.TimeOut == null) return (null, new(HttpStatusCode.Conflict, "Recent attendance not yet clocked out", "Has not clocked out yet from previous attendance, please clock out."));
                 var absencesCount = await GetAbsentCountAsync(lastTimeInDate, student);
                 student.Shift.AbsencesCount += absencesCount;
@@ -80,14 +79,13 @@ namespace OjtPortal.Services
             #endregion
 
             #region Check if time is valid
-            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
             var earlyTimeIn = student.Shift!.Start!.Value.AddMinutes(-15);
 
             // current time is before allowed time in
-            if (currentTime < earlyTimeIn) return (null, new(HttpStatusCode.BadRequest, "Time in not yet allowed", $"You can time in later on {earlyTimeIn}"));
+            if (currentTimeInManila < earlyTimeIn) return (null, new(HttpStatusCode.BadRequest, "Time in not yet allowed", $"You can time in later on {earlyTimeIn}"));
 
             // current time is after shift, time in not allowed
-            if (currentTime >= student.Shift.End!.Value) return (null, new(HttpStatusCode.BadRequest, "Time in not allowed", "Today's shift has already ended."));
+            if (currentTimeInManila >= student.Shift.End!.Value) return (null, new(HttpStatusCode.BadRequest, "Time in not allowed", "Today's shift has already ended."));
             #endregion
 
             if (student.InternshipStatus.Equals(InternshipStatus.Pending)) await _studentRepo.UpdateStudentInternshipStatusAsync(student, InternshipStatus.Ongoing);
@@ -116,7 +114,11 @@ namespace OjtPortal.Services
 
             var remainingHrs = student.HrsToRender - student.Shift.TotalHrsRendered;
             var manDays = (int) Math.Ceiling(remainingHrs / student.Shift.DailyDutyHrs);
-            var (endDate, _) = await _studentService.GetEndDateAsync(DateOnly.FromDateTime(DateTime.Now), manDays, student.Shift.IncludePublicPhHolidays, student.Shift.WorkingDays);
+
+            var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+            var currentDateTimeInManila = TimeZoneInfo.ConvertTime(DateTime.Now, manilaTimeZone);
+
+            var (endDate, _) = await _studentService.GetEndDateAsync(DateOnly.FromDateTime(currentDateTimeInManila), manDays, student.Shift.IncludePublicPhHolidays, student.Shift.WorkingDays);
             student = await _studentRepo.UpdateStudentEndDateAsync(student, endDate!.Value);
 
             return (_mapper.Map<AttendanceDto>(recentAttendance), null);
