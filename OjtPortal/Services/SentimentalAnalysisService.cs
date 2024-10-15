@@ -24,7 +24,7 @@ namespace OjtPortal.Services
         {
             _httpClient = httpClient;
             this._configuration = configuration;
-            _apiKey = _configuration["HuggingFace:ApiKey"]; // Ensure this is configured in your appsettings.json or environment
+            _apiKey = _configuration["HUGGINGFACE_APIKEY"]; // Ensure this is configured in your appsettings.json or environment
         }
 
         public async Task<(SentimentAnalysisDto?, ErrorResponseModel?)> AnalyzeSentimentAsync(string inputText)
