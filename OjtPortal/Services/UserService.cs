@@ -298,9 +298,9 @@ namespace OjtPortal.Services
             if(!user.AccountStatus.Equals(AccountStatus.Active)) return (null, new(HttpStatusCode.BadRequest, "Account not active", "Activate account first"));
         }*/
 
-        public async Task<List<ExistingUserDto>> GetUsersWithFilteringAsync()
+        /*public async Task<List<ExistingUserDto>> GetUsersWithFilteringAsync()
         {
 
-        }
+        }*/
     }
 }
