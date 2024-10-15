@@ -17,14 +17,15 @@ namespace OjtPortal.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<SentimentalAnalysisService> _logger;
         private readonly string _apiUrl = "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest";
-        private readonly string _apiKey = "";
+        private string _apiKey = "";
 
-        public SentimentalAnalysisService(HttpClient httpClient, IConfiguration configuration)
+        public SentimentalAnalysisService(HttpClient httpClient, IConfiguration configuration, ILogger<SentimentalAnalysisService> logger)
         {
             _httpClient = httpClient;
             this._configuration = configuration;
-            _apiKey = _configuration["HUGGINGFACE_APIKEY"]; // Ensure this is configured in your appsettings.json or environment
+            this._logger = logger;
         }
 
         public async Task<(SentimentAnalysisDto?, ErrorResponseModel?)> AnalyzeSentimentAsync(string inputText)
@@ -34,18 +35,25 @@ namespace OjtPortal.Services
                 inputs = inputText
             };
 
-            var response = await QueryAsync(payload);
-            if (response != null)
+            try
             {
-                var label = response[0][0].GetProperty("label").GetString();
-                var score = response[0][0].GetProperty("score").GetSingle();
-
-                var analysis = new SentimentAnalysisDto()
+                var response = await QueryAsync(payload);
+                if (response != null)
                 {
-                    Label = label,
-                    Score = score
-                };
-                return (analysis, null);
+                    var label = response[0][0].GetProperty("label").GetString();
+                    var score = response[0][0].GetProperty("score").GetSingle();
+
+                    var analysis = new SentimentAnalysisDto()
+                    {
+                        Label = label,
+                        Score = score
+                    };
+                    return (analysis, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
             }
 
             return (null, new(HttpStatusCode.BadRequest, "Failed to get analysis", "Please try again."));
@@ -53,6 +61,7 @@ namespace OjtPortal.Services
 
         private async Task<JsonElement[][]> QueryAsync(object payload)
         {
+            _apiKey = _configuration["HUGGINGFACE_APIKEY"];
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
 
             var response = await _httpClient.PostAsJsonAsync(_apiUrl, payload);
