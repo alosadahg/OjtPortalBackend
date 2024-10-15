@@ -21,8 +21,8 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> GetSentimentAnalysis (string input)
+        [HttpPost]
+        public async Task<IActionResult> GetSentimentAnalysis([FromBody] string input)
         {
             var (result, error) = await _sentimentalAnalysisService.AnalyzeSentimentAsync (input);
             if (error != null) return MakeErrorResponse(error);
