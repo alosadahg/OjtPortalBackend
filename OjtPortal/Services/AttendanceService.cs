@@ -49,7 +49,7 @@ namespace OjtPortal.Services
             };
             if (student.Shift == null) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.MissingRecordTitle("shift"), LoggingTemplate.MissingRecordDescription("shift", id.ToString())));
             var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
-            var currentDateTimeInManila = TimeZoneInfo.ConvertTime(DateTime.Now, manilaTimeZone);
+            var currentDateTimeInManila = UtcDateTimeHelper.FromUtcToLocal(DateTime.Now);
             var currentDateInManila = DateOnly.FromDateTime(currentDateTimeInManila);
             var currentTimeInManila = TimeOnly.FromDateTime(currentDateTimeInManila);
 
@@ -68,7 +68,7 @@ namespace OjtPortal.Services
             if (recentAttendance != null)
             {
                 // convert utc to local 
-                var recentTimeIn = TimeZoneInfo.ConvertTimeFromUtc(recentAttendance.TimeIn, manilaTimeZone);
+                var recentTimeIn = UtcDateTimeHelper.FromUtcToLocal(recentAttendance.TimeIn);
                 var lastTimeInDate = DateOnly.FromDateTime(recentTimeIn);
                 if (currentDateInManila.Equals(lastTimeInDate)) return (null, new(HttpStatusCode.Conflict, $"Time in already recorded for {currentDateInManila}", $"Today's time in is already recorded in {recentTimeIn}."));
                 if (recentAttendance.TimeOut == null) return (null, new(HttpStatusCode.Conflict, "Recent attendance not yet clocked out", "Has not clocked out yet from previous attendance, please clock out."));
