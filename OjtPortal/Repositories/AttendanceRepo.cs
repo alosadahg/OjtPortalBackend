@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OjtPortal.Context;
 using OjtPortal.Entities;
+using OjtPortal.Infrastructure;
 
 namespace OjtPortal.Repositories
 {
@@ -60,9 +61,11 @@ namespace OjtPortal.Repositories
         {
             attendance.TimeOut = DateTime.UtcNow;
             var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+            var currentDate = DateOnly.FromDateTime(DateTime.Now);
             var end = attendance.Student.Shift!.End;
             var timeSpan = currentTime.Hour - attendance.Student.Shift!.End!.Value.Hour;
-            if (TimeSpan.FromHours(timeSpan) > TimeSpan.FromHours(1))
+            var lastDate = DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(attendance.TimeIn));
+            if (TimeSpan.FromHours(timeSpan) > TimeSpan.FromHours(1) || lastDate!=currentDate)
             {
                 attendance.IsTimeOutLate = true;
                 attendance.Student.Shift.LateTimeOutCount++;
