@@ -62,6 +62,7 @@ namespace OjtPortal.Services
         private async Task<JsonElement[][]> QueryAsync(object payload)
         {
             _apiKey = _configuration["HUGGINGFACE_APIKEY"];
+            _logger.LogInformation($"HUGGINGFACE: {_apiKey}");
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
 
             var response = await _httpClient.PostAsJsonAsync(_apiUrl, payload);
