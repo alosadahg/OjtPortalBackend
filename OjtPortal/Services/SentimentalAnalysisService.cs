@@ -30,6 +30,9 @@ namespace OjtPortal.Services
 
         public async Task<(SentimentAnalysisDto?, ErrorResponseModel?)> AnalyzeSentimentAsync(string inputText)
         {
+            inputText = inputText.Replace("/", " or ");
+            inputText = inputText.Replace("&", " and ");
+
             var payload = new
             {
                 inputs = inputText
@@ -54,23 +57,37 @@ namespace OjtPortal.Services
             catch (Exception ex)
             {
                 _logger.LogError("Sentiment analysis error: " + ex.Message);
+                return (null, new(HttpStatusCode.RequestTimeout, "Failed to get sentiment analysis", "Encountered a request timeout. Please try again."));
             }
 
             return (null, new(HttpStatusCode.BadRequest, "Failed to get analysis", "Please try again."));
         }
 
-        private async Task<JsonElement[][]> QueryAsync(object payload)
+        private async Task<JsonElement[][]?> QueryAsync(object payload)
         {
             _apiKey = _configuration["HUGGINGFACE_APIKEY"];
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+            var maximumAttempts = 10;
+            for (int i = 1; i <= maximumAttempts; i++)
+            {
+                _logger.LogInformation($"Trying attempt {i} to get sentiment analysis");
+                try
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
 
-            var response = await _httpClient.PostAsJsonAsync(_apiUrl, payload);
-            response.EnsureSuccessStatusCode();
+                    var response = await _httpClient.PostAsJsonAsync(_apiUrl, payload);
+                    response.EnsureSuccessStatusCode();
 
-            var responseString = await response.Content.ReadAsStringAsync();
-            var jsonResponse = JsonSerializer.Deserialize<JsonElement[][]>(responseString);
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var jsonResponse = JsonSerializer.Deserialize<JsonElement[][]>(responseString);
 
-            return jsonResponse!;
+                    return jsonResponse!;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogInformation($"Attempt {i} failed. Retrying to get the sentiment analysis.");
+                }
+            }
+            return null;
         }
     }
 }
