@@ -12,7 +12,8 @@ namespace OjtPortal.Infrastructure.JsonConverters
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(value, TimeZoneInfo.Local);
+            var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+            DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(value, manilaTimeZone);
             string formattedDate = localTime.ToString("ddd MMM dd yyyy HH:mm:ss zz\\:ff", System.Globalization.CultureInfo.InvariantCulture);
             writer.WriteStringValue(formattedDate);
         }
