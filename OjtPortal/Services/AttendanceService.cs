@@ -69,9 +69,8 @@ namespace OjtPortal.Services
                 var lastTimeInDate = DateOnly.FromDateTime(recentTimeIn);
                 _logger.LogInformation("Recent time in: " + recentTimeIn);
                 _logger.LogInformation("Current date: " + dateToday);
-                if (lastTimeInDate.Equals(dateToday)) return (null, new(HttpStatusCode.Conflict, "Time in already recorded", "Today's time in is already recorded."));
+                if (lastTimeInDate.Equals(dateToday)) return (null, new(HttpStatusCode.Conflict, $"Time in already recorded for {dateToday}", $"Today's time in is already recorded in {lastTimeInDate} {recentTimeIn}."));
                 if (recentAttendance.TimeOut == null) return (null, new(HttpStatusCode.Conflict, "Recent attendance not yet clocked out", "Has not clocked out yet from previous attendance, please clock out."));
-                // TODO: absent checking
                 var absencesCount = await GetAbsentCountAsync(lastTimeInDate, student);
                 student.Shift.AbsencesCount += absencesCount;
             }
