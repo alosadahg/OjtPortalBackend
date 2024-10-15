@@ -18,6 +18,7 @@ namespace OjtPortal.Repositories
         Task<(User?, ErrorResponseModel?)> GetUserByEmailAsync(string email);
         Task<User> ActivateAccount(User user, string token);
         Task<User?> DeleteByIdAsync(int id);
+        Task<List<User>> GetAllUsersAsync();
     }
 
     public class UserRepo : IUserRepo
@@ -87,6 +88,11 @@ namespace OjtPortal.Repositories
             _context.Users.Remove(user!);
             await _context.SaveChangesAsync();
             return user;
+        }
+
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _context.Users.ToListAsync();
         }
 /*
         public async Task<User?> ChangeEmailAsync (User user, string newEmail)

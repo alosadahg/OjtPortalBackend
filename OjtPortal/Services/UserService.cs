@@ -30,6 +30,7 @@ namespace OjtPortal.Services
         Task<(string?, ErrorResponseModel?)> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
         Task<(string?, ErrorResponseModel?)> ChangeDefaultPasswordAsync(ChangeDefaultPasswordDto changePasswordDto, string token, bool isActive);
         Task<(ExistingUserDto?, ErrorResponseModel?)> PermanentlyRemoveUserAsync(int id);
+        Task<List<ExistingUserDto>> GetUsersWithFilteringAsync(string? name, UserType? userType, AccountStatus? accountStatus, string? email);
     }
 
 
@@ -289,18 +290,23 @@ namespace OjtPortal.Services
             return (_mapper.Map<ExistingUserDto>(deletedUser), null);
         }
 
-       /* public async Task<(ExistingUserDto?, ErrorResponseModel?)> ChangeEmailAsync(string existingEmail, string newEmail)
-        {
-            var (user, error) = await _userRepository.GetUserByEmailAsync(existingEmail);
-            if (error != null) return (null, error);
-            var (existingUser, _) = await _userRepository.GetUserByEmailAsync(newEmail);
-            if (existingUser != null) return (null, new(HttpStatusCode.BadRequest, "Email unavailable", "Cannot use this email"));
-            if(!user.AccountStatus.Equals(AccountStatus.Active)) return (null, new(HttpStatusCode.BadRequest, "Account not active", "Activate account first"));
-        }*/
+        /* public async Task<(ExistingUserDto?, ErrorResponseModel?)> ChangeEmailAsync(string existingEmail, string newEmail)
+         {
+             var (user, error) = await _userRepository.GetUserByEmailAsync(existingEmail);
+             if (error != null) return (null, error);
+             var (existingUser, _) = await _userRepository.GetUserByEmailAsync(newEmail);
+             if (existingUser != null) return (null, new(HttpStatusCode.BadRequest, "Email unavailable", "Cannot use this email"));
+             if(!user.AccountStatus.Equals(AccountStatus.Active)) return (null, new(HttpStatusCode.BadRequest, "Account not active", "Activate account first"));
+         }*/
 
-        /*public async Task<List<ExistingUserDto>> GetUsersWithFilteringAsync()
+        public async Task<List<ExistingUserDto>> GetUsersWithFilteringAsync(string? name, UserType? userType, AccountStatus? accountStatus, string? email)
         {
-
-        }*/
+            var users = await _userRepository.GetAllUsersAsync();
+            if (name != null) users = users.Where(u => u.FirstName != null && u.LastName != null && (u.LastName.Contains(name, StringComparison.OrdinalIgnoreCase) || u.FirstName.Contains(name, StringComparison.OrdinalIgnoreCase))).ToList();
+            if (userType != null) users = users.Where(u => u.UserType.Equals(userType)).ToList();
+            if (accountStatus != null) users = users.Where(u => u.AccountStatus.Equals(accountStatus)).ToList();
+            if (email != null) users = users.Where(u => u.Email != null && u.Email.Contains(email, StringComparison.OrdinalIgnoreCase)).ToList();
+            return _mapper.Map<List<ExistingUserDto>>(users);
+        }
     }
 }

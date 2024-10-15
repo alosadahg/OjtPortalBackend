@@ -38,6 +38,20 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
+        /// Get users with filtering
+        /// </summary>
+        /// <param name="name">Name of user whether last name or first name</param>
+        /// <param name="userType">Type of user</param>
+        /// <param name="accountStatus">Status of user account</param>
+        /// <param name="email">Email of the user</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<List<ExistingUserDto>> GetUsersWithFilteringAsync(string? name, UserType? userType, AccountStatus? accountStatus, string? email)
+        {
+            return await _userService.GetUsersWithFilteringAsync(name, userType, accountStatus, email);
+        }
+
+        /// <summary>
         /// Login 
         /// </summary>
         /// <param name="loginDto"></param>
