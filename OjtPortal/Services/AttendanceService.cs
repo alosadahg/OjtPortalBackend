@@ -61,15 +61,17 @@ namespace OjtPortal.Services
 
             #region Check if there is no clock in yet and update absences
             var recentAttendance = _attendanceRepo.GetRecentAttendance(student);
+            var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+            var currentDateInManila = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTime.Now, manilaTimeZone));
 
             if (recentAttendance != null)
             {
                 // convert utc to local 
-                var recentTimeIn = TimeZoneInfo.ConvertTimeFromUtc(recentAttendance.TimeIn, TimeZoneInfo.Local);
+                var recentTimeIn = TimeZoneInfo.ConvertTimeFromUtc(recentAttendance.TimeIn, manilaTimeZone);
                 var lastTimeInDate = DateOnly.FromDateTime(recentTimeIn);
                 _logger.LogInformation("Recent time in: " + recentTimeIn);
                 _logger.LogInformation("Current date: " + dateToday);
-                if (lastTimeInDate.Equals(dateToday)) return (null, new(HttpStatusCode.Conflict, $"Time in already recorded for {dateToday}", $"Today's time in is already recorded in {lastTimeInDate} {recentTimeIn}."));
+                if (currentDateInManila.Equals(recentAttendance)) return (null, new(HttpStatusCode.Conflict, $"Time in already recorded for {currentDateInManila}", $"Today's time in is already recorded in {recentTimeIn}."));
                 if (recentAttendance.TimeOut == null) return (null, new(HttpStatusCode.Conflict, "Recent attendance not yet clocked out", "Has not clocked out yet from previous attendance, please clock out."));
                 var absencesCount = await GetAbsentCountAsync(lastTimeInDate, student);
                 student.Shift.AbsencesCount += absencesCount;
