@@ -46,7 +46,7 @@ namespace OjtPortal.Services
                 TimeIn = DateTime.UtcNow,
             };
             if (student.Shift == null) return (null, new(HttpStatusCode.BadRequest, LoggingTemplate.MissingRecordTitle("shift"), LoggingTemplate.MissingRecordDescription("shift", id.ToString())));
-            var dateToday = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local));
+            var dateToday = DateOnly.FromDateTime(DateTime.Now);
 
             #region Check if today is a workday
             // date checking

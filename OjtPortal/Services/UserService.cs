@@ -297,5 +297,10 @@ namespace OjtPortal.Services
             if (existingUser != null) return (null, new(HttpStatusCode.BadRequest, "Email unavailable", "Cannot use this email"));
             if(!user.AccountStatus.Equals(AccountStatus.Active)) return (null, new(HttpStatusCode.BadRequest, "Account not active", "Activate account first"));
         }*/
+
+        public async Task<List<ExistingUserDto>> GetUsersWithFilteringAsync()
+        {
+
+        }
     }
 }
