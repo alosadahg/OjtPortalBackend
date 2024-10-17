@@ -10,5 +10,6 @@ namespace OjtPortal.Entities
         public string Description { get; set; } = string.Empty;
         [JsonIgnore]
         public List<TrainingTask>? Tasks { get; set; }
+        public bool IsSystemGenerated { get; set; } = false;
     }
 }

@@ -20,7 +20,7 @@ namespace OjtPortal.Dtos
     public class NewTrainingPlanDto
     {
         [Required(ErrorMessage = "Mentor ID is required")]
-        public int MentorId { get; set; };
+        public int MentorId { get; set; }
         [Required(ErrorMessage = "Training plan title is required")]
         public string Title { get; set; } = string.Empty;
         [Required(ErrorMessage = "Training plan description is required")]

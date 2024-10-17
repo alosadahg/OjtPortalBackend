@@ -26,6 +26,10 @@ namespace OjtPortal.Context
                .HasMany(t => t.Skills)
                .WithMany(t => t.Tasks)
                .UsingEntity(j => j.ToTable("TaskSkill"));
+            modelBuilder.Entity<TechStack>()
+                .HasIndex(t => t.Name);
+            modelBuilder.Entity<Skill>()
+                .HasIndex(s => s.Name);
         }
 
         public DbSet<User> Users { get; set; }

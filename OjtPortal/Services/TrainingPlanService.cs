@@ -55,7 +55,7 @@ namespace OjtPortal.Services
 
         public async Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> FetchTrainingPlansFromAPIAsync()
         {
-            int maximumAttempts = 3;
+            int maximumAttempts = 5;
             var errorMessage = string.Empty;
             for (int i = 1; i <= maximumAttempts; i++)
             {
@@ -73,6 +73,8 @@ namespace OjtPortal.Services
                     {
                         var trainingPlanEntity = _mapper.Map<TrainingPlan>(trainingPlan);
                         trainingPlanEntity.IsSystemGenerated = true;
+                        trainingPlanEntity.Tasks.ForEach(t => t.Skills.ForEach(s => s.IsSystemGenerated = true));
+                        trainingPlanEntity.Tasks.ForEach(t => t.TechStacks.ForEach(ts => ts.IsSystemGenerated = true));
                         var addedTrainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlanEntity);
                         if (addedTrainingPlan != null) trainingPlanEntity = addedTrainingPlan;
                         trainingPlansList.Add(trainingPlanEntity);
@@ -116,6 +118,8 @@ namespace OjtPortal.Services
                         if (error != null) return (null, error);
                         trainingPlan = _mapper.Map<TrainingPlan>(response);
                         trainingPlan.IsSystemGenerated = true;
+                        trainingPlan.Tasks.ForEach(t => t.Skills.ForEach(s => s.IsSystemGenerated = true));
+                        trainingPlan.Tasks.ForEach(t => t.TechStacks.ForEach(ts => ts.IsSystemGenerated = true));
                         trainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlan);
                         if(!trainingPlanList.Contains(trainingPlan)) trainingPlanList.Add(trainingPlan);
                     }
