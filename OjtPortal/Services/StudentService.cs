@@ -38,8 +38,9 @@ namespace OjtPortal.Services
         private readonly IStudentRepo _studentRepo;
         private readonly IUserRepo _userRepo;
         private readonly ILogbookEntryService _logbookEntryService;
+        private readonly ITrainingPlanService _trainingPlanService;
 
-        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper, IEmailSender emailSender, IUserService userService, ITeacherRepo teacherRepository, IMentorRepo mentorRepository, ILogger<StudentService> logger, IDegreeProgramRepo degreeProgramRepo, IStudentRepo studentRepo, IUserRepo userRepo, ILogbookEntryService logbookEntryService)
+        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper, IEmailSender emailSender, IUserService userService, ITeacherRepo teacherRepository, IMentorRepo mentorRepository, ILogger<StudentService> logger, IDegreeProgramRepo degreeProgramRepo, IStudentRepo studentRepo, IUserRepo userRepo, ILogbookEntryService logbookEntryService, ITrainingPlanService trainingPlanService)
         {
             this._userManager = userManager;
             this._holidayService = holidayService;
@@ -53,6 +54,7 @@ namespace OjtPortal.Services
             this._studentRepo = studentRepo;
             this._userRepo = userRepo;
             this._logbookEntryService = logbookEntryService;
+            this._trainingPlanService = trainingPlanService;
         }
 
         public async Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent, bool withEmailChecking)
@@ -104,6 +106,15 @@ namespace OjtPortal.Services
             }
 
             studentEntity = await _studentRepo.AddStudentAsync(studentEntity);
+            var request = new TrainingPlanRequestDto
+            {
+                Designation = studentEntity.Designation,
+                Division = studentEntity.Division,
+                HrsToRender = studentEntity.HrsToRender,
+                DailyDutyHrs = studentEntity.Shift.DailyDutyHrs
+            };
+            await _trainingPlanService.GenerateSyntheticTrainingPlanAsync(request);
+
             if (studentEntity == null) return (null, new(HttpStatusCode.UnprocessableEntity, LoggingTemplate.DuplicateRecordTitle(key), LoggingTemplate.DuplicateRecordDescription(key, newStudent.Email)));
 
             if (createdUser!.IsPasswordGenerated)
@@ -220,6 +231,7 @@ namespace OjtPortal.Services
             if (companyName != null) students = students.Where(s => s.Mentor != null && string.Equals(s.Mentor.Company.CompanyName, companyName, StringComparison.OrdinalIgnoreCase)).ToList();
             return _mapper.Map<List<StudentDto>>(students);
         }
+
     }
 }
                                             

@@ -16,9 +16,8 @@ namespace OjtPortal.Services
     public interface ITrainingPlanService
     {
         Task<(TrainingPlan?, ErrorResponseModel?)> AddTrainingPlanAsync(NewTrainingPlanDto newTrainingPlan);
-        Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> FetchTrainingPlansFromAPIAsync();
-        Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> AddSystemGeneratedTrainingPlanAsync();
-        Task<(TrainingPlanFromApiDto?, ErrorResponseModel?)> CreateTrainingPlanFromApiAsync(TrainingPlanRequestDto requestDto);
+        Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> GetSystemGeneratedTrainingPlanAsync();
+        Task<(TrainingPlan?, ErrorResponseModel?)> GenerateSyntheticTrainingPlanAsync(TrainingPlanRequestDto requestDto);
     }
 
     public class TrainingPlanService : ITrainingPlanService
@@ -53,7 +52,7 @@ namespace OjtPortal.Services
             return (trainingPlan, null);
         }
 
-        public async Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> FetchTrainingPlansFromAPIAsync()
+        private async Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> FetchAllTrainingPlansFromAPIAsync()
         {
             int maximumAttempts = 5;
             var errorMessage = string.Empty;
@@ -90,7 +89,7 @@ namespace OjtPortal.Services
             return (null, new(HttpStatusCode.RequestTimeout, "Fetch on training plans api failed", errorMessage));
         }
 
-        public async Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> AddSystemGeneratedTrainingPlanAsync()
+        public async Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> GetSystemGeneratedTrainingPlanAsync()
         {
             var students = await _studentRepo.GetStudentsForTrainingPlanAsync();
             if (students != null)
@@ -114,12 +113,10 @@ namespace OjtPortal.Services
                             if (!trainingPlanList.Contains(trainingPlan)) trainingPlanList.Add(trainingPlan);
                             continue;
                         }
-                        var (response, error) = await CreateTrainingPlanFromApiAsync(request);
+                        var (response, error) = await GenerateSyntheticTrainingPlanAsync(request);
                         if (error != null) return (null, error);
-                        trainingPlan = _mapper.Map<TrainingPlan>(response);
-                        trainingPlan.IsSystemGenerated = true;
-                        trainingPlan.Tasks.ForEach(t => t.Skills.ForEach(s => s.IsSystemGenerated = true));
-                        trainingPlan.Tasks.ForEach(t => t.TechStacks.ForEach(ts => ts.IsSystemGenerated = true));
+                        trainingPlan = response;
+                        if (trainingPlan == null) continue;
                         trainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlan);
                         if(!trainingPlanList.Contains(trainingPlan)) trainingPlanList.Add(trainingPlan);
                     }
@@ -129,14 +126,14 @@ namespace OjtPortal.Services
             return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("student"), LoggingTemplate.MissingRecordDescription("student", "")));
         }
 
-
-        public async Task<(TrainingPlanFromApiDto?, ErrorResponseModel?)> CreateTrainingPlanFromApiAsync(TrainingPlanRequestDto requestDto)
+        public async Task<(TrainingPlan?, ErrorResponseModel?)> GenerateSyntheticTrainingPlanAsync(TrainingPlanRequestDto requestDto)
         {
             int maximumAttempts = 3;
+            if (string.IsNullOrEmpty(requestDto.Designation) || string.IsNullOrEmpty(requestDto.Division) || requestDto.HrsToRender <= 0 || requestDto.DailyDutyHrs <= 0) return(null, null);
             var errorMessage = string.Empty;
             for (int i = 1; i <= 3; i++)
             {
-                _logger.LogInformation("Executing post CreateTrainingPlanFromApiAsync in attempt " + i);
+                _logger.LogInformation("Executing post GenerateSyntheticTrainingPlanAsync in attempt " + i);
                 requestDto.Division = requestDto.Division.Replace("/", " or ");
                 requestDto.Division = requestDto.Division.Replace("&", " and ");
 
@@ -153,7 +150,13 @@ namespace OjtPortal.Services
                     var readAsString = await response.Content.ReadAsStringAsync();
                     if (!response.IsSuccessStatusCode) throw new Exception($"Failed to fetch training plans. Status Code: {response.StatusCode}");
                     var trainingPlan = JsonConvert.DeserializeObject<TrainingPlanFromApiDto>(readAsString);
-                    return (trainingPlan, null);
+                    var trainingPlanEntity = _mapper.Map<TrainingPlan>(trainingPlan);
+                    trainingPlanEntity.IsSystemGenerated = true;
+                    trainingPlanEntity.Tasks.ForEach(t => t.Skills.ForEach(s => s.IsSystemGenerated = true));
+                    trainingPlanEntity.Tasks.ForEach(t => t.TechStacks.ForEach(ts => ts.IsSystemGenerated = true));
+                    var addedTrainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlanEntity);
+                    if (addedTrainingPlan != null) trainingPlanEntity = addedTrainingPlan;
+                    return (trainingPlanEntity, null);
                 }
                 catch (Exception ex)
                 {
@@ -161,8 +164,9 @@ namespace OjtPortal.Services
                     _logger.LogError($"Attempt {i} failed.");
                 }
             }
-            return (null, new(HttpStatusCode.RequestTimeout, "Fetch on external api failed", errorMessage));
+            return (new(), new(HttpStatusCode.RequestTimeout, "Fetch on external api failed", errorMessage));
         }
+
     }
 
 }
