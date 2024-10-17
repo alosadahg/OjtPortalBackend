@@ -39,8 +39,9 @@ namespace OjtPortal.Services
         private readonly IUserRepo _userRepo;
         private readonly ILogbookEntryService _logbookEntryService;
         private readonly ITrainingPlanService _trainingPlanService;
+        private readonly ICacheService _cacheService;
 
-        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper, IEmailSender emailSender, IUserService userService, ITeacherRepo teacherRepository, IMentorRepo mentorRepository, ILogger<StudentService> logger, IDegreeProgramRepo degreeProgramRepo, IStudentRepo studentRepo, IUserRepo userRepo, ILogbookEntryService logbookEntryService, ITrainingPlanService trainingPlanService)
+        public StudentService(UserManager<User> userManager, IHolidayService holidayService, IMapper mapper, IEmailSender emailSender, IUserService userService, ITeacherRepo teacherRepository, IMentorRepo mentorRepository, ILogger<StudentService> logger, IDegreeProgramRepo degreeProgramRepo, IStudentRepo studentRepo, IUserRepo userRepo, ILogbookEntryService logbookEntryService, ITrainingPlanService trainingPlanService, ICacheService cacheService)
         {
             this._userManager = userManager;
             this._holidayService = holidayService;
@@ -55,6 +56,7 @@ namespace OjtPortal.Services
             this._userRepo = userRepo;
             this._logbookEntryService = logbookEntryService;
             this._trainingPlanService = trainingPlanService;
+            this._cacheService = cacheService;
         }
 
         public async Task<(StudentDto?, ErrorResponseModel?)> RegisterStudentAsync(NewStudentDto newStudent, bool withEmailChecking)
@@ -114,6 +116,7 @@ namespace OjtPortal.Services
                 DailyDutyHrs = studentEntity.Shift.DailyDutyHrs
             };
             await _trainingPlanService.GenerateSyntheticTrainingPlanAsync(request);
+            _cacheService.RemoveFromCache("trainingPlanList", "");
 
             if (studentEntity == null) return (null, new(HttpStatusCode.UnprocessableEntity, LoggingTemplate.DuplicateRecordTitle(key), LoggingTemplate.DuplicateRecordDescription(key, newStudent.Email)));
 

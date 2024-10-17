@@ -27,8 +27,9 @@ namespace OjtPortal.Services
         private readonly IStudentService _studentService;
         private readonly IStudentRepo _studentRepo;
         private readonly ITrainingPlanService _trainingPlanService;
+        private readonly ICacheService _cacheService;
 
-        public MentorService(IMentorRepo mentorRepository, IMapper mapper, IUserService userService, ICompanyRepo companyRepository, IUserRepo userRepo, IStudentService studentService, IStudentRepo studentRepo, ITrainingPlanService trainingPlanService)
+        public MentorService(IMentorRepo mentorRepository, IMapper mapper, IUserService userService, ICompanyRepo companyRepository, IUserRepo userRepo, IStudentService studentService, IStudentRepo studentRepo, ITrainingPlanService trainingPlanService, ICacheService cacheService)
         {
             this._mentorRepository = mentorRepository;
             this._mapper = mapper;
@@ -38,6 +39,7 @@ namespace OjtPortal.Services
             this._studentService = studentService;
             this._studentRepo = studentRepo;
             this._trainingPlanService = trainingPlanService;
+            this._cacheService = cacheService;
         }
 
         public async Task<(FullMentorDto?, ErrorResponseModel?)> AddMentorAsync(NewMentorDto newMentorDto)
@@ -115,7 +117,7 @@ namespace OjtPortal.Services
                 DailyDutyHrs = studentEntity.Shift.DailyDutyHrs
             };
             await _trainingPlanService.GenerateSyntheticTrainingPlanAsync(request);
-
+            _cacheService.RemoveFromCache("trainingPlanList", "");
             return (_mapper.Map<StudentDto>(studentEntity), null);
         }
 
