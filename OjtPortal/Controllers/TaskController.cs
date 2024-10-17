@@ -18,7 +18,7 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
-        /// Get system generated tasks with filtering
+        /// Get AI generated tasks with filtering
         /// </summary>
         /// <param name="titleFilter">Filters tasks by title</param>
         /// <param name="descriptionFilter">Filters tasks by description</param>
@@ -31,7 +31,7 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
-        /// Get system generated tasks (include stack and skill) with filtering
+        /// Get AI generated tasks (include stack and skill) with filtering
         /// </summary>
         /// <param name="titleFilter">Filters tasks by title</param>
         /// <param name="descriptionFilter">Filters tasks by description</param>
