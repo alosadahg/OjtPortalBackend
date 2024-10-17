@@ -75,6 +75,7 @@ namespace OjtPortal.Services
                     {
                         var trainingPlanEntity = _mapper.Map<TrainingPlan>(trainingPlan);
                         trainingPlanEntity.IsSystemGenerated = true;
+                        trainingPlanEntity.Tasks.ForEach(t => t.IsSystemGenerated = true);
                         trainingPlanEntity.Tasks.ForEach(t => t.Skills.ForEach(s => s.IsSystemGenerated = true));
                         trainingPlanEntity.Tasks.ForEach(t => t.TechStacks.ForEach(ts => ts.IsSystemGenerated = true));
                         var addedTrainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlanEntity);
@@ -163,6 +164,7 @@ namespace OjtPortal.Services
                     var trainingPlan = JsonConvert.DeserializeObject<TrainingPlanFromApiDto>(readAsString);
                     var trainingPlanEntity = _mapper.Map<TrainingPlan>(trainingPlan);
                     trainingPlanEntity.IsSystemGenerated = true;
+                    trainingPlanEntity.Tasks.ForEach(t => t.IsSystemGenerated = true);
                     trainingPlanEntity.Tasks.ForEach(t => t.Skills.ForEach(s => s.IsSystemGenerated = true));
                     trainingPlanEntity.Tasks.ForEach(t => t.TechStacks.ForEach(ts => ts.IsSystemGenerated = true));
                     var addedTrainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlanEntity);
