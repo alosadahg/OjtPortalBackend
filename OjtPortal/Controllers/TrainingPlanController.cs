@@ -37,7 +37,7 @@ namespace OjtPortal.Controllers
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TrainingPlanDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
-        [HttpPut("fetch/from/api")]
+        [HttpGet("fetch/from/api")]
         public async Task<IActionResult> FetchTrainingPlanFromAPIAsync()
         {
             var (result, error) = await _trainingPlanService.GetSystemGeneratedTrainingPlansAsync();
