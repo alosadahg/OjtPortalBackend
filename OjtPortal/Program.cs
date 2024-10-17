@@ -93,6 +93,7 @@ builder.Services.AddTransient<ISentimentalAnalysisService, SentimentalAnalysisSe
 builder.Services.AddTransient<ITaskService, TaskService>();
 builder.Services.AddTransient<ITechStackService, TechStackService>();
 builder.Services.AddTransient<ISkillService, SkillService>();
+builder.Services.AddTransient<IStudentTrainingService, StudentTrainingService>();
 
 // Scoped repositories
 builder.Services.AddScoped<IHolidayRepo, HolidayRepo>();
@@ -112,6 +113,7 @@ builder.Services.AddScoped<ITrainingPlanRepo, TrainingPlanRepo>();
 builder.Services.AddScoped<ITaskRepo, TaskRepo>();
 builder.Services.AddScoped<ITechStackRepo, TechStackRepo>();
 builder.Services.AddScoped<ISkillRepo, SkillRepo>();
+builder.Services.AddScoped<IStudentTrainingRepo, StudentTrainingRepo>();
 
 builder.Services.AddSwaggerGen(options =>
 {

@@ -4,8 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace OjtPortal.Enums
 {
-    [JsonConverter(typeof(EnumDescriptionConverter<TaskStatus>))]
-    public enum TaskStatus
+    [JsonConverter(typeof(EnumDescriptionConverter<TrainingTaskStatus>))]
+    public enum TrainingTaskStatus
     {
         [Description("Not Started")]
         NotStarted,
