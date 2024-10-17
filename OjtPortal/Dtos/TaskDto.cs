@@ -38,4 +38,15 @@ namespace OjtPortal.Dtos
         public List<NewTechStackDto> TechStacks { get; set; } = new();
         public List<NewSkillDto> Skills { get; set; } = new();
     }
+
+    public class AssignedTaskDto
+    {
+        public int Id { get; set; }
+        public int StudentId { get; set; }
+        public TrainingTask? TrainingTask { get; set; }
+        public TrainingTaskStatus? TaskStatus { get; set; } = TrainingTaskStatus.NotStarted;
+        public int? TaskCompletionDurationInHrs { get; set; } = 0;
+        public DateOnly? DueDate { get; set; } = new();
+        public double Score { get; set; } = 0.0;
+    }
 }

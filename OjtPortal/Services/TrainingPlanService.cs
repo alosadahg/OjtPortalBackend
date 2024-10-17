@@ -19,7 +19,7 @@ namespace OjtPortal.Services
         Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> GetSystemGeneratedTrainingPlansAsync();
         Task<(TrainingPlan?, ErrorResponseModel?)> GenerateSyntheticTrainingPlanAsync(TrainingPlanRequestDto requestDto);
         Task<(TrainingPlan?, ErrorResponseModel?)> GetTrainingPlanByIdAsync(int id);
-        Task<(List<TrainingPlan>, ErrorResponseModel?)> GetTrainingPlansByMentorAsync(int mentorId);
+        Task<(List<TrainingPlan>?, ErrorResponseModel?)> GetTrainingPlansByMentorAsync(int mentorId);
     }
 
     public class TrainingPlanService : ITrainingPlanService
@@ -188,7 +188,7 @@ namespace OjtPortal.Services
             return (trainingPlan, null);
         }
 
-        public async Task<(List<TrainingPlan>, ErrorResponseModel?)> GetTrainingPlansByMentorAsync(int mentorId)
+        public async Task<(List<TrainingPlan>?, ErrorResponseModel?)> GetTrainingPlansByMentorAsync(int mentorId)
         {
             var trainingPlan = await _trainingPlanRepo.GetTrainingPlansByMentorAsync(mentorId);
             if (trainingPlan == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("training plan"), LoggingTemplate.MissingRecordDescription("training plan", mentorId.ToString())));

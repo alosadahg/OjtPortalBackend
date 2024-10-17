@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using OjtPortal.Entities;
+using OjtPortal.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OjtPortal.Dtos
 {
@@ -56,4 +58,19 @@ namespace OjtPortal.Dtos
         [JsonProperty("daily_duty_hrs")]
         public int DailyDutyHrs { get; set; } = 0;
     }
+
+    public class AssignedTrainingPlanToStudentDto
+    {
+        public int StudentId { get; set; }
+        public int TrainingPlanId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public List<AssignedTaskDto> Tasks { get; set; } = new();
+        public int CompletedTaskCount { get; set; } = 0;
+        public TrainingTaskStatus TrainingPlanStatus { get; set; } = TrainingTaskStatus.NotStarted;
+        public int? DurationInHours { get; set; } = 0;
+        public DateOnly ExpectedStartDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateOnly ExpectedEndDate { get; set; } = new();
+    }
+
 }

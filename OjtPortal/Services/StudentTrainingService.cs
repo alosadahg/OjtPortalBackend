@@ -11,6 +11,7 @@ namespace OjtPortal.Services
     public interface IStudentTrainingService
     {
         Task<(StudentTraining?, ErrorResponseModel?)> AssignTrainingPlanAsync(AssignTrainingPlanDto assignTrainingPlanDto, int mentorId);
+        Task<(AssignedTrainingPlanToStudentDto?, ErrorResponseModel?)> GetAssignedTrainingPlanToStudentAsync(int studentId);
     }
 
     public class StudentTrainingService : IStudentTrainingService
@@ -59,6 +60,16 @@ namespace OjtPortal.Services
             var addedStudentTraining = await _studentTrainingRepo.AddStudentTrainingAsync(studentTraining);
             if (addedStudentTraining != null) studentTraining = addedStudentTraining;
             return (studentTraining, null);
+        }
+
+        public async Task<(AssignedTrainingPlanToStudentDto?, ErrorResponseModel?)> GetAssignedTrainingPlanToStudentAsync(int studentId)
+        {
+            var existing = await _studentTrainingRepo.GetStudentTrainingAsync(studentId);
+            if (existing == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("training plan"), LoggingTemplate.MissingRecordDescription("training plan", studentId.ToString())));
+            var mappedExisting = _mapper.Map<AssignedTrainingPlanToStudentDto>(existing);
+            mappedExisting.Title = existing.TrainingPlan!.Title;
+            mappedExisting.Description = existing.TrainingPlan.Description;
+            return (mappedExisting, null);
         }
     }
 }

@@ -8,6 +8,7 @@ namespace OjtPortal.Repositories
     public interface IStudentTrainingRepo
     {
         Task<StudentTraining> AddStudentTrainingAsync(StudentTraining studentTraining);
+        Task<StudentTraining?> GetStudentTrainingAsync(int studentId);
     }
 
     public class StudentTrainingRepo : IStudentTrainingRepo
@@ -36,6 +37,11 @@ namespace OjtPortal.Repositories
                 return null;
             }
             return studentTraining;
+        }
+
+        public async Task<StudentTraining?> GetStudentTrainingAsync(int studentId)
+        {
+            return await _context.StudentTrainings.Include(st => st.TrainingPlan).Include(st => st.Tasks).ThenInclude(t => t.TrainingTask).ThenInclude(t => t.TechStacks).Include(st => st.Tasks).ThenInclude(t => t.TrainingTask).ThenInclude(t => t.Skills).FirstOrDefaultAsync(st => st.StudentId == studentId);
         }
     }
 }
