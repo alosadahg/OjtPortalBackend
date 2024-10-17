@@ -45,7 +45,7 @@
               <meta name=""viewport"" content=""width=device-width, initial-scale=1"">
               <style type=""text/css"">
               /**
-               * Google webfonts. Recommended to include the .woff version for cross-client compatibility.
+               * Google webfonts. Recommended to include the .woff version for cross-_client compatibility.
                */
               @media screen {{
                 @font-face {{

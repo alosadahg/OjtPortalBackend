@@ -20,6 +20,7 @@ namespace OjtPortal.Repositories
         Task<Student?> UpdateStudentInternshipStatusAsync(Student student, InternshipStatus status);
         Task<Student?> UpdateStudentEndDateAsync(Student student, DateOnly newEndDate);
         Task<Student?> UpdateStudentAbsentCountAsync(Student student, int addedAbsent);
+        Task<List<Student>?> GetStudentsForTrainingPlanAsync();
     }
 
     public class StudentRepo : IStudentRepo
@@ -186,5 +187,21 @@ namespace OjtPortal.Repositories
             await _context.SaveChangesAsync();
             return student;
         }
+
+        public async Task<List<Student>?> GetStudentsForTrainingPlanAsync()
+        {
+            var students = await _context.Students
+                .Include(s => s.DegreeProgram)
+                .ThenInclude(dp => dp.Department)
+                .Include(s => s.User)
+                .ToListAsync();
+
+            var uniqueStudents = students
+                .DistinctBy(s => new { s.Division, s.Designation, s.HrsToRender, s.Shift.DailyDutyHrs })
+                .ToList();
+
+            return uniqueStudents;
+        }
+
     }
 }
