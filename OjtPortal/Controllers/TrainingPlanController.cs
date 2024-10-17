@@ -8,7 +8,7 @@ using OjtPortal.Services;
 namespace OjtPortal.Controllers
 {
     [ApiController]
-    [Route("api/training/plan")]
+    [Route("api/training/plans")]
     public class TrainingPlanController : OjtPortalBaseController
     {
         private readonly ITrainingPlanService _trainingPlanService;
