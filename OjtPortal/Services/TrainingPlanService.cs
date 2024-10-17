@@ -18,6 +18,7 @@ namespace OjtPortal.Services
         Task<(TrainingPlan?, ErrorResponseModel?)> AddTrainingPlanAsync(NewTrainingPlanDto newTrainingPlan);
         Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> GetSystemGeneratedTrainingPlanAsync();
         Task<(TrainingPlan?, ErrorResponseModel?)> GenerateSyntheticTrainingPlanAsync(TrainingPlanRequestDto requestDto);
+        Task<(TrainingPlan?, ErrorResponseModel?)> GetTrainingPlanByIdAsync(int id);
     }
 
     public class TrainingPlanService : ITrainingPlanService
@@ -128,6 +129,11 @@ namespace OjtPortal.Services
 
         public async Task<(TrainingPlan?, ErrorResponseModel?)> GenerateSyntheticTrainingPlanAsync(TrainingPlanRequestDto requestDto)
         {
+            var existingTrainingPlan = (await _trainingPlanRepo.CheckSystemGeneratedTrainingPlanAsync(requestDto.Designation, requestDto.Division, requestDto.HrsToRender, requestDto.DailyDutyHrs));
+            if (existingTrainingPlan != null)
+            {
+                return (existingTrainingPlan, null);
+            }
             int maximumAttempts = 3;
             if (string.IsNullOrEmpty(requestDto.Designation) || string.IsNullOrEmpty(requestDto.Division) || requestDto.HrsToRender <= 0 || requestDto.DailyDutyHrs <= 0) return(null, null);
             var errorMessage = string.Empty;
@@ -165,6 +171,13 @@ namespace OjtPortal.Services
                 }
             }
             return (new(), new(HttpStatusCode.RequestTimeout, "Fetch on external api failed", errorMessage));
+        }
+
+        public async Task<(TrainingPlan?, ErrorResponseModel?)> GetTrainingPlanByIdAsync(int id)
+        {
+            var trainingPlan = await _trainingPlanRepo.GetTrainingPlanByIdAsync(id);
+            if (trainingPlan == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("training plan"), LoggingTemplate.MissingRecordDescription("training plan", id.ToString())));
+            return (trainingPlan, null);
         }
 
     }

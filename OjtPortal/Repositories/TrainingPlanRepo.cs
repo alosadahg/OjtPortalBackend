@@ -9,6 +9,7 @@ namespace OjtPortal.Repositories
         Task<TrainingPlan> AddTrainingPlanAsync(TrainingPlan trainingPlan);
         Task<TrainingPlan?> FetchExistingSystemGeneratedTrainingPlanAsync(TrainingPlan trainingPlan);
         Task<TrainingPlan?> CheckSystemGeneratedTrainingPlanAsync(string position, string division, int totalHrs, int dailyDutyHrs);
+        Task<TrainingPlan?> GetTrainingPlanByIdAsync(int id);
     }
 
     public class TrainingPlanRepo : ITrainingPlanRepo
@@ -24,10 +25,11 @@ namespace OjtPortal.Repositories
 
         public async Task<TrainingPlan> AddTrainingPlanAsync(TrainingPlan trainingPlan)
         {
-            if (trainingPlan.MentorId == null)
+            var existingPlan = await FetchExistingSystemGeneratedTrainingPlanAsync(trainingPlan);
+            if (existingPlan != null)
             {
-                var existing = FetchExistingSystemGeneratedTrainingPlanAsync(trainingPlan).Result;
-                if (existing != null) return existing;
+                if (trainingPlan.MentorId != null && trainingPlan.MentorId == existingPlan.MentorId) return existingPlan;
+                if (trainingPlan.MentorId == null) return existingPlan;
             }
             _context.TrainingPlans.Add(trainingPlan);
             await _context.SaveChangesAsync();
@@ -57,11 +59,19 @@ namespace OjtPortal.Repositories
                 if (existing != null)
                 {
                     _logger.LogInformation($"Existing: {existing.TotalTasks} | Total: {totalTasks}");
+                    if (existing.MentorId != null) continue;
                     if (existing.TotalTasks == totalTasks) return existing;
                 }
             }
             return null;
             
+        }
+
+        public async Task<TrainingPlan?> GetTrainingPlanByIdAsync(int id)
+        {
+            IQueryable<TrainingPlan> query = _context.TrainingPlans.Include(tp => tp.Tasks).ThenInclude(t => t.TechStacks);
+            query = query.Include(tp => tp.Tasks).ThenInclude(t => t.Skills);
+            return await query.FirstOrDefaultAsync(tp => tp.Id == id);
         }
     }
 }

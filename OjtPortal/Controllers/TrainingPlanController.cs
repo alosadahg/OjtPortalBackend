@@ -28,7 +28,7 @@ namespace OjtPortal.Controllers
         {
             var (result, error) = await _trainingPlanService.AddTrainingPlanAsync(newTrainingPlan);
             if (error != null) return MakeErrorResponse(error);
-            return Ok(result);
+            return CreatedAtRoute("GetTrainingPlanByIdAsync", new { id = result.Id }, result);
         }
 
         /// <summary>
@@ -41,6 +41,19 @@ namespace OjtPortal.Controllers
         public async Task<IActionResult> FetchTrainingPlanFromAPIAsync()
         {
             var (result, error) = await _trainingPlanService.GetSystemGeneratedTrainingPlanAsync();
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get training plan by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("{id}", Name = "GetTrainingPlanByIdAsync")]
+        public async Task<IActionResult> GetTrainingPlanByIdAsync(int id)
+        {
+            var (result, error) = await _trainingPlanService.GetTrainingPlanByIdAsync(id);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
