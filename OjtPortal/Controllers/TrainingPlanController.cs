@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
 using OjtPortal.Infrastructure;
@@ -17,13 +18,18 @@ namespace OjtPortal.Controllers
             this._trainingPlanService = trainingPlanService;
         }
 
-        /*   [HttpPost]
-           public async Task<IActionResult> AddTrainingPlanAsync(NewTrainingPlanDto newTrainingPlan)
-           {
-               var (result, error) = await _trainingPlanService.AddTrainingPlanAsync(newTrainingPlan);
-               if (error != null) return MakeErrorResponse(error);
-               return Ok(result);
-           }*/
+        /// <summary>
+        /// Add a training plan with mentor id
+        /// </summary>
+        /// <param name="newTrainingPlan"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> AddTrainingPlanAsync(NewTrainingPlanDto newTrainingPlan)
+        {
+            var (result, error) = await _trainingPlanService.AddTrainingPlanAsync(newTrainingPlan);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
 
         /// <summary>
         /// Fetch and update the system generated training plans 

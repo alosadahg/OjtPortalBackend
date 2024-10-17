@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using OjtPortal.Dtos;
 using OjtPortal.EmailTemplates;
 using OjtPortal.Entities;
+using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
 using OjtPortal.Repositories;
 using System.Net;
@@ -40,6 +41,14 @@ namespace OjtPortal.Services
         public async Task<(TrainingPlan?, ErrorResponseModel?)> AddTrainingPlanAsync(NewTrainingPlanDto newTrainingPlan)
         {
             var trainingPlan = _mapper.Map<TrainingPlan>(newTrainingPlan);
+            if (trainingPlan.MentorId == null) trainingPlan.IsSystemGenerated = true;
+            foreach(var task in trainingPlan.Tasks)
+            {
+                if(task.Difficulty == TaskDifficulty.Easy) trainingPlan.EasyTasksCount++;
+                if (task.Difficulty == TaskDifficulty.Medium) trainingPlan.MediumTasksCount++;
+                if (task.Difficulty == TaskDifficulty.Hard) trainingPlan.HardTasksCount++;
+            }
+            trainingPlan.TotalTasks = trainingPlan.Tasks.Count;
             trainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlan);
             return (trainingPlan, null);
         }
@@ -106,6 +115,7 @@ namespace OjtPortal.Services
                         var (response, error) = await CreateTrainingPlanFromApiAsync(request);
                         if (error != null) return (null, error);
                         trainingPlan = _mapper.Map<TrainingPlan>(response);
+                        trainingPlan.IsSystemGenerated = true;
                         trainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlan);
                         if(!trainingPlanList.Contains(trainingPlan)) trainingPlanList.Add(trainingPlan);
                     }
