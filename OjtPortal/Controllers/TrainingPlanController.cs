@@ -40,7 +40,7 @@ namespace OjtPortal.Controllers
         [HttpPut("fetch/from/api")]
         public async Task<IActionResult> FetchTrainingPlanFromAPIAsync()
         {
-            var (result, error) = await _trainingPlanService.GetSystemGeneratedTrainingPlanAsync();
+            var (result, error) = await _trainingPlanService.GetSystemGeneratedTrainingPlansAsync();
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

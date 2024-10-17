@@ -16,7 +16,7 @@ namespace OjtPortal.Services
     public interface ITrainingPlanService
     {
         Task<(TrainingPlan?, ErrorResponseModel?)> AddTrainingPlanAsync(NewTrainingPlanDto newTrainingPlan);
-        Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> GetSystemGeneratedTrainingPlanAsync();
+        Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> GetSystemGeneratedTrainingPlansAsync();
         Task<(TrainingPlan?, ErrorResponseModel?)> GenerateSyntheticTrainingPlanAsync(TrainingPlanRequestDto requestDto);
         Task<(TrainingPlan?, ErrorResponseModel?)> GetTrainingPlanByIdAsync(int id);
     }
@@ -28,14 +28,16 @@ namespace OjtPortal.Services
         private readonly HttpClient _client;
         private readonly ILogger<TrainingPlanService> _logger;
         private readonly IStudentRepo _studentRepo;
+        private readonly ICacheService _cache;
 
-        public TrainingPlanService(ITrainingPlanRepo trainingPlanRepo, IMapper mapper, HttpClient client, ILogger<TrainingPlanService> logger, IStudentRepo studentRepo)
+        public TrainingPlanService(ITrainingPlanRepo trainingPlanRepo, IMapper mapper, HttpClient client, ILogger<TrainingPlanService> logger, IStudentRepo studentRepo, ICacheService cache)
         {
             this._trainingPlanRepo = trainingPlanRepo;
             this._mapper = mapper;
             this._client = client;
             this._logger = logger;
             this._studentRepo = studentRepo;
+            this._cache = cache;
         }
 
         public async Task<(TrainingPlan?, ErrorResponseModel?)> AddTrainingPlanAsync(NewTrainingPlanDto newTrainingPlan)
@@ -90,8 +92,10 @@ namespace OjtPortal.Services
             return (null, new(HttpStatusCode.RequestTimeout, "Fetch on training plans api failed", errorMessage));
         }
 
-        public async Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> GetSystemGeneratedTrainingPlanAsync()
+        public async Task<(List<TrainingPlanDto>?, ErrorResponseModel?)> GetSystemGeneratedTrainingPlansAsync()
         {
+            var trainingPlansFromCache = _cache.GetFromCache<List<TrainingPlan>>("trainingPlanList", "");
+            if (trainingPlansFromCache != null) return (_mapper.Map<List<TrainingPlanDto>>(trainingPlansFromCache), null);
             var students = await _studentRepo.GetStudentsForTrainingPlanAsync();
             if (students != null)
             {
@@ -121,6 +125,7 @@ namespace OjtPortal.Services
                         trainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlan);
                         if(!trainingPlanList.Contains(trainingPlan)) trainingPlanList.Add(trainingPlan);
                     }
+                    _cache.AddToCache("trainingPlanList", "", trainingPlanList);
                     return (_mapper.Map<List<TrainingPlanDto>>(trainingPlanList), null);
                 }
             }

@@ -4,7 +4,7 @@
     {
         public static string CacheMissProceedToDatabase(string type)
         {
-            return $"No existing {type} in cache. Attempting to find in database...";
+            return $"No existing {type} in _cache. Attempting to find in database...";
         }
 
         public static string DuplicateRecordTitle(string type)

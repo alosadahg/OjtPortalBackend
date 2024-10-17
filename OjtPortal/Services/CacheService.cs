@@ -26,10 +26,8 @@ namespace OjtPortal.Services
             _logger = logger;
         }
 
-        public T? GetFromCache<T>(string key, string index) where T : class
+        public T? GetFromCache<T>(string find, string index) where T : class
         {
-            var find = !string.IsNullOrEmpty(index) ? $"{key}:{index}" : $"{key}";
-
             if (_cache.TryGetValue(find, out var existing))
             {
                 _logger.LogInformation($"Cache hit for {find}");
