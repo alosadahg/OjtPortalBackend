@@ -11,11 +11,13 @@ namespace OjtPortal.Controllers
     {
         private readonly ISkillService _skillService;
         private readonly ITechStackService _techStackService;
+        private readonly IStudentService _studentService;
 
-        public AnalyticsController(ISkillService skillService, ITechStackService techStackService)
+        public AnalyticsController(ISkillService skillService, ITechStackService techStackService, IStudentService studentService)
         {
             this._skillService = skillService;
             this._techStackService = techStackService;
+            this._studentService = studentService;
         }
 
 
@@ -23,7 +25,7 @@ namespace OjtPortal.Controllers
         /// Gets overall skill frequency in all training plans
         /// </summary>
         /// <returns></returns>
-        [HttpGet("skill/frequency")]
+        [HttpGet("skill")]
         public async Task<List<KeyFrequency>> GetOverallSKillFrequency()
         {
             return await _skillService.GetSkillFrequencyAsync();
@@ -33,7 +35,7 @@ namespace OjtPortal.Controllers
         /// Gets the frequency by techstack name in all training plans
         /// </summary>
         /// <returns></returns>
-        [HttpGet("techstack/name/frequency")]
+        [HttpGet("techstack/name")]
         public async Task<List<KeyFrequency>> GetOverallTechStackNameFrequency()
         {
             return await _techStackService.GetTechStackFrequencyAsync();
@@ -42,10 +44,22 @@ namespace OjtPortal.Controllers
         /// <summary>
         /// Gets the frequency by techstack type in all training plans
         /// </summary>
-        [HttpGet("techstack/type/frequency")]
+        [HttpGet("techstack/type")]
         public async Task<List<KeyFrequency>> GetOverallTechStackTypeFrequency()
         {
             return await _techStackService.GetTechStackTypeFrequencyAsync();
+        }
+
+        /// <summary>
+        /// Gets the designation frequency with filters
+        /// </summary>
+        /// <param name="instructorId">Filter student designations by student instructor</param>
+        /// <param name="departmentCode">Filter student designation by department</param>
+        /// <returns></returns>
+        [HttpGet("student/designation")]
+        public async Task<List<KeyFrequency>> GetStudentDesignationFrequency(int? instructorId, string? departmentCode)
+        {
+            return await _studentService.GetStudentDesignationFrequency(instructorId, departmentCode);
         }
     }
 }

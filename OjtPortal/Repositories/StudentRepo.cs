@@ -4,6 +4,7 @@ using OjtPortal.Context;
 using OjtPortal.Dtos;
 using OjtPortal.Entities;
 using OjtPortal.Enums;
+using System.ComponentModel;
 
 namespace OjtPortal.Repositories
 {
@@ -21,6 +22,7 @@ namespace OjtPortal.Repositories
         Task<Student?> UpdateStudentEndDateAsync(Student student, DateOnly newEndDate);
         Task<Student?> UpdateStudentAbsentCountAsync(Student student, int addedAbsent);
         Task<List<Student>?> GetStudentsForTrainingPlanAsync();
+        Task<List<string>> GetUniqueStudentDesigntionsAsync();
     }
 
     public class StudentRepo : IStudentRepo
@@ -203,5 +205,13 @@ namespace OjtPortal.Repositories
             return uniqueStudents;
         }
 
+        public async Task<List<string>> GetUniqueStudentDesigntionsAsync()
+        {
+            var students = await _context.Students.ToListAsync();
+            students = students.DistinctBy(s => s.Designation).ToList();
+            var designationList = new List<string>();
+            foreach (var student in students) if (!string.IsNullOrEmpty(student.Designation)) designationList.Add(student.Designation);
+            return designationList;
+        }
     }
 }

@@ -8,6 +8,7 @@ using OjtPortal.Infrastructure;
 using OjtPortal.EmailTemplates;
 using OjtPortal.Repositories;
 using System.Net;
+using System.ComponentModel;
 
 namespace OjtPortal.Services
 {
@@ -22,6 +23,7 @@ namespace OjtPortal.Services
         int CalculateManDays(int hrs, int dailyHours);
         Task<(StudentPerformance?, ErrorResponseModel?)> GetStudentPerformanceAsync(int studentId);
         Task<List<StudentDto>> GetStudentWithFilteringAsync(string? companyName, string? programCode, int? instructorId, string? designation, DateOnly? startDate, DateOnly? endDate, int? hrsToRender, InternshipStatus? internshipStatus, string? departmentCode);
+        Task<List<KeyFrequency>> GetStudentDesignationFrequency(int? instructorId, string? departmentCode);
     }
 
     public class StudentService : IStudentService
@@ -233,6 +235,31 @@ namespace OjtPortal.Services
             if (internshipStatus != null) students = students.Where(s => s.InternshipStatus == internshipStatus).ToList();
             if (companyName != null) students = students.Where(s => s.Mentor != null && string.Equals(s.Mentor.Company.CompanyName, companyName, StringComparison.OrdinalIgnoreCase)).ToList();
             return _mapper.Map<List<StudentDto>>(students);
+        }
+
+        public async Task<List<KeyFrequency>> GetStudentDesignationFrequency(int? instructorId, string? departmentCode)
+        {
+            var designationList = await _studentRepo.GetUniqueStudentDesigntionsAsync();
+            var frequencyDict = new Dictionary<string, int>();
+            foreach( var designation in designationList)
+            {
+                var students = await GetStudentWithFilteringAsync(null, null, instructorId, designation, null, null, null, null, departmentCode);
+                if(frequencyDict.ContainsKey(designation))
+                {
+                    frequencyDict[designation] += students.Count;
+                } 
+                else
+                {
+                    frequencyDict[designation] = students.Count;
+                }
+            }
+            var frequencyList = frequencyDict.Select(kvp => new KeyFrequency
+            {
+                Key = kvp.Key,
+                Usage = kvp.Value
+            }).OrderByDescending(o => o.Usage).ToList();
+            frequencyList = frequencyList.Where(f => f.Usage > 0).ToList();
+            return frequencyList;
         }
 
     }
