@@ -7,6 +7,7 @@ namespace OjtPortal.Repositories
     public interface ITechStackRepo
     {
         Task<List<TechStack>> GetTechStacksAsync(string? nameFilter, string? typeFilter, string? descriptionFilter);
+        Task<List<TechStack>> GetUniqueNameTechStacksAsync();
     }
 
     public class TechStackRepo : ITechStackRepo
@@ -30,6 +31,13 @@ namespace OjtPortal.Repositories
                .Select(group => group.First())
                .ToList();
 
+            return techStacks;
+        }
+
+        public async Task<List<TechStack>> GetUniqueNameTechStacksAsync()
+        {
+            var techStacks = await _context.TechStacks.ToListAsync();
+            techStacks = techStacks.GroupBy(ts => ts.Name).Select(group => group.First()).OrderBy(ts => ts.Name).ToList();
             return techStacks;
         }
     }

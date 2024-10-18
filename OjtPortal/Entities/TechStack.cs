@@ -13,5 +13,5 @@ namespace OjtPortal.Entities
         public List<TrainingTask>? Tasks { get; set; } = null;
         public bool IsSystemGenerated { get; set; } = false;
     }
-        
+            
 }

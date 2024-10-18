@@ -28,5 +28,15 @@ namespace OjtPortal.Controllers
         {
             return await _techStackService.GetTechStacksAsync(nameFilter, typeFilter, descriptionFilter); ;
         }
+
+        /// <summary>
+        /// Get unique tech stack names
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("unique")]
+        public async Task<List<string>> GetUniqueTechStackNamesAsync()
+        {
+            return await _techStackService.GetUniqueTechStackNames(); 
+        }
     }
 }
