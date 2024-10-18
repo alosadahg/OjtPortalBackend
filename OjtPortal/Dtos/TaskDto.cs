@@ -42,11 +42,16 @@ namespace OjtPortal.Dtos
     public class AssignedTaskDto
     {
         public int Id { get; set; }
-        public int StudentId { get; set; }
+        public int StudentTrainingId { get; set; }
         public TrainingTask? TrainingTask { get; set; }
         public TrainingTaskStatus? TaskStatus { get; set; } = TrainingTaskStatus.NotStarted;
         public int? TaskCompletionDurationInHrs { get; set; } = 0;
         public DateOnly? DueDate { get; set; } = new();
         public double Score { get; set; } = 0.0;
+    }
+
+    public class AddTaskToPlanDto : NewTaskDto
+    {
+        public int TrainingPlanId { get; set; }
     }
 }

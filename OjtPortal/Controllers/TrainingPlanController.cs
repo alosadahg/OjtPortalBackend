@@ -84,12 +84,12 @@ namespace OjtPortal.Controllers
         /// <summary>
         /// Gets training plans by mentor 
         /// </summary>
-        /// <param name="studentUserId">The unique identifier of mentor</param>
+        /// <param name="mentorId">The unique identifier of mentor</param>
         /// <returns></returns>
         [HttpGet("mentor/{mentorId}")]
-        public async Task<IActionResult> GetTrainingPlansByMentorAsync(int studentUserId)
+        public async Task<IActionResult> GetTrainingPlansByMentorAsync(int mentorId)
         {
-            var (result, error) = await _trainingPlanService.GetTrainingPlansByMentorAsync(studentUserId);
+            var (result, error) = await _trainingPlanService.GetTrainingPlansByMentorAsync(mentorId);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }

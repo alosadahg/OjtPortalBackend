@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
 using OjtPortal.Dtos;
+using OjtPortal.EmailTemplates;
+using OjtPortal.Entities;
 using OjtPortal.Enums;
 using OjtPortal.Infrastructure;
 using OjtPortal.Repositories;
+using System.Net;
 
 namespace OjtPortal.Services
 {
@@ -10,17 +13,20 @@ namespace OjtPortal.Services
     {
         Task<List<TaskDto>> GetSyntheticTasksWithFilteringAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter);
         Task<List<TaskWithStackAndSkillDto>> GetSyntheticFullTasksWithFilteringAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter);
+        Task<(TrainingPlan?, ErrorResponseModel?)> AddTaskToTrainingPlan(AddTaskToPlanDto addTaskToPlanDto);
     }
 
     public class TaskService : ITaskService
     {
         private readonly ITaskRepo _taskRepo;
         private readonly IMapper _mapper;
+        private readonly ITrainingPlanRepo _trainingPlanRepo;
 
-        public TaskService(ITaskRepo taskRepo, IMapper mapper)
+        public TaskService(ITaskRepo taskRepo, IMapper mapper, ITrainingPlanRepo trainingPlanRepo)
         {
             this._taskRepo = taskRepo;
             this._mapper = mapper;
+            this._trainingPlanRepo = trainingPlanRepo;
         }
 
         public async Task<List<TaskDto>> GetSyntheticTasksWithFilteringAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter)
@@ -53,6 +59,22 @@ namespace OjtPortal.Services
                 taskDtoList[i].SkillCount = taskList[i].Skills.Count;
             }
             return (taskDtoList);
+        }
+
+        public async Task<(TrainingPlan?, ErrorResponseModel?)> AddTaskToTrainingPlan(AddTaskToPlanDto addTaskToPlanDto)
+        {
+            var trainingPlan = await _trainingPlanRepo.GetTrainingPlanByIdAsync(addTaskToPlanDto.TrainingPlanId);
+            if (trainingPlan == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("training plan"), LoggingTemplate.MissingRecordDescription("training plan", addTaskToPlanDto.TrainingPlanId.ToString())));
+            if (addTaskToPlanDto.Difficulty.Equals(TaskDifficulty.Easy)) trainingPlan.EasyTasksCount++;
+            if (addTaskToPlanDto.Difficulty.Equals(TaskDifficulty.Medium)) trainingPlan.MediumTasksCount++;
+            if (addTaskToPlanDto.Difficulty.Equals(TaskDifficulty.Hard)) trainingPlan.HardTasksCount++;
+            trainingPlan.TotalTasks++;
+            var task = _mapper.Map<TrainingTask>(addTaskToPlanDto);
+            task.TrainingPlanId = trainingPlan.Id;
+            var updatedTrainingPlan = await _taskRepo.AddTaskToPlanAsync(trainingPlan, task);
+            if (updatedTrainingPlan == null) return (null, new(HttpStatusCode.BadRequest, "Failed to add task", "An error occured while adding"));
+            trainingPlan = updatedTrainingPlan;
+            return (trainingPlan, null);
         }
     }
 }

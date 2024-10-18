@@ -44,5 +44,18 @@ namespace OjtPortal.Controllers
         {
             return await _taskService.GetSyntheticFullTasksWithFilteringAsync(titleFilter, descriptionFilter, difficulty, techStackFilter, skillFilter);
         }
+
+        /// <summary>
+        /// Add new task to existing training plan
+        /// </summary>
+        /// <param name="addTaskToPlanDto"></param>
+        /// <returns></returns>
+        [HttpPut("add")]
+        public async Task<IActionResult> AddTaskToPlanAsync(AddTaskToPlanDto addTaskToPlanDto)
+        {
+            var (result, error) = await _taskService.AddTaskToTrainingPlan(addTaskToPlanDto);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
     }
 }

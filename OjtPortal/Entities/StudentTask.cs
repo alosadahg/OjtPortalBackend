@@ -7,9 +7,6 @@ namespace OjtPortal.Entities
     public class StudentTask
     {
         public int Id { get; set; }
-        public int StudentId {get; set;}
-        [JsonIgnore]
-        public Student? Student {get; set;}
         public int StudentTrainingId {get; set;}
         [JsonIgnore]
         public StudentTraining? StudentTraining {get; set;}

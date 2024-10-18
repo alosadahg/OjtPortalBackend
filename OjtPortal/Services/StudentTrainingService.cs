@@ -49,7 +49,7 @@ namespace OjtPortal.Services
                     var taskWithDue = assignTrainingPlanDto.TaskWithDueDtos!.Where(t => t.TaskId == task.Id).FirstOrDefault();
                     var studentTask = new StudentTask
                     {
-                        Student = student,
+                        StudentTrainingId = student.UserId,
                         TrainingTask = task,
                         DueDate = (taskWithDue != null && taskWithDue.DueDate != null) ? taskWithDue.DueDate : null
                     };
