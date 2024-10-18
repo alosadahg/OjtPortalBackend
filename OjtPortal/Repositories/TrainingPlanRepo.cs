@@ -11,6 +11,7 @@ namespace OjtPortal.Repositories
         Task<TrainingPlan?> CheckSystemGeneratedTrainingPlanAsync(string position, string division, int totalHrs, int dailyDutyHrs);
         Task<TrainingPlan?> GetTrainingPlanByIdAsync(int id);
         Task<List<TrainingPlan>> GetTrainingPlansByMentorAsync(int id);
+        Task<List<TrainingPlan>> GetTrainingPlansByDescription(string filterBy);
     }
 
     public class TrainingPlanRepo : ITrainingPlanRepo
@@ -22,6 +23,14 @@ namespace OjtPortal.Repositories
         {
             this._context = context;
             this._logger = logger;
+        }
+
+        public async Task<List<TrainingPlan>> GetTrainingPlansByDescription(string filterBy)
+        {
+            return await _context.TrainingPlans
+                .Include(t => t.Tasks).ThenInclude(t => t.Skills)
+                .Include(t => t.Tasks).ThenInclude(t => t.TechStacks)
+                .Where(t => t.Description.ToLower().Contains(filterBy.ToLower())).ToListAsync();
         }
 
         public async Task<TrainingPlan> AddTrainingPlanAsync(TrainingPlan trainingPlan)
@@ -80,7 +89,7 @@ namespace OjtPortal.Repositories
 
         public async Task<List<TrainingPlan>> GetTrainingPlansByMentorAsync(int id)
         {
-            return await _context.TrainingPlans.Include(tp => tp.Tasks).Where(tp => tp.MentorId == id).ToListAsync();
+            return await _context.TrainingPlans.Include(tp => tp.Tasks).ThenInclude(t => t.Skills).Include(tp => tp.Tasks).ThenInclude(t => t.TechStacks).Where(tp => tp.MentorId == id).ToListAsync();
         }
     }
 }

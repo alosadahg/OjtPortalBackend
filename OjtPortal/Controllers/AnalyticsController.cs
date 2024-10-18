@@ -32,6 +32,16 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
+        /// Gets overall skill frequency grouped by designation
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("skill/designation")]
+        public async Task<List<GroupKeyFrequency>> GetOverallSKillFrequencyGroupedByDesignation()
+        {
+            return await _skillService.GetSkillFrquenciesByDesignationAsync();
+        }
+
+        /// <summary>
         /// Gets the frequency by techstack name in all training plans
         /// </summary>
         /// <returns></returns>

@@ -194,6 +194,7 @@ namespace OjtPortal.Services
             if (trainingPlan == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("training plan"), LoggingTemplate.MissingRecordDescription("training plan", mentorId.ToString())));
             return (trainingPlan, null);
         }
+
     }
 
 }

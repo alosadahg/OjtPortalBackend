@@ -1,4 +1,5 @@
-﻿using OjtPortal.Entities;
+﻿using OjtPortal.Dtos;
+using OjtPortal.Entities;
 using OjtPortal.Repositories;
 
 namespace OjtPortal.Services
@@ -26,5 +27,10 @@ namespace OjtPortal.Services
             if (cityFilter != null) companies = companies.Where(c => c.Address.City.ToLower().Contains(cityFilter.ToLower())).ToList();
             return companies;
         }
+
+        /*public async Task<List<GroupKeyFrequency>> GetSkillFrequenciesByCompany()
+        {
+
+        }*/
     }
 }
