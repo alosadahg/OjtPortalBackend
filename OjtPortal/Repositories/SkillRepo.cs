@@ -8,6 +8,8 @@ namespace OjtPortal.Repositories
     {
         Task<List<Skill>> GetSkillsWithFilteringAsync(string? nameFilter, string? descriptionFilter);
         Task<List<Skill>> GetUniqueNameSkillsAsync();
+        Task<List<Skill>> GetUniqueNameSkillsWithTasksAsync();
+        Task<List<Skill>> GetSkillsByNameAsync(string name);
     }
 
     public class SkillRepo : ISkillRepo
@@ -22,7 +24,7 @@ namespace OjtPortal.Repositories
 
         public async Task<List<Skill>> GetSkillsWithFilteringAsync(string? nameFilter, string? descriptionFilter)
         {
-            var skills = await _context.Skills.Where(s => s.IsSystemGenerated).ToListAsync();
+            var skills = await _context.Skills.Include(s => s.Tasks).Where(s => s.IsSystemGenerated).ToListAsync();
             if (nameFilter != null) skills = skills.Where(s => s.Name.ToLower().Contains(nameFilter.ToLower())).ToList();
             if (descriptionFilter != null) skills = skills.Where(s => s.Description.ToLower().Contains(descriptionFilter.ToLower())).ToList();
 
@@ -38,6 +40,18 @@ namespace OjtPortal.Repositories
             var skills = await _context.Skills.ToListAsync();
             skills = skills.GroupBy(ts => ts.Name).Select(group => group.First()).OrderBy(ts => ts.Name).ToList();
             return skills;
+        }
+
+        public async Task<List<Skill>> GetUniqueNameSkillsWithTasksAsync()
+        {
+            var skills = await _context.Skills.Include(s => s.Tasks).ToListAsync();
+            skills = skills.GroupBy(ts => ts.Name).Select(group => group.First()).OrderBy(ts => ts.Name).ToList();
+            return skills;
+        }
+
+        public async Task<List<Skill>> GetSkillsByNameAsync(string name)
+        {
+            return await _context.Skills.Include(s => s.Tasks).Where(sk => sk.Name.ToLower().Equals(name.ToLower())).ToListAsync();
         }
     }
 }

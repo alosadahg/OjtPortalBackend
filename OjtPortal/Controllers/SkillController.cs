@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OjtPortal.Dtos;
 using OjtPortal.Entities;
 using OjtPortal.Services;
 
@@ -34,7 +35,17 @@ namespace OjtPortal.Controllers
         [HttpGet("unique")]
         public async Task<List<string>> GetUniqueNameSkillsAsync()
         {
-            return await _skillService.GetUniqueTechStackNames();
+            return await _skillService.GetUniqueSkillNames();
+        }
+
+        /// <summary>
+        /// Gets overall skill frequency 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("overall/frequency")]
+        public async Task<List<SkillFrequency>> GetOverallSKillFrequency()
+        {
+            return await _skillService.GetSkillFrequencyAsync();
         }
     }
 }

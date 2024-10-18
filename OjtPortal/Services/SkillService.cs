@@ -1,4 +1,5 @@
-﻿using OjtPortal.Entities;
+﻿using OjtPortal.Dtos;
+using OjtPortal.Entities;
 using OjtPortal.Repositories;
 
 namespace OjtPortal.Services
@@ -6,8 +7,8 @@ namespace OjtPortal.Services
     public interface ISkillService
     {
         Task<List<Skill>> GetSkillsWithFilteringAsync(string? nameFilter, string? descriptionFilter);
-        Task<List<Skill>> GetUniqueTechStacks();
-        Task<List<string>> GetUniqueTechStackNames();
+        Task<List<SkillFrequency>> GetSkillFrequencyAsync();
+        Task<List<string>> GetUniqueSkillNames();
     }
 
     public class SkillService : ISkillService
@@ -24,12 +25,42 @@ namespace OjtPortal.Services
             return await _skillRepo.GetSkillsWithFilteringAsync(nameFilter, descriptionFilter);
         }
 
-        public async Task<List<Skill>> GetUniqueTechStacks()
+        public async Task<List<SkillFrequency>> GetSkillFrequencyAsync()
         {
-            return await _skillRepo.GetUniqueNameSkillsAsync();
+            var allSkillNames = await GetUniqueSkillNames();
+            var frequencyDictionary = new Dictionary<string, int>();
+            foreach (var skillName in allSkillNames) {
+                var skills = await _skillRepo.GetSkillsByNameAsync(skillName);
+
+                foreach (var skill in skills)
+                {
+                    if (skill.Tasks != null && skill.Tasks.Any())
+                    {
+                        if (frequencyDictionary.ContainsKey(skill.Name))
+                        {
+                            frequencyDictionary[skill.Name] += skill.Tasks.Count;
+                        }
+                        else
+                        {
+                            frequencyDictionary[skill.Name] = skill.Tasks.Count;
+                        }
+                    }
+                } 
+            }
+
+            var frequencyList = frequencyDictionary
+                .Select(kvp => new SkillFrequency
+                {
+                    Name = kvp.Key,
+                    Usage = kvp.Value
+                })
+                .OrderByDescending(o => o.Usage)
+                .ToList();
+
+            return frequencyList;
         }
 
-        public async Task<List<string>> GetUniqueTechStackNames()
+        public async Task<List<string>> GetUniqueSkillNames()
         {
             var stacks = await _skillRepo.GetUniqueNameSkillsAsync();
             var names = new List<string>();
