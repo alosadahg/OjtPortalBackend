@@ -45,7 +45,6 @@ namespace OjtPortal.Dtos
         public int StudentTrainingId { get; set; }
         public TrainingTask? TrainingTask { get; set; }
         public TrainingTaskStatus? TaskStatus { get; set; } = TrainingTaskStatus.NotStarted;
-        public int? TaskCompletionDurationInHrs { get; set; } = 0;
         public DateOnly? DueDate { get; set; } = new();
         public double Score { get; set; } = 0.0;
     }
