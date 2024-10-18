@@ -40,23 +40,6 @@ namespace OjtPortal.Controllers
             return await _techStackService.GetUniqueTechStackNames(); 
         }
 
-        /// <summary>
-        /// Gets the frequency by techstack name in all training plans
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("name/overall/frequency")]
-        public async Task<List<KeyFrequency>> GetOverallTechStackNameFrequency()
-        {
-            return await _techStackService.GetTechStackFrequencyAsync();
-        }
-
-        /// <summary>
-        /// Gets the frequency by techstack type in all training plans
-        /// </summary>
-        [HttpGet("type/overall/frequency")]
-        public async Task<List<KeyFrequency>> GetOverallTechStackTypeFrequency()
-        {
-            return await _techStackService.GetTechStackTypeFrequencyAsync();
-        }
+       
     }
 }

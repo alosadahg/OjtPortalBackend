@@ -37,15 +37,5 @@ namespace OjtPortal.Controllers
         {
             return await _skillService.GetUniqueSkillNames();
         }
-
-        /// <summary>
-        /// Gets overall skill frequency in all training plans
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("overall/frequency")]
-        public async Task<List<KeyFrequency>> GetOverallSKillFrequency()
-        {
-            return await _skillService.GetSkillFrequencyAsync();
-        }
     }
 }
