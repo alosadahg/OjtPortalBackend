@@ -9,6 +9,7 @@ namespace OjtPortal.Repositories
         Task<Company> AddCompanyAsync(Company newCompany);
         Task<bool> IsCompanyExistingAsync(Company newCompany);
         Task<Company?> FindCompanyByNameAsync(string companyName);
+        Task<List<Company>> GetCompaniesAsync();
     }
 
     public class CompanyRepo : ICompanyRepo
@@ -42,6 +43,11 @@ namespace OjtPortal.Repositories
         public async Task<Company?> FindCompanyByNameAsync(string companyName)
         {
             return await _context.Companies.FirstOrDefaultAsync(c => c.CompanyName == companyName);
+        }
+
+        public async Task<List<Company>> GetCompaniesAsync()
+        {
+            return await _context.Companies.ToListAsync();
         }
     }
 }

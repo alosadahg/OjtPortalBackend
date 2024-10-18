@@ -95,6 +95,7 @@ builder.Services.AddTransient<ITechStackService, TechStackService>();
 builder.Services.AddTransient<ISkillService, SkillService>();
 builder.Services.AddTransient<IStudentTrainingService, StudentTrainingService>();
 builder.Services.AddTransient<IStudentTaskService, StudentTaskService>();
+builder.Services.AddTransient<ICompanyService, CompanyService>();
 
 // Scoped repositories
 builder.Services.AddScoped<IHolidayRepo, HolidayRepo>();
