@@ -24,7 +24,7 @@ namespace OjtPortal.Repositories
             return await _context.StudentTasks.Include(st => st.StudentTraining).ThenInclude(st => st.TrainingPlan).Include(st => st.TrainingTask).ThenInclude(t => t.Skills).Include(st => st.TrainingTask).ThenInclude(t => t.TechStacks).FirstOrDefaultAsync(st => st.TrainingTaskId == taskId && st.StudentTrainingId == studentId);
         }
 
-        public async Task<StudentTask> UpdateStudentTaskStatusAsync(StudentTask task, TrainingTaskStatus updatedStatus)
+        public async Task<StudentTask?> UpdateStudentTaskStatusAsync(StudentTask task, TrainingTaskStatus updatedStatus)
         {
             try
             {

@@ -17,6 +17,7 @@ namespace OjtPortal.Services
         Task<(LogbookDto?, ErrorResponseModel?)> AddRemarksAsync(long logbookId, int mentorId, string remarks);
         Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByStudentWithFilteringAsync(int studentId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate);
         Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByMentorWithFilteringAsync(int mentorId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate);
+        Task<List<LogbookDto>> GetLogbooksWithFilteringAsync(LogbookStatus? status, DateOnly? startDate, DateOnly? endDate);
     }
 
     public class LogbookEntryService : ILogbookEntryService
@@ -105,6 +106,15 @@ namespace OjtPortal.Services
             var logbookDtoList = new List<LogbookDto>();
             logbookList.ForEach(l => logbookDtoList.Add(_mapper.Map<LogbookDto>(l)));
             return (logbookDtoList, null);
+        }
+
+        public async Task<List<LogbookDto>> GetLogbooksWithFilteringAsync(LogbookStatus? status, DateOnly? startDate, DateOnly? endDate)
+        {
+            var logbookList = await _logbookEntryRepo.GetLogbooksAsync();
+            if (status != null) logbookList = logbookList.Where(l => l.LogbookStatus == status).ToList();
+            if (startDate != null) logbookList = logbookList.Where(l => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(l.CreationTimestamp!.Value)) >= startDate).ToList();
+            if (endDate != null) logbookList = logbookList.Where(l => DateOnly.FromDateTime(UtcDateTimeHelper.FromUtcToLocal(l.CreationTimestamp!.Value)) <= endDate).ToList();
+            return _mapper.Map<List<LogbookDto>>(logbookList);
         }
 
         public async Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByMentorWithFilteringAsync(int mentorId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate)

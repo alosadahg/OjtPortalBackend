@@ -69,7 +69,7 @@ namespace OjtPortal.Controllers
         /// Update task status
         /// </summary>
         /// /// <param name="userId">The student user id</param>
-        /// <param name="taskId">Task id may be retrieved from getting the student training plan</param>
+        /// <param name="taskId">Task id may be retrieved from getting the student training plan (trainingTaskId)</param>
         /// <param name="updatedStatus">Updated task status</param>
         /// <returns></returns>
         [HttpPatch("{taskId}/user/{userId}")]

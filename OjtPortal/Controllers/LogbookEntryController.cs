@@ -109,5 +109,20 @@ namespace OjtPortal.Controllers
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Gets all logbooks with filtering
+        /// </summary>
+        /// <param name="logbookStatus">The status of the logbook</param>
+        /// <param name="start">Start date for filtering (format: yyyy-mm-dd)</param>
+        /// <param name="end">End date for filtering (format: yyyy-mm-dd)</param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<LogbookDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpGet]
+        public async Task<IActionResult> GetLogbooksWithFiltering(LogbookStatus? logbookStatus, DateOnly? start, DateOnly? end)
+        {
+            return Ok(await _logbookEntryService.GetLogbooksWithFilteringAsync(logbookStatus, start, end));
+        }
     }
 }
