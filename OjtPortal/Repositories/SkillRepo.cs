@@ -51,7 +51,7 @@ namespace OjtPortal.Repositories
 
         public async Task<List<Skill>> GetSkillsByNameAsync(string name)
         {
-            return await _context.Skills.Include(s => s.Tasks).Where(sk => sk.Name.ToLower().Equals(name.ToLower())).ToListAsync();
+            return await _context.Skills.Include(s => s.Tasks).Where(sk => sk.Name.ToLower().Contains(name.ToLower())).ToListAsync();
         }
     }
 }

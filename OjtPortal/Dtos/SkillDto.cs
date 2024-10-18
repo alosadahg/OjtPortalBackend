@@ -10,7 +10,7 @@
         public string Description { get; set; } = string.Empty;
     }
 
-    public class SkillFrequency
+    public class KeyFrequency
     {
         public string Name { get; set; } = string.Empty;
         public int Usage { get; set; } = 0;

@@ -7,7 +7,7 @@ namespace OjtPortal.Services
     public interface ISkillService
     {
         Task<List<Skill>> GetSkillsWithFilteringAsync(string? nameFilter, string? descriptionFilter);
-        Task<List<SkillFrequency>> GetSkillFrequencyAsync();
+        Task<List<KeyFrequency>> GetSkillFrequencyAsync();
         Task<List<string>> GetUniqueSkillNames();
     }
 
@@ -25,7 +25,7 @@ namespace OjtPortal.Services
             return await _skillRepo.GetSkillsWithFilteringAsync(nameFilter, descriptionFilter);
         }
 
-        public async Task<List<SkillFrequency>> GetSkillFrequencyAsync()
+        public async Task<List<KeyFrequency>> GetSkillFrequencyAsync()
         {
             var allSkillNames = await GetUniqueSkillNames();
             var frequencyDictionary = new Dictionary<string, int>();
@@ -49,7 +49,7 @@ namespace OjtPortal.Services
             }
 
             var frequencyList = frequencyDictionary
-                .Select(kvp => new SkillFrequency
+                .Select(kvp => new KeyFrequency
                 {
                     Name = kvp.Key,
                     Usage = kvp.Value

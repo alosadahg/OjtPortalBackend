@@ -43,7 +43,7 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("overall/frequency")]
-        public async Task<List<SkillFrequency>> GetOverallSKillFrequency()
+        public async Task<List<KeyFrequency>> GetOverallSKillFrequency()
         {
             return await _skillService.GetSkillFrequencyAsync();
         }
