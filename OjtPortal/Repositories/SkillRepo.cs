@@ -7,6 +7,7 @@ namespace OjtPortal.Repositories
     public interface ISkillRepo
     {
         Task<List<Skill>> GetSkillsWithFilteringAsync(string? nameFilter, string? descriptionFilter);
+        Task<List<Skill>> GetUniqueNameSkillsAsync();
     }
 
     public class SkillRepo : ISkillRepo
@@ -29,6 +30,13 @@ namespace OjtPortal.Repositories
                         .Select(group => group.First())
                         .ToList();
             
+            return skills;
+        }
+
+        public async Task<List<Skill>> GetUniqueNameSkillsAsync()
+        {
+            var skills = await _context.Skills.ToListAsync();
+            skills = skills.GroupBy(ts => ts.Name).Select(group => group.First()).OrderBy(ts => ts.Name).ToList();
             return skills;
         }
     }

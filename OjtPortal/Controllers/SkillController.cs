@@ -26,5 +26,15 @@ namespace OjtPortal.Controllers
         {
             return await _skillService.GetSkillsWithFilteringAsync(nameFilter, descriptionFilter);
         }
+
+        /// <summary>
+        /// Gets unique skill names
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("unique")]
+        public async Task<List<string>> GetUniqueNameSkillsAsync()
+        {
+            return await _skillService.GetUniqueTechStackNames();
+        }
     }
 }
