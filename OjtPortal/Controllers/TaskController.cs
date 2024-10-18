@@ -79,5 +79,20 @@ namespace OjtPortal.Controllers
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Update task score
+        /// </summary>
+        /// <param name="userId">The student user id</param>
+        /// <param name="taskId">Task id may be retrieved from getting the student training plan (trainingTaskId)</param>
+        /// <param name="score">Score is in (1.0 to 5.0) grading with 1.0 being the lowest</param>
+        /// <returns></returns>
+        [HttpPatch("{taskId}/user/{userId}/score")]
+        public async Task<IActionResult> UpdateTaskScoreAsync(int userId, int taskId, double score)
+        {
+            var (result, error) = await _studentTaskService.UpdateTaskScore(userId, taskId, score);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
     }
 }

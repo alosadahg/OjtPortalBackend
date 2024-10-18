@@ -9,6 +9,7 @@ namespace OjtPortal.Repositories
     {
         Task<StudentTask?> GetStudentTaskByIdAsync(int studentId, int taskId);
         Task<StudentTask?> UpdateStudentTaskStatusAsync(StudentTask task, TrainingTaskStatus updatedStatus);
+        Task<StudentTask?> UpdateStudentTaskScoreAsync(StudentTask task, double score);
     }
 
     public class StudentTaskRepo : IStudentTaskRepo
@@ -29,6 +30,20 @@ namespace OjtPortal.Repositories
             try
             {
                 task.TaskStatus = updatedStatus;
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            return task;
+        }
+
+        public async Task<StudentTask?> UpdateStudentTaskScoreAsync(StudentTask task, double score)
+        {
+            try
+            {
+                task.Score = score;
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
