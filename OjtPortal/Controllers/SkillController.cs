@@ -39,7 +39,7 @@ namespace OjtPortal.Controllers
         }
 
         /// <summary>
-        /// Gets overall skill frequency 
+        /// Gets overall skill frequency in all training plans
         /// </summary>
         /// <returns></returns>
         [HttpGet("overall/frequency")]
