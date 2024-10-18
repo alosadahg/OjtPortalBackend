@@ -51,7 +51,7 @@ namespace OjtPortal.Services
             var frequencyList = frequencyDictionary
                 .Select(kvp => new KeyFrequency
                 {
-                    Name = kvp.Key,
+                    Key = kvp.Key,
                     Usage = kvp.Value
                 })
                 .OrderByDescending(o => o.Usage)

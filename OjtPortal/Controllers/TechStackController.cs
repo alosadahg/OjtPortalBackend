@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
+using OjtPortal.Dtos;
 using OjtPortal.Entities;
 using OjtPortal.Services;
 
@@ -37,6 +38,19 @@ namespace OjtPortal.Controllers
         public async Task<List<string>> GetUniqueTechStackNamesAsync()
         {
             return await _techStackService.GetUniqueTechStackNames(); 
+        }
+
+        [HttpGet("name/overall/frequency")]
+        public async Task<List<KeyFrequency>> GetOverallTechStackNameFrequency()
+        {
+            return await _techStackService.GetTechStackFrequencyAsync();
+        }
+
+
+        [HttpGet("type/overall/frequency")]
+        public async Task<List<KeyFrequency>> GetOverallTechStackTypeFrequency()
+        {
+            return await _techStackService.GetTechStackTypeFrequencyAsync();
         }
     }
 }

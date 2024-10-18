@@ -8,6 +8,9 @@ namespace OjtPortal.Repositories
     {
         Task<List<TechStack>> GetTechStacksAsync(string? nameFilter, string? typeFilter, string? descriptionFilter);
         Task<List<TechStack>> GetUniqueNameTechStacksAsync();
+        Task<List<TechStack>> GetUniqueTypeTechStacksAsync();
+        Task<List<TechStack>> GetTechStacksByNameAsync(string name);
+        Task<List<TechStack>> GetTechStacksByTypeAsync(string type);
     }
 
     public class TechStackRepo : ITechStackRepo
@@ -39,6 +42,23 @@ namespace OjtPortal.Repositories
             var techStacks = await _context.TechStacks.ToListAsync();
             techStacks = techStacks.GroupBy(ts => ts.Name).Select(group => group.First()).OrderBy(ts => ts.Name).ToList();
             return techStacks;
+        }
+
+        public async Task<List<TechStack>> GetUniqueTypeTechStacksAsync()
+        {
+            var techStacks = await _context.TechStacks.ToListAsync();
+            techStacks = techStacks.GroupBy(ts => ts.Type).Select(group => group.First()).OrderBy(ts => ts.Type).ToList();
+            return techStacks;
+        }
+
+        public async Task<List<TechStack>> GetTechStacksByNameAsync(string name)
+        {
+            return await _context.TechStacks.Include(s => s.Tasks).Where(sk => sk.Name.ToLower().Contains(name.ToLower())).ToListAsync();
+        }
+
+        public async Task<List<TechStack>> GetTechStacksByTypeAsync(string type)
+        {
+            return await _context.TechStacks.Include(s => s.Tasks).Where(sk => sk.Type.ToLower().Contains(type.ToLower())).ToListAsync();
         }
     }
 }
