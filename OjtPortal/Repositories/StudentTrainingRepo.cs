@@ -43,5 +43,7 @@ namespace OjtPortal.Repositories
         {
             return await _context.StudentTrainings.Include(st => st.TrainingPlan).Include(st => st.Tasks).ThenInclude(t => t.TrainingTask).ThenInclude(t => t.TechStacks).Include(st => st.Tasks).ThenInclude(t => t.TrainingTask).ThenInclude(t => t.Skills).FirstOrDefaultAsync(st => st.StudentId == studentId);
         }
+
+
     }
 }

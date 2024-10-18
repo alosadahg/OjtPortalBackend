@@ -16,6 +16,7 @@ namespace OjtPortal.Entities
         [Column(TypeName = "varchar(50)")]
         public TrainingTaskStatus? TaskStatus { get; set; } = TrainingTaskStatus.NotStarted;
         public DateOnly? DueDate { get; set; } = new();
+        public DateOnly? DateCompleted { get; set; } = null;
         public double Score { get; set; } = 0.0;
     }
 }

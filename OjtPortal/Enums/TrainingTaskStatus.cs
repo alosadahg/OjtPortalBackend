@@ -7,11 +7,13 @@ namespace OjtPortal.Enums
     [JsonConverter(typeof(EnumDescriptionConverter<TrainingTaskStatus>))]
     public enum TrainingTaskStatus
     {
-        [Description("Not Started")]
+        [Description("NotStarted")]
         NotStarted,
-        [Description("In Progress")]
+        [Description("InProgress")]
         InProgress,
         [Description("Done")]
-        Done
+        Done,
+        [Description("DoneLate")]
+        DoneLate
     }
 }

@@ -21,12 +21,14 @@ namespace OjtPortal.Services
         private readonly ITaskRepo _taskRepo;
         private readonly IMapper _mapper;
         private readonly ITrainingPlanRepo _trainingPlanRepo;
+        private readonly IStudentTaskRepo _studentTaskRepo;
 
-        public TaskService(ITaskRepo taskRepo, IMapper mapper, ITrainingPlanRepo trainingPlanRepo)
+        public TaskService(ITaskRepo taskRepo, IMapper mapper, ITrainingPlanRepo trainingPlanRepo, IStudentTaskRepo studentTaskRepo)
         {
             this._taskRepo = taskRepo;
             this._mapper = mapper;
             this._trainingPlanRepo = trainingPlanRepo;
+            this._studentTaskRepo = studentTaskRepo;
         }
 
         public async Task<List<TaskDto>> GetSyntheticTasksWithFilteringAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter)
@@ -76,5 +78,6 @@ namespace OjtPortal.Services
             trainingPlan = updatedTrainingPlan;
             return (trainingPlan, null);
         }
+
     }
 }

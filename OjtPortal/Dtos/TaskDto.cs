@@ -53,4 +53,15 @@ namespace OjtPortal.Dtos
     {
         public int TrainingPlanId { get; set; }
     }
+
+    public class StudentTaskDto
+    {
+        public int Id { get; set; }
+        public int StudentTrainingId { get; set; }
+        public TrainingTask? TrainingTask { get; set; }
+        public TrainingTaskStatus? TaskStatus { get; set; }
+        public DateOnly? DueDate { get; set; } = new();
+        public DateOnly? DateCompleted { get; set; } = new();
+        public double Score { get; set; } = 0.0;
+    }
 }

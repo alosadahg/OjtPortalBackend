@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
+using OjtPortal.Entities;
 using OjtPortal.Enums;
 using OjtPortal.Services;
 
@@ -11,10 +14,14 @@ namespace OjtPortal.Controllers
     public class TaskController : OjtPortalBaseController
     {
         private readonly ITaskService _taskService;
+        private readonly IStudentTaskService _studentTaskService;
+        private readonly UserManager<User> _userManager;
 
-        public TaskController(ITaskService taskService)
+        public TaskController(ITaskService taskService, IStudentTaskService studentTaskService, UserManager<User> userManager)
         {
             this._taskService = taskService;
+            this._studentTaskService = studentTaskService;
+            this._userManager = userManager;
         }
 
         /// <summary>
@@ -54,6 +61,21 @@ namespace OjtPortal.Controllers
         public async Task<IActionResult> AddTaskToPlanAsync(AddTaskToPlanDto addTaskToPlanDto)
         {
             var (result, error) = await _taskService.AddTaskToTrainingPlan(addTaskToPlanDto);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Update task status
+        /// </summary>
+        /// /// <param name="userId">The student user id</param>
+        /// <param name="taskId">Task id may be retrieved from getting the student training plan</param>
+        /// <param name="updatedStatus">Updated task status</param>
+        /// <returns></returns>
+        [HttpPatch("{taskId}/user/{userId}")]
+        public async Task<IActionResult> UpdateTaskStatusAsync(int userId,int taskId, TrainingTaskStatus updatedStatus)
+        {
+            var (result, error) = await _studentTaskService.UpdateTaskStatus(userId, taskId, updatedStatus);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
