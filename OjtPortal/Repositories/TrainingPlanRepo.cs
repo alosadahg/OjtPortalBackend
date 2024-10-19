@@ -36,7 +36,7 @@ namespace OjtPortal.Repositories
         public async Task<TrainingPlan> AddTrainingPlanAsync(TrainingPlan trainingPlan)
         {
             var existingPlans = await FetchExistingSystemGeneratedTrainingPlansAsync(trainingPlan);
-            if (existingPlans != null)
+            if (existingPlans != null && existingPlans.Count > 0)
             {
                 foreach (var existingPlan in existingPlans)
                 {
