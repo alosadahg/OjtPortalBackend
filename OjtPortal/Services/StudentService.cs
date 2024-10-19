@@ -117,7 +117,13 @@ namespace OjtPortal.Services
                 HrsToRender = studentEntity.HrsToRender,
                 DailyDutyHrs = studentEntity.Shift.DailyDutyHrs
             };
-            await _trainingPlanService.GenerateSyntheticTrainingPlanAsync(request);
+            try
+            {
+                await _trainingPlanService.GenerateSyntheticTrainingPlanAsync(request);
+            } catch(Exception ex)
+            {
+
+            }
             _cacheService.RemoveFromCache("trainingPlanList", "");
 
             if (studentEntity == null) return (null, new(HttpStatusCode.UnprocessableEntity, LoggingTemplate.DuplicateRecordTitle(key), LoggingTemplate.DuplicateRecordDescription(key, newStudent.Email)));
