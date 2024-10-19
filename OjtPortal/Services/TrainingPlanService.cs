@@ -44,7 +44,13 @@ namespace OjtPortal.Services
         public async Task<(TrainingPlan?, ErrorResponseModel?)> AddTrainingPlanAsync(NewTrainingPlanDto newTrainingPlan)
         {
             var trainingPlan = _mapper.Map<TrainingPlan>(newTrainingPlan);
-            if (trainingPlan.MentorId == null) trainingPlan.IsSystemGenerated = true;
+            if (trainingPlan.MentorId == null)
+            {
+                trainingPlan.IsSystemGenerated = true;
+                trainingPlan.Tasks.ForEach(t => t.IsSystemGenerated = true);
+                trainingPlan.Tasks.ForEach(t => t.Skills.ForEach(s => s.IsSystemGenerated = true));
+                trainingPlan.Tasks.ForEach(t => t.TechStacks.ForEach(ts => ts.IsSystemGenerated = true));
+            }
             foreach(var task in trainingPlan.Tasks)
             {
                 if(task.Difficulty == TaskDifficulty.Easy) trainingPlan.EasyTasksCount++;
