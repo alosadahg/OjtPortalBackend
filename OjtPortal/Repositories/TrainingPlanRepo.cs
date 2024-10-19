@@ -6,7 +6,7 @@ namespace OjtPortal.Repositories
 {
     public interface ITrainingPlanRepo
     {
-        Task<TrainingPlan> AddTrainingPlanAsync(TrainingPlan trainingPlan);
+        Task<TrainingPlan?> AddTrainingPlanAsync(TrainingPlan trainingPlan);
         Task<List<TrainingPlan>?> FetchExistingSystemGeneratedTrainingPlansAsync(TrainingPlan trainingPlan);
         Task<TrainingPlan?> CheckSystemGeneratedTrainingPlanAsync(string position, string division, int totalHrs, int dailyDutyHrs);
         Task<TrainingPlan?> GetTrainingPlanByIdAsync(int id);
@@ -18,11 +18,13 @@ namespace OjtPortal.Repositories
     {
         private readonly OjtPortalContext _context;
         private readonly ILogger<TrainingPlanRepo> _logger;
+        private readonly IMentorRepo _mentorRepo;
 
-        public TrainingPlanRepo(OjtPortalContext context, ILogger<TrainingPlanRepo> logger)
+        public TrainingPlanRepo(OjtPortalContext context, ILogger<TrainingPlanRepo> logger, IMentorRepo mentorRepo)
         {
             this._context = context;
             this._logger = logger;
+            this._mentorRepo = mentorRepo;
         }
 
         public async Task<List<TrainingPlan>> GetTrainingPlansByDescription(string filterBy)
@@ -33,19 +35,31 @@ namespace OjtPortal.Repositories
                 .Where(t => t.Description.ToLower().Contains(filterBy.ToLower())).ToListAsync();
         }
 
-        public async Task<TrainingPlan> AddTrainingPlanAsync(TrainingPlan trainingPlan)
+        public async Task<TrainingPlan?> AddTrainingPlanAsync(TrainingPlan trainingPlan)
         {
-            var existingPlans = await FetchExistingSystemGeneratedTrainingPlansAsync(trainingPlan);
-            if (existingPlans != null && existingPlans.Count > 0)
+            try
             {
-                foreach (var existingPlan in existingPlans)
+                var existingPlans = await FetchExistingSystemGeneratedTrainingPlansAsync(trainingPlan);
+                if (existingPlans != null && existingPlans.Count > 0)
                 {
-                    if (trainingPlan.MentorId != null && trainingPlan.MentorId == existingPlan.MentorId) return existingPlan;
-                    if (trainingPlan.MentorId == null) return existingPlan;
+                    foreach (var existingPlan in existingPlans)
+                    {
+                        if (trainingPlan.MentorId != null && trainingPlan.MentorId == existingPlan.MentorId) return existingPlan;
+                        if (trainingPlan.MentorId == null) return existingPlan;
+                    }
                 }
+                if(trainingPlan.MentorId != null)
+                {
+                    var mentor = await _mentorRepo.GetMentorByIdAsync(trainingPlan.MentorId.Value, false, false);
+                    if (mentor != null) trainingPlan.Mentor = mentor;
+                    else trainingPlan.MentorId = null;
+                }
+                _context.TrainingPlans.Add(trainingPlan);
+                await _context.SaveChangesAsync();
+            } catch (Exception ex)
+            {
+                return null;
             }
-            _context.TrainingPlans.Add(trainingPlan);
-            await _context.SaveChangesAsync();
             return trainingPlan;
         }
 
