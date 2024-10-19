@@ -141,10 +141,10 @@ namespace OjtPortal.Services
             {
                 return (existingTrainingPlan, null);
             }
-            int maximumAttempts = 3;
+            int maximumAttempts = 8;
             if (string.IsNullOrEmpty(requestDto.Designation) || string.IsNullOrEmpty(requestDto.Division) || requestDto.HrsToRender <= 0 || requestDto.DailyDutyHrs <= 0) return(null, null);
             var errorMessage = string.Empty;
-            for (int i = 1; i <= 3; i++)
+            for (int i = 1; i <= maximumAttempts; i++)
             {
                 _logger.LogInformation("Executing post GenerateSyntheticTrainingPlanAsync in attempt " + i);
                 requestDto.Division = requestDto.Division.Replace("/", " or ");
