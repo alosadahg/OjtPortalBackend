@@ -92,7 +92,7 @@ namespace OjtPortal.Services
              //if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.TeacherId.ToString()))));
 
             key = "student";
-            var (createdUser, error) = await _userService.CreateUserAsync(newStudent, newStudent.Password, UserType.Student);
+            var (createdUser, error) = await _userService.CreateUserAsync(newStudent, newStudent.Password!, UserType.Student);
             if(error != null) return (null, error);
 
             // Linking the student to its object fields
@@ -110,23 +110,31 @@ namespace OjtPortal.Services
             }
 
             studentEntity = await _studentRepo.AddStudentAsync(studentEntity);
-            var request = new TrainingPlanRequestDto
-            {
-                Designation = studentEntity.Designation,
-                Division = studentEntity.Division,
-                HrsToRender = studentEntity.HrsToRender,
-                DailyDutyHrs = studentEntity.Shift.DailyDutyHrs
-            };
-            try
-            {
-                await _trainingPlanService.GenerateSyntheticTrainingPlanAsync(request);
-            } catch(Exception ex)
-            {
-
-            }
-            _cacheService.RemoveFromCache("trainingPlanList", "");
-
             if (studentEntity == null) return (null, new(HttpStatusCode.UnprocessableEntity, LoggingTemplate.DuplicateRecordTitle(key), LoggingTemplate.DuplicateRecordDescription(key, newStudent.Email)));
+
+            if (!string.IsNullOrEmpty(studentEntity.Designation)
+                && !string.IsNullOrEmpty(studentEntity.Division)
+                && studentEntity.HrsToRender > 0
+                && studentEntity.Shift != null
+                && studentEntity.Shift.DailyDutyHrs > 0)
+            {
+                var request = new TrainingPlanRequestDto
+                {
+                    Designation = studentEntity.Designation,
+                    Division = studentEntity.Division,
+                    HrsToRender = studentEntity.HrsToRender,
+                    DailyDutyHrs = studentEntity.Shift.DailyDutyHrs
+                };
+                try
+                {
+                    await _trainingPlanService.GenerateSyntheticTrainingPlanAsync(request);
+                }
+                catch (Exception)
+                {
+
+                }
+                _cacheService.RemoveFromCache("trainingPlanList", "");
+            }
 
             if (createdUser!.IsPasswordGenerated)
             {

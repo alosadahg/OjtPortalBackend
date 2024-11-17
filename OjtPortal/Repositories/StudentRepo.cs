@@ -42,6 +42,8 @@ namespace OjtPortal.Repositories
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(newStudent.Designation)) newStudent.Designation = string.Empty;
+                if (string.IsNullOrWhiteSpace(newStudent.Division)) newStudent.Division = string.Empty;
                 if (await IsStudentExistingAsync(newStudent)) return null;
                 await _context.Students.AddAsync(newStudent);
                 await _context.SaveChangesAsync();
@@ -93,16 +95,9 @@ namespace OjtPortal.Repositories
 
         public async Task<bool> IsStudentExistingAsync(Student student)
         {
-            var containsObject = await _context.Students.ContainsAsync(student);
-            if(!containsObject)
-            {
-                if (!string.IsNullOrEmpty(student.StudentId))
-                {
-                    containsObject = (await _context.Students
-                        .Where(s => s.StudentId.Equals(student.StudentId))
-                        .FirstOrDefaultAsync() != null) ? true : false;
-                }
-            }
+            var containsObject = (!string.IsNullOrEmpty(student.StudentId)) 
+                ? (await _context.Students.FirstOrDefaultAsync(s => s.StudentId == student.StudentId) != null)
+                : await _context.Students.ContainsAsync(student);
             return containsObject;
         }
 
