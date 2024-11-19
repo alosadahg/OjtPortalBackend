@@ -30,6 +30,7 @@ namespace OjtPortal.Context
                 .HasIndex(t => t.Name);
             modelBuilder.Entity<Skill>()
                 .HasIndex(s => s.Name);
+            modelBuilder.Entity<SubMentor>().ToTable("SubMentors");
         }
 
         public DbSet<User> Users { get; set; }
@@ -50,5 +51,6 @@ namespace OjtPortal.Context
         public DbSet<Skill> Skills { get; set; }
         public DbSet<StudentTask> StudentTasks { get; set; }
         public DbSet<StudentTraining> StudentTrainings { get; set; }
+        public DbSet<SubMentor> SubMentors { get; set; }
     }
 }

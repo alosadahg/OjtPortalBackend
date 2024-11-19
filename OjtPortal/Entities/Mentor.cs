@@ -18,6 +18,8 @@ namespace OjtPortal.Entities
         public string Designation { get; set; } = string.Empty;
         [JsonIgnore]
         public IEnumerable<Student>? Students { get; set; }
+        [JsonIgnore]
+        public IEnumerable<SubMentor>? SubMentors { get; set; }
 
         public Mentor()
         {
