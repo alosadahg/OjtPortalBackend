@@ -133,7 +133,7 @@ namespace OjtPortal.Services
             var studentEntity = _mapper.Map<Student>(studentToAddDto);
             var key = "teacher";
 
-            var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(studentToAddDto.InstructorId!.Value, true);
+            var existingTeacher = await _teacherRepository.GetTeacherByIdAsync(studentToAddDto.InstructorId, true);
             if (existingTeacher == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, studentToAddDto.InstructorId!.ToString()))));
             studentEntity.Instructor = existingTeacher;
 

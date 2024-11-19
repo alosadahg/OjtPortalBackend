@@ -131,7 +131,7 @@ namespace OjtPortal.Services
                         trainingPlan = response;
                         if (trainingPlan == null) continue;
                         trainingPlan = await _trainingPlanRepo.AddTrainingPlanAsync(trainingPlan);
-                        if(!trainingPlanList.Contains(trainingPlan)) trainingPlanList.Add(trainingPlan);
+                        if(trainingPlan != null && !trainingPlanList.Contains(trainingPlan)) trainingPlanList.Add(trainingPlan);
                     }
                     _cache.AddToCache("trainingPlanList", "", trainingPlanList);
                     return (_mapper.Map<List<TrainingPlanDto>>(trainingPlanList), null);

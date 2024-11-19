@@ -8,7 +8,7 @@ namespace OjtPortal.Repositories
     {
         Task<Mentor?> AddMentorAsync(Mentor newMentor);
         Task<bool> IsMentorExisting(Mentor mentor);
-        Task<Mentor?> GetMentorByIdAsync(int id, bool includeStudents, bool includeStudentsAttendance);
+        Task<Mentor?> GetMentorByIdAsync(int id, bool includeStudents, bool includeStudentsAttendance, bool includeSubmentors);
     }
 
     public class MentorRepo : IMentorRepo
@@ -33,7 +33,7 @@ namespace OjtPortal.Repositories
             return await _context.Mentors.ContainsAsync(mentor);
         }
 
-        public async Task<Mentor?> GetMentorByIdAsync(int id, bool includeStudents, bool includeStudentsAttendance)
+        public async Task<Mentor?> GetMentorByIdAsync(int id, bool includeStudents, bool includeStudentsAttendance, bool includeSubMentors = false)
         {
             IQueryable<Mentor> query = _context.Mentors.Include(m => m.User).Include(m => m.Company);
             if (includeStudents && includeStudentsAttendance)
@@ -42,6 +42,10 @@ namespace OjtPortal.Repositories
             {
                 query = query.Include(m => m.Students)!.ThenInclude(s => s.User);
                 query = query.Include(m => m.Students)!.ThenInclude(s => s.Instructor).ThenInclude(i => i.User);
+            }
+            if(includeSubMentors)
+            {
+                query = query.Include(m => m.SubMentors);
             }
             return await query.FirstOrDefaultAsync(m => m.UserId == id);
         }

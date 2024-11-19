@@ -44,7 +44,7 @@ namespace OjtPortal.Services
 
         public async Task<(FullMentorDto?, ErrorResponseModel?)> AddMentorAsync(NewMentorDto newMentorDto)
         {
-            var (createdUser, error) = await _userService.CreateUserAsync(newMentorDto, newMentorDto.Password, UserType.Mentor);
+            var (createdUser, error) = await _userService.CreateUserAsync(newMentorDto, newMentorDto.Password!, UserType.Mentor);
             if (error != null) return (null, error);
             var mentorEntity = _mapper.Map<Mentor>(newMentorDto);
             mentorEntity.User = createdUser!.User;
@@ -70,7 +70,7 @@ namespace OjtPortal.Services
 
         public async Task<(FullMentorDto?, ErrorResponseModel?)> GetMentorByIdAsync(int id, bool includeStudent)
         {
-            var existingMentor = await _mentorRepository.GetMentorByIdAsync(id, includeStudent, false);
+            var existingMentor = await _mentorRepository.GetMentorByIdAsync(id, includeStudent, false, false);
             if (existingMentor == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("mentor"), LoggingTemplate.MissingRecordDescription("mentor", $"{id}")));
             var mentorDto = _mapper.Map<FullMentorDto>(existingMentor);
             if (existingMentor.Students != null)
@@ -85,7 +85,7 @@ namespace OjtPortal.Services
             var studentEntity = _mapper.Map<Student>(newStudent);
             var key = "mentor";
 
-            var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId, true, false);
+            var existingMentor = await _mentorRepository.GetMentorByIdAsync(newStudent.MentorId, true, false, false);
             if (existingMentor == null) return (null, new(HttpStatusCode.NotFound, new ErrorModel(LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, newStudent.MentorId.ToString()))));
             studentEntity.Mentor = existingMentor;
 
@@ -99,7 +99,7 @@ namespace OjtPortal.Services
                 return (studentDto, null);
             }
 
-            if (studentEntity.StartDate != null && studentEntity.HrsToRender > 0)
+            if (studentEntity.Shift != null)
             {
                 studentEntity.ManDays = _studentService.CalculateManDays(studentEntity.HrsToRender, studentEntity.Shift.DailyDutyHrs);
                 var (endDate, dateError) = await _studentService.GetEndDateAsync(studentEntity.StartDate, studentEntity.ManDays, newStudent.Shift.IncludePublicPhHolidays, newStudent.Shift.WorkingDays);
@@ -108,22 +108,25 @@ namespace OjtPortal.Services
             }
 
             studentEntity = await _studentRepo.UpdateStudentByMentorAsync(studentEntity, existingStudentUser.Id);
-
-            var request = new TrainingPlanRequestDto
+            if (studentEntity != null && studentEntity.Shift != null)
             {
-                Designation = studentEntity.Designation,
-                Division = studentEntity.Division,
-                HrsToRender = studentEntity.HrsToRender,
-                DailyDutyHrs = studentEntity.Shift.DailyDutyHrs
-            };
-            await _trainingPlanService.GenerateSyntheticTrainingPlanAsync(request);
-            _cacheService.RemoveFromCache("trainingPlanList", "");
+                var request = new TrainingPlanRequestDto
+                {
+                    Designation = studentEntity.Designation,
+                    Division = studentEntity.Division,
+                    HrsToRender = studentEntity.HrsToRender,
+                    DailyDutyHrs = studentEntity.Shift.DailyDutyHrs
+                };
+                await _trainingPlanService.GenerateSyntheticTrainingPlanAsync(request);
+                _cacheService.RemoveFromCache("trainingPlanList", "");
+
+            }
             return (_mapper.Map<StudentDto>(studentEntity), null);
         }
 
         public async Task<(FullMentorDtoWithStudents?, ErrorResponseModel?)> GetStudentsByMentor(int mentorId)
         {
-            var existingMentor = await _mentorRepository.GetMentorByIdAsync(mentorId, true, false);
+            var existingMentor = await _mentorRepository.GetMentorByIdAsync(mentorId, true, false, false);
             if (existingMentor == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("mentor"), LoggingTemplate.MissingRecordDescription("mentor", $"{mentorId}")));
             var mentorDto = _mapper.Map<FullMentorDtoWithStudents>(existingMentor);
             if (existingMentor.Students != null)

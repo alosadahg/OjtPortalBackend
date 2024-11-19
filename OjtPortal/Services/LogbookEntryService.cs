@@ -120,7 +120,7 @@ namespace OjtPortal.Services
         public async Task<(List<LogbookDto>?, ErrorResponseModel?)> GetLogbooksByMentorWithFilteringAsync(int mentorId, LogbookStatus? status, DateOnly? startDate, DateOnly? endDate)
         {
             var key = "mentor";
-            var mentor = await _mentorRepo.GetMentorByIdAsync(mentorId, true, true);
+            var mentor = await _mentorRepo.GetMentorByIdAsync(mentorId, true, true, false);
             if (mentor == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle(key), LoggingTemplate.MissingRecordDescription(key, mentorId.ToString())));
 
             var students = mentor.Students!.ToList();

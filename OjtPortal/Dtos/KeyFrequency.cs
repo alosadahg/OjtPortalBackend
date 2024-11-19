@@ -8,7 +8,7 @@
 
     public class GroupKeyFrequency
     {
-        public string GroupedBy { get; set; }
+        public string GroupedBy { get; set; } = string.Empty;
         public List<KeyFrequency> Frequencies { get; set; } = new();
     }
 }

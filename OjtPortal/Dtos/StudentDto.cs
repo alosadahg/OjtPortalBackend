@@ -57,7 +57,7 @@ namespace OjtPortal.Dtos
     public class TeacherAddStudentDto : UserDto
     {
         [Required(ErrorMessage = "Instructor ID is required")]
-        public int? InstructorId { get; set; } = null;
+        public int InstructorId { get; set; }
         [Required(ErrorMessage = "Student ID is required")]
         public string StudentId { get; set; } = string.Empty;
         [Required(ErrorMessage = "Degree program ID is required")]

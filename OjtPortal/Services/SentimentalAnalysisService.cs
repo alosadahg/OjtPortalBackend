@@ -82,7 +82,7 @@ namespace OjtPortal.Services
 
                     return jsonResponse!;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     _logger.LogInformation($"Attempt {i} failed. Retrying to get the sentiment analysis.");
                 }

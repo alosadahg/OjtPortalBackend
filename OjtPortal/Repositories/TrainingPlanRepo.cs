@@ -50,13 +50,13 @@ namespace OjtPortal.Repositories
                 }
                 if(trainingPlan.MentorId != null)
                 {
-                    var mentor = await _mentorRepo.GetMentorByIdAsync(trainingPlan.MentorId.Value, false, false);
+                    var mentor = await _mentorRepo.GetMentorByIdAsync(trainingPlan.MentorId.Value, false, false, false);
                     if (mentor != null) trainingPlan.Mentor = mentor;
                     else trainingPlan.MentorId = null;
                 }
                 _context.TrainingPlans.Add(trainingPlan);
                 await _context.SaveChangesAsync();
-            } catch (Exception ex)
+            } catch (Exception)
             {
                 return null;
             }
