@@ -4,24 +4,37 @@ using OjtPortal.Entities;
 
 namespace OjtPortal.Repositories
 {
-    public class SubMentorRepo
+    public interface ISubMentorRepo
+    {
+        Task<SubMentor?> AddSubMentorAsync(SubMentor subMentor);
+        Task<bool> IsSubMentorExisting(SubMentor subMentor);
+    }
+
+    public class SubMentorRepo : ISubMentorRepo
     {
         private readonly OjtPortalContext _context;
+        private readonly ILogger<SubMentorRepo> _logger;
 
-        public SubMentorRepo(OjtPortalContext context)
+        public SubMentorRepo(OjtPortalContext context, ILogger<SubMentorRepo> logger)
         {
             this._context = context;
+            this._logger = logger;
         }
 
         public async Task<SubMentor?> AddSubMentorAsync(SubMentor subMentor)
         {
-            if (IsSubMentorExisting(subMentor).Result) return subMentor;
+            if (await IsSubMentorExisting(subMentor)) return subMentor;
             try
             {
+                _context.Entry(subMentor).State = EntityState.Unchanged;
+                _context.Entry(subMentor.HeadMentor).State = EntityState.Unchanged;
+
                 _context.SubMentors.Add(subMentor);
                 await _context.SaveChangesAsync();
-            } catch (Exception)
+            }
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return null;
             }
             return subMentor;
@@ -29,8 +42,8 @@ namespace OjtPortal.Repositories
 
         public async Task<bool> IsSubMentorExisting(SubMentor subMentor)
         {
-            var existing = await _context.SubMentors.FirstOrDefaultAsync(sb => sb.UserId.Equals(subMentor.UserId) && sb.HeadMentorId.Equals(subMentor.HeadMentorId));
-            return (existing == null) ? false : true ;
+            var existing = await _context.SubMentors.AnyAsync(sb => sb.SubmentorId.Equals(subMentor.SubmentorId) && sb.HeadMentorId.Equals(subMentor.HeadMentor.UserId));
+            return existing;
         }
     }
 }

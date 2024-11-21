@@ -16,7 +16,10 @@ namespace OjtPortal.Context
             modelBuilder.Entity<Chair>().ToTable("Chairs");
             modelBuilder.Entity<Teacher>().ToTable("Teachers");
             modelBuilder.Entity<Student>().ToTable("Students").OwnsOne(s => s.Shift);
-            modelBuilder.Entity<Mentor>().ToTable("Mentors");
+            modelBuilder.Entity<Mentor>()
+                .HasMany(m => m.SubMentors)
+                .WithOne(sm => sm.HeadMentor)
+                .HasForeignKey(sm => sm.HeadMentorId);
             modelBuilder.Entity<Company>().OwnsOne(c => c.Address);
             modelBuilder.Entity<TrainingTask>()
                .HasMany(t => t.TechStacks) 
