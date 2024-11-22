@@ -14,6 +14,7 @@ namespace OjtPortal.Services
         Task<List<TaskDto>> GetSyntheticTasksWithFilteringAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter);
         Task<List<TaskWithStackAndSkillDto>> GetSyntheticFullTasksWithFilteringAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter);
         Task<(TrainingPlan?, ErrorResponseModel?)> AddTaskToTrainingPlan(AddTaskToPlanDto addTaskToPlanDto);
+        Task<(TaskWithStackAndSkillDto?, ErrorResponseModel?)> UpdateTaskAsync(UpdateTaskDto updateTaskDto);
         Task<TaskWithStackAndSkillDto?> GetTaskByIdAsync(int id);
     }
 
@@ -74,10 +75,14 @@ namespace OjtPortal.Services
             return (trainingPlan, null);
         }
 
-        /*public async Task<(ErrorResponseModel?)> UpdateTaskAsync(UpdateTaskDto updateTaskDto)
+        public async Task<(TaskWithStackAndSkillDto?, ErrorResponseModel?)> UpdateTaskAsync(UpdateTaskDto updateTaskDto)
         {
-            var existingTask = _taskRepo
-        }*/
+            var existingTask = await _taskRepo.GetTaskByIdAsync(updateTaskDto.TaskId);
+            if (existingTask == null) return (null, new ErrorResponseModel(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("task"), LoggingTemplate.MissingRecordDescription("task", updateTaskDto.TaskId.ToString())));
+            var updatedTask = _mapper.Map<TrainingTask>(updateTaskDto);
+            existingTask = await _taskRepo.UpdateTaskAsync(existingTask, updatedTask);
+            return (_mapper.Map<TaskWithStackAndSkillDto>(existingTask), null);
+        }
 
         public async Task<TaskWithStackAndSkillDto?> GetTaskByIdAsync(int id)
         {
@@ -85,5 +90,6 @@ namespace OjtPortal.Services
             if (existing == null) return null;
             return _mapper.Map<TaskWithStackAndSkillDto>(existing);
         }
+
     }
 }

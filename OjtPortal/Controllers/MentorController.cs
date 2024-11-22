@@ -86,7 +86,7 @@ namespace OjtPortal.Controllers
         /// <param name="mentorId">The id of the current mentor</param>
         /// <param name="submentorId">The id of the submentor successor</param>
         /// <returns></returns>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SubMentorDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullMentorDtoWithStudents))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpPatch("transfer/submentor")]
         public async Task<IActionResult> TransferMentorshipToSubmentorAsyn([Required] int mentorId,[Required] int submentorId)

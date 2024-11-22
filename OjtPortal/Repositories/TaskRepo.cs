@@ -12,6 +12,7 @@ namespace OjtPortal.Repositories
         Task<List<TrainingTask>> GetSyntheticTasksAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter);
         Task<TrainingPlan?> AddTaskToPlanAsync(TrainingPlan trainingPlan, TrainingTask trainingTask);
         Task<TrainingTask?> GetTaskByIdAsync(int id);
+        Task<TrainingTask> UpdateTaskAsync(TrainingTask previousTask, TrainingTask updatedTask);
     }
 
     public class TaskRepo : ITaskRepo
@@ -72,5 +73,24 @@ namespace OjtPortal.Repositories
         {
             return await _context.TrainingTasks.Include(t => t.TechStacks).Include(t => t.Skills).FirstOrDefaultAsync(t => t.Id == id);
         }
+
+        public async Task<TrainingTask> UpdateTaskAsync(TrainingTask previousTask, TrainingTask updatedTask)
+        {
+            _context.Skills.RemoveRange(previousTask.Skills);
+            _context.TechStacks.RemoveRange(previousTask.TechStacks);
+            previousTask.Skills = updatedTask.Skills;
+            previousTask.Difficulty = updatedTask.Difficulty;
+            previousTask.Description = updatedTask.Description;
+            previousTask.TechStacks = updatedTask.TechStacks;
+            previousTask.Title = updatedTask.Title;
+            try
+            {
+                await _context.SaveChangesAsync();
+            } catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+            return previousTask;
+        } 
     }
 }

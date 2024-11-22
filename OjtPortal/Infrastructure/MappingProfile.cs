@@ -53,6 +53,7 @@ namespace OjtPortal.Infrastructure
             CreateMap<TrainingTask, NewTaskDto>().ReverseMap();
             CreateMap<TrainingTask, TaskDto>().ReverseMap();
             CreateMap<TrainingTask, TaskWithStackAndSkillDto>().ReverseMap();
+            CreateMap<TrainingTask, UpdateTaskDto>().ReverseMap();
             CreateMap<Skill, NewSkillDto>().ReverseMap();
             CreateMap<TechStack, NewTechStackDto>().ReverseMap();
             CreateMap<StudentTask, StudentTaskDto>().ReverseMap();

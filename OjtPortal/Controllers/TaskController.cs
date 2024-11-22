@@ -6,6 +6,7 @@ using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
 using OjtPortal.Entities;
 using OjtPortal.Enums;
+using OjtPortal.Infrastructure;
 using OjtPortal.Services;
 
 namespace OjtPortal.Controllers
@@ -101,10 +102,27 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="id">The task id</param>
         /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TaskWithStackAndSkillDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTaskByIdAsync([Required] int id)
         {
             var result = await _taskService.GetTaskByIdAsync(id);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Updates existing task
+        /// </summary>
+        /// <param name="updateTaskDto"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TaskWithStackAndSkillDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpPut]
+        public async Task<IActionResult> UpdateTaskAsync(UpdateTaskDto updateTaskDto)
+        {
+            var (result, error) = await _taskService.UpdateTaskAsync(updateTaskDto);
+            if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
     }
