@@ -40,7 +40,7 @@ namespace OjtPortal.Services
                 return (null, new ErrorResponseModel(HttpStatusCode.MethodNotAllowed, "Invalid Company", "Submentor and mentor have different companies"));
 
             var isExisting = await _subMentorRepo.IsRecordExisting(mentorId, submentorId);
-            if(isExisting != null) return (_mapper.Map<SubMentorDto>(isExisting), null);
+            if(isExisting != null && isExisting.HeadMentorId == submentorId) return (null, new ErrorResponseModel(HttpStatusCode.MethodNotAllowed, "Invalid IDs", "This submentor ID is the head mentor"));
 
             var newSubmentor = new SubMentor
             {
