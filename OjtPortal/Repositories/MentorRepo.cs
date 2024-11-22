@@ -45,7 +45,7 @@ namespace OjtPortal.Repositories
             }
             if(includeSubMentors)
             {
-                query = query.Include(m => m.SubMentors);
+                query = query.Include(m => m.SubMentors)!.ThenInclude(sb => sb.Submentor);
             }
             return await query.FirstOrDefaultAsync(m => m.UserId == id);
         }

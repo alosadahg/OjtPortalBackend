@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
 using OjtPortal.Infrastructure;
@@ -11,10 +12,12 @@ namespace OjtPortal.Controllers
     public class MentorController : OjtPortalBaseController
     {
         private readonly IMentorService _mentorService;
+        private readonly ISubMentorService _subMentorService;
 
-        public MentorController(IMentorService mentorService)
+        public MentorController(IMentorService mentorService, ISubMentorService subMentorService)
         {
             this._mentorService = mentorService;
+            this._subMentorService = subMentorService;
         }
 
         /// <summary>
@@ -75,6 +78,20 @@ namespace OjtPortal.Controllers
             var (student, error) = await _mentorService.MentorAddStudentAsync(newStudentDto);
             if (error != null) return MakeErrorResponse(error);
             return Ok(student);
+        }
+
+        /// <summary>
+        /// Transfer mentorship to submentor
+        /// </summary>
+        /// <param name="mentorId">The id of the current mentor</param>
+        /// <param name="submentorId">The id of the submentor successor</param>
+        /// <returns></returns>
+        [HttpPatch("transfer/submentor")]
+        public async Task<IActionResult> TransferMentorshipToSubmentorAsyn([Required] int mentorId,[Required] int submentorId)
+        {
+            var (result, error) = await _subMentorService.TransferMentorshipToSubmentorAsync(mentorId, submentorId);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
         }
     }
 }

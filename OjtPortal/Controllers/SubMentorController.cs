@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,7 @@ namespace OjtPortal.Controllers
         /// <param name="submentorId">The submentor's id</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> RegisterSubmentor(int mentorId, int submentorId)
+        public async Task<IActionResult> RegisterSubmentor([Required] int mentorId,[Required] int submentorId)
         {
             var (result, error) = await _subMentorService.RegisterSubmentor(mentorId, submentorId);
             if (error != null) return MakeErrorResponse(error);
