@@ -1,5 +1,6 @@
 ﻿
 using OjtPortal.Entities;
+using OjtPortal.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -25,25 +26,24 @@ namespace OjtPortal.Dtos
 
     public class FullMentorDto : MentorDto
     {
-        public int InternCount { get; set; } = 0;
         [JsonIgnore]
         public IEnumerable<StudentToMentorOverviewDto>? Interns { get; set; }
-        public FullMentorDto()
-        {
-            this.InternCount = (Interns != null) ? Interns.Count() : 0;
-        }
+        [JsonIgnore]
+        public IEnumerable<SubMentor>? SubMentors { get; set; }
+        public int SubMentorCount => SubMentors?.Count() ?? 0;
+        public int InternCount => Interns?.Count() ?? 0;
 
     }
 
     public class FullMentorDtoWithStudents : MentorDto
     {
         public IEnumerable<StudentToMentorOverviewDto>? Interns { get; set; }
-        public int InternCount { get; set; } = 0;
-        public FullMentorDtoWithStudents()
-        {
-            this.InternCount = (Interns != null) ? Interns.Count() : 0;
-        }
-
+        public int InternCount => Interns?.Count() ?? 0;
     }
 
+    public class FullMentorDtoWithSubMentors : MentorDto
+    {
+        public List<MentorDto>? SubMentors { get; set; }
+        public int SubMentorCount => SubMentors?.Count() ?? 0;
+    }
 }

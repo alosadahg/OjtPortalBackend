@@ -12,6 +12,7 @@ namespace OjtPortal.Services
     {
         Task<(SubMentorDto?, ErrorResponseModel?)> RegisterSubmentor(int mentorId, int submentorId);
         Task<(FullMentorDtoWithStudents?, ErrorResponseModel?)> TransferMentorshipToSubmentorAsync(int previousMentorId, int subMentorId);
+        Task<(FullMentorDtoWithSubMentors?, ErrorResponseModel?)> GetSubmentorsByHeadMentorIdAsync(int headMentorId);
     }
 
     public class SubMentorService : ISubMentorService
@@ -40,7 +41,7 @@ namespace OjtPortal.Services
                 return (null, new ErrorResponseModel(HttpStatusCode.MethodNotAllowed, "Invalid Company", "Submentor and mentor have different companies"));
 
             var isExisting = await _subMentorRepo.IsRecordExisting(mentorId, submentorId);
-            if(isExisting != null && isExisting.HeadMentorId == submentorId) return (null, new ErrorResponseModel(HttpStatusCode.MethodNotAllowed, "Invalid IDs", "This submentor ID is the head mentor"));
+            if (isExisting != null && isExisting.HeadMentorId == submentorId) return (null, new ErrorResponseModel(HttpStatusCode.MethodNotAllowed, "Invalid IDs", "This submentor ID is the head mentor"));
 
             var newSubmentor = new SubMentor
             {
@@ -71,6 +72,23 @@ namespace OjtPortal.Services
                 }
             }
             return (null, new ErrorResponseModel(HttpStatusCode.NotFound, "Missing submentor", "Submentor not found reporting under mentor"));
+        }
+
+        public async Task<(FullMentorDtoWithSubMentors?, ErrorResponseModel?)> GetSubmentorsByHeadMentorIdAsync(int headMentorId)
+        {
+            var existing = await _mentorRepo.GetMentorByIdAsync(headMentorId, false, false, true);
+            if (existing == null) return (null, new ErrorResponseModel(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("head mentor"), LoggingTemplate.MissingRecordDescription("head mentor", headMentorId.ToString())));
+            var mapped = _mapper.Map<FullMentorDtoWithSubMentors>(existing);
+            if (existing.SubMentors != null)
+            {
+                var subMentorList = new List<Mentor>();
+                existing.SubMentors.ToList().ForEach(sb =>
+                {
+                    subMentorList.Add(sb.Submentor!);
+                });
+                mapped.SubMentors = _mapper.Map<List<MentorDto>>(subMentorList);
+            }
+            return (mapped, null);
         }
     }
 }

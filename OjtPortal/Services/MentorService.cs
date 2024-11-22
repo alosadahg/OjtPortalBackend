@@ -70,13 +70,12 @@ namespace OjtPortal.Services
 
         public async Task<(FullMentorDto?, ErrorResponseModel?)> GetMentorByIdAsync(int id, bool includeStudent)
         {
-            var existingMentor = await _mentorRepository.GetMentorByIdAsync(id, includeStudent, false, false);
+            var existingMentor = await _mentorRepository.GetMentorByIdAsync(id, includeStudent, false, true);
             if (existingMentor == null) return (null, new(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("mentor"), LoggingTemplate.MissingRecordDescription("mentor", $"{id}")));
             var mentorDto = _mapper.Map<FullMentorDto>(existingMentor);
             if (existingMentor.Students != null)
             {
                 mentorDto.Interns = _studentService.MapStudentsToDtoList<StudentToMentorOverviewDto>(existingMentor.Students!);
-                mentorDto.InternCount = mentorDto.Interns.Count();
             }
             return (mentorDto, null);
         }
@@ -132,7 +131,6 @@ namespace OjtPortal.Services
             if (existingMentor.Students != null)
             {
                 mentorDto.Interns = _studentService.MapStudentsToDtoList<StudentToMentorOverviewDto>(existingMentor.Students!);
-                mentorDto.InternCount = mentorDto.Interns.Count();
             }
             return (mentorDto, null);
         }

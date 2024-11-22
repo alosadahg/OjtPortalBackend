@@ -41,11 +41,11 @@ namespace OjtPortal.Repositories
             else if (includeStudents)
             {
                 query = query.Include(m => m.Students)!.ThenInclude(s => s.User);
-                query = query.Include(m => m.Students)!.ThenInclude(s => s.Instructor).ThenInclude(i => i.User);
+                query = query.Include(m => m.Students)!.ThenInclude(s => s.Instructor).ThenInclude(i => i!.User);
             }
             if(includeSubMentors)
             {
-                query = query.Include(m => m.SubMentors)!.ThenInclude(sb => sb.Submentor);
+                query = query.Include(m => m.SubMentors)!.ThenInclude(sb => sb.Submentor).ThenInclude(m => m!.User);
             }
             return await query.FirstOrDefaultAsync(m => m.UserId == id);
         }

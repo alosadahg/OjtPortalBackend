@@ -39,5 +39,18 @@ namespace OjtPortal.Controllers
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Gets the submentors by headmentor
+        /// </summary>
+        /// <param name="headMentorId"></param>
+        /// <returns></returns>
+        [HttpGet("headmentor/{headMentorId}")]
+        public async Task<IActionResult> GetSubmentorsByHeadMentorAsync([Required] int headMentorId)
+        {
+            var (result, error) = await _subMentorService.GetSubmentorsByHeadMentorIdAsync(headMentorId);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
     }
 }
