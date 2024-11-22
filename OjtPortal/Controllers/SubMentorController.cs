@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
+using OjtPortal.Dtos;
 using OjtPortal.Entities;
+using OjtPortal.Infrastructure;
 using OjtPortal.Services;
 
 namespace OjtPortal.Controllers
@@ -28,6 +30,8 @@ namespace OjtPortal.Controllers
         /// <param name="mentorId">The head mentor's id</param>
         /// <param name="submentorId">The submentor's id</param>
         /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK,Type = typeof(SubMentorDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpPost]
         public async Task<IActionResult> RegisterSubmentor([Required] int mentorId,[Required] int submentorId)
         {
