@@ -20,6 +20,7 @@ namespace OjtPortal.Services
         Task<(TrainingPlan?, ErrorResponseModel?)> GenerateSyntheticTrainingPlanAsync(TrainingPlanRequestDto requestDto);
         Task<(TrainingPlan?, ErrorResponseModel?)> GetTrainingPlanByIdAsync(int id);
         Task<(List<TrainingPlan>?, ErrorResponseModel?)> GetTrainingPlansByMentorAsync(int mentorId);
+        Task<(TrainingPlanDto?, ErrorResponseModel?)> UpdateTrainingPlanAsync(UpdateTrainingPlanDto updateTrainingPlanDto);
     }
 
     public class TrainingPlanService : ITrainingPlanService
@@ -201,6 +202,14 @@ namespace OjtPortal.Services
             return (trainingPlan, null);
         }
 
+        public async Task<(TrainingPlanDto?, ErrorResponseModel?)> UpdateTrainingPlanAsync(UpdateTrainingPlanDto updateTrainingPlanDto)
+        {
+            var existing = await _trainingPlanRepo.GetTrainingPlanByIdAsync(updateTrainingPlanDto.TrainingPlanId);
+            if (existing == null) return (null, new ErrorResponseModel(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("training plan"), LoggingTemplate.MissingRecordDescription("training plan", updateTrainingPlanDto.TrainingPlanId.ToString())));
+            var updated = _mapper.Map<TrainingPlan>(updateTrainingPlanDto);
+            existing = await _trainingPlanRepo.UpdateTrainingPlanAsync(existing, updated);
+            return (_mapper.Map<TrainingPlanDto>(existing), null);
+        }
     }
 
 }

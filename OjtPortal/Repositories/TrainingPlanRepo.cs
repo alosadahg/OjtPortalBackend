@@ -12,6 +12,7 @@ namespace OjtPortal.Repositories
         Task<TrainingPlan?> GetTrainingPlanByIdAsync(int id);
         Task<List<TrainingPlan>> GetTrainingPlansByMentorAsync(int id);
         Task<List<TrainingPlan>> GetTrainingPlansByDescription(string filterBy);
+        Task<TrainingPlan> UpdateTrainingPlanAsync(TrainingPlan existing, TrainingPlan updated);
     }
 
     public class TrainingPlanRepo : ITrainingPlanRepo
@@ -104,6 +105,21 @@ namespace OjtPortal.Repositories
         public async Task<List<TrainingPlan>> GetTrainingPlansByMentorAsync(int id)
         {
             return await _context.TrainingPlans.Include(tp => tp.Tasks).ThenInclude(t => t.Skills).Include(tp => tp.Tasks).ThenInclude(t => t.TechStacks).Where(tp => tp.MentorId == id).ToListAsync();
+        }
+
+        public async Task<TrainingPlan> UpdateTrainingPlanAsync(TrainingPlan existing, TrainingPlan updated)
+        {
+            existing.Description = updated.Description;
+            existing.Title = updated.Title;
+
+            try
+            {
+               await _context.SaveChangesAsync();
+            }catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+            return existing;
         }
     }
 }

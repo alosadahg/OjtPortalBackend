@@ -47,6 +47,7 @@ namespace OjtPortal.Infrastructure
             CreateMap<TrainingPlan, TrainingPlanFromApiDto>().ReverseMap();
             CreateMap<TrainingPlan, TrainingPlanDto>().ReverseMap();
             CreateMap<TrainingPlan, TrainingPlanRequestDto>().ReverseMap();
+            CreateMap<TrainingPlan, UpdateTrainingPlanDto>().ReverseMap();
             CreateMap<StudentTraining, AssignTrainingPlanDto>().ReverseMap();
             CreateMap<StudentTraining, AssignedTrainingPlanToStudentDto>().ReverseMap();
             CreateMap<StudentTask, AssignedTaskDto>().ReverseMap();

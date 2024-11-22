@@ -29,6 +29,15 @@ namespace OjtPortal.Dtos
         public List<NewTaskDto> Tasks { get; set; } = new();
     }
 
+    public class UpdateTrainingPlanDto
+    {
+        public int TrainingPlanId { get; set; }
+        [Required(ErrorMessage = "Training plan title is required")]
+        public string Title { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Training plan description is required")]
+        public string Description { get; set; } = string.Empty;
+    }
+
     public class TrainingPlanFromApiDto
     {
         public string Title { get; set; } = string.Empty;

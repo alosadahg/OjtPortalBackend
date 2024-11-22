@@ -106,5 +106,20 @@ namespace OjtPortal.Controllers
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Update existing training plan
+        /// </summary>
+        /// <param name="updateTrainingPlanDto"></param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TrainingPlanDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
+        [HttpPut]
+        public async Task<IActionResult> UpdateTrainingPlanAsync(UpdateTrainingPlanDto updateTrainingPlanDto)
+        {
+            var (result, error) = await _trainingPlanService.UpdateTrainingPlanAsync(updateTrainingPlanDto);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
     }
 }
