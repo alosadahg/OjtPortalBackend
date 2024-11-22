@@ -11,6 +11,7 @@ namespace OjtPortal.Repositories
     {
         Task<List<TrainingTask>> GetSyntheticTasksAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter);
         Task<TrainingPlan?> AddTaskToPlanAsync(TrainingPlan trainingPlan, TrainingTask trainingTask);
+        Task<TrainingTask?> GetTaskByIdAsync(int id);
     }
 
     public class TaskRepo : ITaskRepo
@@ -67,5 +68,9 @@ namespace OjtPortal.Repositories
             return null;
         }
 
+        public async Task<TrainingTask?> GetTaskByIdAsync(int id)
+        {
+            return await _context.TrainingTasks.Include(t => t.TechStacks).Include(t => t.Skills).FirstOrDefaultAsync(t => t.Id == id);
+        }
     }
 }

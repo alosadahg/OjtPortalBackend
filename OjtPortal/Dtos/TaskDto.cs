@@ -2,6 +2,7 @@
 using OjtPortal.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace OjtPortal.Dtos
 {
@@ -11,15 +12,23 @@ namespace OjtPortal.Dtos
         public string Title { get; set; } = string.Empty;
         public TaskDifficulty Difficulty { get; set; }
         public string Description { get; set; } = string.Empty;
-        public int TechStackCount { get; set; } = 0;
-        public int SkillCount { get; set; } = 0;
+
+        [JsonIgnore]
+        public virtual List<TechStack> TechStacks { get; set; } = new();
+
+        [JsonIgnore]
+        public virtual List<Skill> Skills { get; set; } = new();
+
+        public int TechStackCount => TechStacks?.Count() ?? 0;
+        public int SkillCount => Skills?.Count() ?? 0;
+
         public bool IsSystemGenerated { get; set; } = false;
     }
 
     public class TaskWithStackAndSkillDto : TaskDto
     {
-        public List<TechStack> TechStacks { get; set; } = new();
-        public List<Skill> Skills { get; set; } = new();
+        public override List<TechStack> TechStacks { get; set; } = new();
+        public override List<Skill> Skills { get; set; } = new();
     }
 
     public class TaskFullDto : TaskDto
@@ -52,6 +61,11 @@ namespace OjtPortal.Dtos
     public class AddTaskToPlanDto : NewTaskDto
     {
         public int TrainingPlanId { get; set; }
+    }
+
+    public class UpdateTaskDto : NewTaskDto
+    {
+        public int TaskId { get; set; }
     }
 
     public class StudentTaskDto

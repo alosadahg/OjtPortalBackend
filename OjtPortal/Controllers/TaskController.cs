@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
@@ -92,6 +93,18 @@ namespace OjtPortal.Controllers
         {
             var (result, error) = await _studentTaskService.UpdateTaskScore(userId, taskId, score);
             if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets task by id
+        /// </summary>
+        /// <param name="id">The task id</param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTaskByIdAsync([Required] int id)
+        {
+            var result = await _taskService.GetTaskByIdAsync(id);
             return Ok(result);
         }
     }

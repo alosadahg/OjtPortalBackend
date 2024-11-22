@@ -14,6 +14,7 @@ namespace OjtPortal.Services
         Task<List<TaskDto>> GetSyntheticTasksWithFilteringAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter);
         Task<List<TaskWithStackAndSkillDto>> GetSyntheticFullTasksWithFilteringAsync(string? titleFilter, string? descriptionFilter, TaskDifficulty? difficulty, string? techStackFilter, string? skillFilter);
         Task<(TrainingPlan?, ErrorResponseModel?)> AddTaskToTrainingPlan(AddTaskToPlanDto addTaskToPlanDto);
+        Task<TaskWithStackAndSkillDto?> GetTaskByIdAsync(int id);
     }
 
     public class TaskService : ITaskService
@@ -40,9 +41,6 @@ namespace OjtPortal.Services
                 var originalTitle = taskDtoList[i].Title;
 
                 if(originalTitle.Contains(":")) taskDtoList[i].Title = originalTitle.Substring(originalTitle.IndexOf(":") + 1).Trim();
-
-                taskDtoList[i].TechStackCount = taskList[i].TechStacks.Count;
-                taskDtoList[i].SkillCount = taskList[i].Skills.Count;
             }
             return (taskDtoList);
         }
@@ -56,9 +54,6 @@ namespace OjtPortal.Services
                 var originalTitle = taskDtoList[i].Title;
 
                 if (originalTitle.Contains(":")) taskDtoList[i].Title = originalTitle.Substring(originalTitle.IndexOf(":") + 1).Trim();
-
-                taskDtoList[i].TechStackCount = taskList[i].TechStacks.Count;
-                taskDtoList[i].SkillCount = taskList[i].Skills.Count;
             }
             return (taskDtoList);
         }
@@ -79,5 +74,16 @@ namespace OjtPortal.Services
             return (trainingPlan, null);
         }
 
+        /*public async Task<(ErrorResponseModel?)> UpdateTaskAsync(UpdateTaskDto updateTaskDto)
+        {
+            var existingTask = _taskRepo
+        }*/
+
+        public async Task<TaskWithStackAndSkillDto?> GetTaskByIdAsync(int id)
+        {
+            var existing = await _taskRepo.GetTaskByIdAsync(id);
+            if (existing == null) return null;
+            return _mapper.Map<TaskWithStackAndSkillDto>(existing);
+        }
     }
 }
