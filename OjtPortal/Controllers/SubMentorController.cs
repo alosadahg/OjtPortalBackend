@@ -45,6 +45,8 @@ namespace OjtPortal.Controllers
         /// </summary>
         /// <param name="headMentorId"></param>
         /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullMentorDtoWithSubMentors))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponseModel))]
         [HttpGet("headmentor/{headMentorId}")]
         public async Task<IActionResult> GetSubmentorsByHeadMentorAsync([Required] int headMentorId)
         {
