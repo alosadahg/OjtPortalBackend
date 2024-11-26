@@ -55,6 +55,17 @@ namespace OjtPortal.Controllers
             return Ok(result);
         }
 
-        //[HttpGet]
+        /// <summary>
+        /// Gets all mentors available to be submentors
+        /// </summary>
+        /// <param name="companyId">The id of the company</param>
+        /// <returns></returns>
+        [HttpGet("available")]
+        public async Task<IActionResult> GetAvailableForSubmentorsAsync([Required] int companyId)
+        {
+            var (result, error) = await _subMentorService.GetMentorsWithNoHeadMentorsAsync(companyId);
+            if (error != null) MakeErrorResponse(error);
+            return Ok(result);
+        }
     }
 }

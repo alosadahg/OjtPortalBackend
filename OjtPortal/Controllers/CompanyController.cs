@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
 using OjtPortal.Dtos;
@@ -38,7 +39,7 @@ namespace OjtPortal.Controllers
         /// <param name="companyId">The company id</param>
         /// <returns></returns>
         [HttpGet("{companyId}")]
-        public async Task<IActionResult> GetCompanyByIdWithMentorsAsync(int companyId)
+        public async Task<IActionResult> GetCompanyByIdWithMentorsAsync([Required] int companyId)
         {
             var(result, error) = await _companyService.GetCompanyByIdWithMentorsAsync(companyId);
             if (error != null) MakeErrorResponse(error);
