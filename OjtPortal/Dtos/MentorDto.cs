@@ -14,6 +14,25 @@ namespace OjtPortal.Dtos
         public string Designation { get; set; } = string.Empty;
     }
 
+    public class MentorWithoutCompanyDto
+    {
+        public ExistingUserDto User { get; set; } = new();
+        public string Department { get; set; } = string.Empty;
+        public string Designation { get; set; } = string.Empty;
+    }
+
+    public class FullMentorWithoutCompanyDto : MentorWithoutCompanyDto
+    {
+        [JsonIgnore]
+        public IEnumerable<Student>? Students { get; set; }
+        [JsonIgnore]
+        public IEnumerable<SubMentor>? SubMentors { get; set; }
+        public int SubMentorCount => SubMentors?.Count() ?? 0;
+        public int InternCount => Students?.Count() ?? 0;
+
+    }
+
+
     public class NewMentorDto : NewUserDto
     {
         [Required(ErrorMessage = "Company information is required")]

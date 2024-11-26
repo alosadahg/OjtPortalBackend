@@ -13,6 +13,7 @@ namespace OjtPortal.Services
         Task<(SubMentorDto?, ErrorResponseModel?)> RegisterSubmentor(int mentorId, int submentorId);
         Task<(FullMentorDtoWithStudents?, ErrorResponseModel?)> TransferMentorshipToSubmentorAsync(int previousMentorId, int subMentorId);
         Task<(FullMentorDtoWithSubMentors?, ErrorResponseModel?)> GetSubmentorsByHeadMentorIdAsync(int headMentorId);
+        Task<(CompanyWithFullMentorsDto?, ErrorResponseModel?)> GetMentorsWithNoHeadMentorsAsync(int companyId);
     }
 
     public class SubMentorService : ISubMentorService
@@ -93,9 +94,21 @@ namespace OjtPortal.Services
             return (mapped, null);
         }
 
-       /* public async Task<(List<MentorDto>?, ErrorResponseModel?)> GetMentorsWithNoHeadMentorsAsync(int companyId)
+        public async Task<(CompanyWithFullMentorsDto?, ErrorResponseModel?)> GetMentorsWithNoHeadMentorsAsync(int companyId)
         {
-            var existingCompany = await _companyRepo.
-        }*/
+            var existingCompany = await _companyRepo.GetCompanyWithMentorsFullAsync(companyId);
+            if (existingCompany == null) return (null, new ErrorResponseModel(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("company"), LoggingTemplate.MissingRecordDescription("company", companyId.ToString())));
+            if(existingCompany.Mentors != null)
+            {
+                var mentorsCopy = existingCompany.Mentors.ToList();
+                foreach (var mentor in existingCompany.Mentors)
+                {
+                    var headmentorExists = await _subMentorRepo.HasHeadMentorAsync(mentor.UserId);
+                    if (headmentorExists) mentorsCopy.Remove(mentor);
+                }
+                existingCompany.Mentors = mentorsCopy;
+            }
+            return (_mapper.Map<CompanyWithFullMentorsDto>(existingCompany), null);
+        }
     }
 }

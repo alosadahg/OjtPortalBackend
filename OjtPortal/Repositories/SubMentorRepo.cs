@@ -10,6 +10,7 @@ namespace OjtPortal.Repositories
         Task<bool> IsSubMentorExisting(SubMentor subMentor);
         Task<SubMentor?> IsRecordExisting(int headMentorId, int subMentorId);
         Task<Mentor> TransferMentorshipToSubmentorAsync(List<TrainingPlan>? trainingPlans, List<Student>? students, List<SubMentor>? subMentors, SubMentor submentor);
+        Task<bool> HasHeadMentorAsync(int submentorId);
     }
 
     public class SubMentorRepo : ISubMentorRepo
@@ -54,6 +55,11 @@ namespace OjtPortal.Repositories
             if(existing != null) return existing;
             existing = await _context.SubMentors.FirstOrDefaultAsync(sb => sb.HeadMentorId.Equals(subMentorId) && sb.SubmentorId.Equals(headMentorId));
             return existing;
+        }
+
+        public async Task<bool> HasHeadMentorAsync(int submentorId)
+        {
+            return await _context.SubMentors.Where(sm => sm.SubmentorId == submentorId).AnyAsync();
         }
 
         public async Task<Mentor> TransferMentorshipToSubmentorAsync(List<TrainingPlan>? trainingPlans, List<Student>? students, List<SubMentor>? subMentors, SubMentor submentor)

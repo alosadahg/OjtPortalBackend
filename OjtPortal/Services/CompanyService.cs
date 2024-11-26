@@ -39,18 +39,7 @@ namespace OjtPortal.Services
         {
             var company = await _companyRepo.GetCompanyWithMentorsAsync(companyId);
             if (company == null) return (null, new ErrorResponseModel(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("company"), LoggingTemplate.MissingRecordDescription("company", companyId.ToString())));
-            var result = _mapper.Map<CompanyWithMentorsDto>(company);
-            if (company.Mentors != null)
-            {
-                var mentors = company.Mentors.ToList();
-                var mentorUserList = new List<ExistingUserDto>();
-                mentors.ForEach(m =>
-                {
-                    mentorUserList.Add(_mapper.Map<ExistingUserDto>(m.User));
-                });
-                result.Mentors = mentorUserList;
-            }
-            return (result, null);
+            return (_mapper.Map<CompanyWithMentorsDto>(company), null);
         }
 
         /*public async Task<List<GroupKeyFrequency>> GetSkillFrequenciesByCompany()
