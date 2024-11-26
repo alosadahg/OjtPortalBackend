@@ -64,7 +64,7 @@ namespace OjtPortal.Controllers
         public async Task<IActionResult> GetAvailableForSubmentorsAsync([Required] int companyId)
         {
             var (result, error) = await _subMentorService.GetMentorsWithNoHeadMentorsAsync(companyId);
-            if (error != null) MakeErrorResponse(error);
+            if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
     }
