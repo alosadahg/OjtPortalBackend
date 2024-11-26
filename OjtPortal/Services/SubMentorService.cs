@@ -21,13 +21,15 @@ namespace OjtPortal.Services
         private readonly ISubMentorRepo _subMentorRepo;
         private readonly IMapper _mapper;
         private readonly ITrainingPlanRepo _trainingPlanRepo;
+        private readonly ICompanyRepo _companyRepo;
 
-        public SubMentorService(IMentorRepo mentorRepo, ISubMentorRepo subMentorRepo, IMapper mapper, ITrainingPlanRepo trainingPlanRepo)
+        public SubMentorService(IMentorRepo mentorRepo, ISubMentorRepo subMentorRepo, IMapper mapper, ITrainingPlanRepo trainingPlanRepo, ICompanyRepo companyRepo)
         {
             this._mentorRepo = mentorRepo;
             this._subMentorRepo = subMentorRepo;
             this._mapper = mapper;
             this._trainingPlanRepo = trainingPlanRepo;
+            this._companyRepo = companyRepo;
         }
         public async Task<(SubMentorDto?, ErrorResponseModel?)> RegisterSubmentor(int mentorId, int submentorId)
         {
@@ -90,5 +92,10 @@ namespace OjtPortal.Services
             }
             return (mapped, null);
         }
+
+       /* public async Task<(List<MentorDto>?, ErrorResponseModel?)> GetMentorsWithNoHeadMentorsAsync(int companyId)
+        {
+            var existingCompany = await _companyRepo.
+        }*/
     }
 }

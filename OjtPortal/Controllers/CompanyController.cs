@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using OjtPortal.Controllers.BaseController.cs;
+using OjtPortal.Dtos;
 using OjtPortal.Entities;
 using OjtPortal.Services;
 
@@ -28,6 +30,19 @@ namespace OjtPortal.Controllers
         public async Task<List<Company>> GetCompaniesWithFileringAsync(string? companyNameFilter, string? countryFilter, string? addressStateFilter, string? cityFilter)
         {
             return await _companyService.GetCompaniesWithFilteringAsync(companyNameFilter, countryFilter, addressStateFilter, cityFilter);
+        }
+
+        /// <summary>
+        /// Gets the company by id with mentors
+        /// </summary>
+        /// <param name="companyId">The company id</param>
+        /// <returns></returns>
+        [HttpGet("{companyId}")]
+        public async Task<IActionResult> GetCompanyByIdWithMentorsAsync(int companyId)
+        {
+            var(result, error) = await _companyService.GetCompanyByIdWithMentorsAsync(companyId);
+            if (error != null) MakeErrorResponse(error);
+            return Ok(result);
         }
     }
 }

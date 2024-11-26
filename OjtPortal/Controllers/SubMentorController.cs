@@ -54,5 +54,7 @@ namespace OjtPortal.Controllers
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
+
+        //[HttpGet]
     }
 }

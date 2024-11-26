@@ -11,6 +11,7 @@ namespace OjtPortal.Repositories
         Task<Company?> FindCompanyByNameAsync(string companyName);
         Task<List<Company>> GetCompaniesAsync();
         Task<List<Company>> GetCompaniesWithMentorsAsync();
+        Task<Company?> GetCompanyWithMentorsAsync(int companyId);
     }
 
     public class CompanyRepo : ICompanyRepo
@@ -54,6 +55,11 @@ namespace OjtPortal.Repositories
         public async Task<List<Company>> GetCompaniesWithMentorsAsync()
         {
             return await _context.Companies.Include(c => c.Mentors).ToListAsync();
+        }
+
+        public async Task<Company?> GetCompanyWithMentorsAsync(int companyId)
+        {
+            return await _context.Companies.Include(c => c.Mentors!).ThenInclude(m => m.User).FirstOrDefaultAsync(c => c.CompanyId == companyId);
         }
     }
 }
