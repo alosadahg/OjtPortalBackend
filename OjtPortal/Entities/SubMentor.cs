@@ -12,5 +12,6 @@ namespace OjtPortal.Entities
         public Mentor? Submentor { get; set; }
         public int HeadMentorId { get; set; }
         public Mentor HeadMentor { get; set; } = new();
+        public IEnumerable<TrainingTask>? TrainingTask { get; set; }
     }
 }

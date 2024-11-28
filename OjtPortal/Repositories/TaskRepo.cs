@@ -71,7 +71,7 @@ namespace OjtPortal.Repositories
 
         public async Task<TrainingTask?> GetTaskByIdAsync(int id)
         {
-            return await _context.TrainingTasks.Include(t => t.TechStacks).Include(t => t.Skills).FirstOrDefaultAsync(t => t.Id == id);
+            return await _context.TrainingTasks.Include(t => t.TrainingPlan).Include(t => t.TechStacks).Include(t => t.Skills).FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<TrainingTask> UpdateTaskAsync(TrainingTask previousTask, TrainingTask updatedTask)

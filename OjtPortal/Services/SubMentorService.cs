@@ -14,6 +14,7 @@ namespace OjtPortal.Services
         Task<(FullMentorDtoWithStudents?, ErrorResponseModel?)> TransferMentorshipToSubmentorAsync(int previousMentorId, int subMentorId);
         Task<(FullMentorDtoWithSubMentors?, ErrorResponseModel?)> GetSubmentorsByHeadMentorIdAsync(int headMentorId);
         Task<(CompanyWithFullMentorsDto?, ErrorResponseModel?)> GetMentorsWithNoHeadMentorsAsync(int companyId);
+        Task<(SubMentorWithTasksDto?, ErrorResponseModel?)> DelegateSubmentorToTaskAsync(int mentorId, int submentorId, int taskId);
     }
 
     public class SubMentorService : ISubMentorService
@@ -23,14 +24,16 @@ namespace OjtPortal.Services
         private readonly IMapper _mapper;
         private readonly ITrainingPlanRepo _trainingPlanRepo;
         private readonly ICompanyRepo _companyRepo;
+        private readonly ITaskRepo _taskRepo;
 
-        public SubMentorService(IMentorRepo mentorRepo, ISubMentorRepo subMentorRepo, IMapper mapper, ITrainingPlanRepo trainingPlanRepo, ICompanyRepo companyRepo)
+        public SubMentorService(IMentorRepo mentorRepo, ISubMentorRepo subMentorRepo, IMapper mapper, ITrainingPlanRepo trainingPlanRepo, ICompanyRepo companyRepo, ITaskRepo taskRepo)
         {
             this._mentorRepo = mentorRepo;
             this._subMentorRepo = subMentorRepo;
             this._mapper = mapper;
             this._trainingPlanRepo = trainingPlanRepo;
             this._companyRepo = companyRepo;
+            this._taskRepo = taskRepo;
         }
         public async Task<(SubMentorDto?, ErrorResponseModel?)> RegisterSubmentor(int mentorId, int submentorId)
         {
@@ -109,6 +112,30 @@ namespace OjtPortal.Services
                 existingCompany.Mentors = mentorsCopy;
             }
             return (_mapper.Map<CompanyWithFullMentorsDto>(existingCompany), null);
+        }
+
+        public async Task<(SubMentorWithTasksDto?, ErrorResponseModel?)> DelegateSubmentorToTaskAsync(int mentorId, int submentorId, int taskId)
+        {
+            var existingMentor = await _mentorRepo.GetMentorByIdAsync(mentorId, false, false, true);
+            if (existingMentor == null) return (null, new ErrorResponseModel(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("head mentor"), LoggingTemplate.MissingRecordDescription("head mentor", mentorId.ToString())));
+            var subMentors = existingMentor.SubMentors;
+            var existingTask = await _taskRepo.GetTaskByIdAsync(taskId);
+            if (existingTask == null) return (null, new ErrorResponseModel(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("task"), LoggingTemplate.MissingRecordDescription("task", taskId.ToString())));
+            var trainingPlan = existingTask.TrainingPlan;
+            if (trainingPlan!.MentorId != mentorId) return (null, new ErrorResponseModel(HttpStatusCode.MethodNotAllowed, "Unauthorized mentor", "Access not allowed"));
+            if (subMentors != null)
+            {
+                foreach (var submentor in subMentors)
+                {
+                    var sub = await _subMentorRepo.GetSubMentorByIdAsync(submentor.SubmentorId, true);
+                    if (sub!.SubmentorId == submentorId)
+                    {
+                        sub = await _subMentorRepo.AssignTaskToSubmentorAsync(sub, existingTask);
+                        return (_mapper.Map<SubMentorWithTasksDto>(sub), null);
+                    }
+                }
+            }
+            return (null, new ErrorResponseModel(HttpStatusCode.NotFound, LoggingTemplate.MissingRecordTitle("submentor"), LoggingTemplate.MissingRecordDescription("submentor", submentorId.ToString())));
         }
     }
 }

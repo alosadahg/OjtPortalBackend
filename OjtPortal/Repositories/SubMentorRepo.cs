@@ -11,6 +11,9 @@ namespace OjtPortal.Repositories
         Task<SubMentor?> IsRecordExisting(int headMentorId, int subMentorId);
         Task<Mentor> TransferMentorshipToSubmentorAsync(List<TrainingPlan>? trainingPlans, List<Student>? students, List<SubMentor>? subMentors, SubMentor submentor);
         Task<bool> HasHeadMentorAsync(int submentorId);
+        Task<SubMentor?> GetSubMentorByIdAsync(int id, bool includeTasks);
+        Task<SubMentor> AssignTaskToSubmentorAsync(SubMentor subMentor, TrainingTask task);
+
     }
 
     public class SubMentorRepo : ISubMentorRepo
@@ -60,6 +63,25 @@ namespace OjtPortal.Repositories
         public async Task<bool> HasHeadMentorAsync(int submentorId)
         {
             return await _context.SubMentors.Where(sm => sm.SubmentorId == submentorId).AnyAsync();
+        }
+
+        public async Task<SubMentor?> GetSubMentorByIdAsync(int id, bool includeTasks)
+        {
+            IQueryable<SubMentor> query = _context.SubMentors;
+            if(includeTasks) query = query.Include(sm => sm.TrainingTask);
+            return await query.FirstOrDefaultAsync(sm => sm.SubmentorId == id);
+        }
+
+        public async Task<SubMentor> AssignTaskToSubmentorAsync(SubMentor subMentor, TrainingTask task)
+        {
+            var taskList = subMentor.TrainingTask!.ToList();
+            if (!taskList.Contains(task))
+            {
+                taskList.Add(task);
+                subMentor.TrainingTask = taskList;
+            }
+            await _context.SaveChangesAsync();
+            return subMentor;
         }
 
         public async Task<Mentor> TransferMentorshipToSubmentorAsync(List<TrainingPlan>? trainingPlans, List<Student>? students, List<SubMentor>? subMentors, SubMentor submentor)

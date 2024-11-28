@@ -25,6 +25,10 @@ namespace OjtPortal.Context
                .HasMany(t => t.TechStacks) 
                .WithMany(t => t.Tasks) 
                .UsingEntity(j => j.ToTable("TaskStack"));
+            modelBuilder.Entity<SubMentor>()
+               .HasMany(sm => sm.TrainingTask)
+               .WithMany(t => t.SubMentor)
+               .UsingEntity(j => j.ToTable("SubmentorTasks"));
             modelBuilder.Entity<TrainingTask>()
                .HasMany(t => t.Skills)
                .WithMany(t => t.Tasks)

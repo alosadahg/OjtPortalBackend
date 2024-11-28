@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.Design;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -64,6 +65,22 @@ namespace OjtPortal.Controllers
         public async Task<IActionResult> GetAvailableForSubmentorsAsync([Required] int companyId)
         {
             var (result, error) = await _subMentorService.GetMentorsWithNoHeadMentorsAsync(companyId);
+            if (error != null) return MakeErrorResponse(error);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Delegate task to submentor [Requires Auth}
+        /// </summary>
+        /// <param name="submentorId">The id of the submentor</param>
+        /// <param name="taskId">The id of the task</param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPut("assign/task/")]
+        public async Task<IActionResult> AssignSubmentorTaskAsync([Required] int submentorId, [Required] int taskId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var (result, error) = await _subMentorService.DelegateSubmentorToTaskAsync(user!.Id, submentorId, taskId);
             if (error != null) return MakeErrorResponse(error);
             return Ok(result);
         }
