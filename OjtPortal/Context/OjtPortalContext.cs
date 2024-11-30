@@ -22,8 +22,8 @@ namespace OjtPortal.Context
                 .HasForeignKey(sm => sm.HeadMentorId);
             modelBuilder.Entity<Company>().OwnsOne(c => c.Address);
             modelBuilder.Entity<TrainingTask>()
-               .HasMany(t => t.TechStacks) 
-               .WithMany(t => t.Tasks) 
+               .HasMany(t => t.TechStacks)
+               .WithMany(t => t.Tasks)
                .UsingEntity(j => j.ToTable("TaskStack"));
             modelBuilder.Entity<SubMentor>()
                .HasMany(sm => sm.TrainingTask)

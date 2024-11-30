@@ -1,4 +1,5 @@
-﻿using System.Security.Permissions;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Permissions;
 using System.Text.Json.Serialization;
 
 namespace OjtPortal.Entities
@@ -11,7 +12,8 @@ namespace OjtPortal.Entities
 		public Mentor? Mentor { get; set; }
 		public string Title { get; set; } = string.Empty;
 		public string Description { get; set; } = string.Empty;
-		public List<TrainingTask> Tasks { get; set; } = new();
+        [InverseProperty("TrainingPlan")]
+        public List<TrainingTask> Tasks { get; set; } = new();
         public int TotalTasks { get; set; } = 0;
 		public int EasyTasksCount { get; set; } = 0;
 		public int MediumTasksCount { get; set; } = 0;

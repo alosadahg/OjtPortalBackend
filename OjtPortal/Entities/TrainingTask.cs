@@ -9,6 +9,7 @@ namespace OjtPortal.Entities
         public int Id { get; set; }
         public int TrainingPlanId { get; set; }
         [JsonIgnore]
+        [ForeignKey("TrainingPlanId")]
         public TrainingPlan? TrainingPlan { get; set; }
         public string Title { get; set; } = string.Empty;
         [Column(TypeName = "varchar(50)")]
